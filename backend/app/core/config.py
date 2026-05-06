@@ -174,10 +174,11 @@ class Settings(BaseSettings):
             return set(json.loads(v))
         return v
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": True
+    }
 
 
 def load_common_passwords(file_path: str) -> List[str]:

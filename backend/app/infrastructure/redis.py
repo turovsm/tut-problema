@@ -1,9 +1,8 @@
 from typing import Optional, Any
 
 import redis.asyncio as redis
+from app.core.config import settings
 from redis.asyncio import Redis
-
-from app.config import settings
 
 
 class AsyncRedisClient:

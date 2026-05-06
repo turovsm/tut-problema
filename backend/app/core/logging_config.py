@@ -3,10 +3,9 @@ import sys
 from typing import Any
 
 import structlog
+from app.core.config import settings
 from structlog.contextvars import merge_contextvars
 from structlog.types import EventDict, Processor
-
-from app.config import settings
 
 
 def add_app_context(_: Any, __: Any, event_dict: EventDict) -> EventDict:

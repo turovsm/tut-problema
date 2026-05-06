@@ -2,7 +2,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from app.config import settings
+from app.core.config import settings
 
 
 class EmailService:
@@ -38,7 +38,8 @@ class EmailService:
             return False
 
     def send_verification_email(self, to_email: str, to_name: str, token: str) -> bool:
-        verification_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+        # FIXED: Added /auth/ to the URL path
+        verification_url = f"{settings.FRONTEND_URL}/auth/verify-email?token={token}"
 
         html_content = f"""
         <!DOCTYPE html>
@@ -77,7 +78,8 @@ class EmailService:
         return self._send_email(to_email, "Подтверждение email адреса", html_content, text_content)
 
     def send_password_reset_email(self, to_email: str, to_name: str, token: str) -> bool:
-        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+        # FIXED: Added /auth/ to the URL path
+        reset_url = f"{settings.FRONTEND_URL}/auth/reset-password?token={token}"
 
         html_content = f"""
         <!DOCTYPE html>

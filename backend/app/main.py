@@ -2,19 +2,17 @@ import time
 import uuid
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends, Request
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from structlog.contextvars import bind_contextvars, clear_contextvars
-from uvicorn import run
 
-from app.config import settings
-from app.database.redis_client import redis_client
+from app.api.v1.api import api_router
+from app.core.config import settings
+from app.core.logging_config import setup_logging, get_logger
 from app.database.session import init_db, create_tables, get_engine
-from app.logging_config import setup_logging, get_logger
-from app.rate_limiter import rate_limit_auth, rate_limit_api
-from app.routers import auth_router, reports_router, votes_router, users_router, uploads_router
+from app.infrastructure.redis import redis_client
 
 setup_logging()
 logger = get_logger("app.main")
@@ -48,7 +46,6 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
             response.headers["X-Request-ID"] = request_id
             response.headers["X-Process-Time"] = str(process_time)
-
             return response
 
         except Exception as e:
@@ -66,7 +63,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
+    async def dispatch(self, request: Request, call_next):
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
@@ -79,7 +76,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
+    async def dispatch(self, request: Request, call_next):
         request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
         response = await call_next(request)
         response.headers["X-Request-ID"] = request_id
@@ -89,20 +86,13 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     logger.info("Starting up application...")
-    try:
-        await init_db()
-        await create_tables()
-        await redis_client.connect()
-        logger.info("Application startup complete")
-    except Exception as e:
-        logger.error("Failed to start application", error=str(e), exc_info=True)
-        raise
-
+    await init_db()
+    await create_tables()
+    await redis_client.connect()
+    logger.info("Application startup complete")
     yield
-
     logger.info("Shutting down application...")
     await redis_client.disconnect()
-    logger.info("Shutdown complete")
 
 
 app = FastAPI(
@@ -115,12 +105,11 @@ app = FastAPI(
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestIDMiddleware)
-app.add_middleware(RequestLoggingMiddleware)
 
 if not settings.DEBUG:
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=settings.ALLOWED_HOSTS if hasattr(settings, 'ALLOWED_HOSTS') else ["localhost", "127.0.0.1"]
+        allowed_hosts=settings.ALLOWED_HOSTS
     )
 
 app.add_middleware(
@@ -131,18 +120,7 @@ app.add_middleware(
     allow_headers=settings.CORS_ALLOW_HEADERS,
 )
 
-if settings.RATE_LIMIT_ENABLED:
-    app.include_router(auth_router, prefix=settings.API_PREFIX, dependencies=[Depends(rate_limit_auth)])
-    app.include_router(uploads_router, prefix=settings.API_PREFIX, dependencies=[Depends(rate_limit_api)])
-    app.include_router(reports_router, prefix=settings.API_PREFIX, dependencies=[Depends(rate_limit_api)])
-    app.include_router(votes_router, prefix=settings.API_PREFIX, dependencies=[Depends(rate_limit_api)])
-    app.include_router(users_router, prefix=settings.API_PREFIX, dependencies=[Depends(rate_limit_api)])
-else:
-    app.include_router(auth_router, prefix=settings.API_PREFIX)
-    app.include_router(reports_router, prefix=settings.API_PREFIX)
-    app.include_router(votes_router, prefix=settings.API_PREFIX)
-    app.include_router(users_router, prefix=settings.API_PREFIX)
-    app.include_router(uploads_router, prefix=settings.API_PREFIX)
+app.include_router(api_router, prefix=settings.API_PREFIX)
 
 
 @app.get("/")
@@ -160,7 +138,6 @@ async def health():
 async def detailed_health():
     engine = await get_engine()
     pool = engine.pool
-
     health_data = {
         "status": "healthy",
         "database": {
@@ -173,9 +150,3 @@ async def detailed_health():
         "redis": "connected" if redis_client.is_enabled() else "disabled"
     }
     return health_data
-
-
-if __name__ == "__main__":
-    workers = getattr(settings, 'WORKERS', 1)
-    reload = getattr(settings, 'RELOAD', settings.DEBUG)
-    run("app.main:app", host=settings.HOST, port=settings.PORT, reload=reload, workers=workers)

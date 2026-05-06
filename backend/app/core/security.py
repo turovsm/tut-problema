@@ -2,10 +2,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Optional
 from uuid import uuid4
 
+from app.core.config import settings
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-
-from app.config import settings
 
 pwd_context = CryptContext(
     schemes=["argon2"],

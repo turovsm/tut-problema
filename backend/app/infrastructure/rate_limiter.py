@@ -2,8 +2,8 @@ from typing import Optional
 
 from fastapi import Request, HTTPException, status
 
-from app.config import settings
-from app.database.redis_client import redis_client
+from app.core.config import settings
+from app.infrastructure.redis import redis_client
 
 
 class RateLimiter:
@@ -12,10 +12,7 @@ class RateLimiter:
 
     @staticmethod
     def _get_client_ip(request: Request) -> str:
-        forwarded = request.headers.get("X-Forwarded-For")
-        if forwarded:
-            return forwarded.split(",")[0].strip()
-        return request.client.host if request.client else "unknown"
+        return request.client.host if request.client else "127.0.0.1"
 
     @staticmethod
     def _get_user_id(request: Request) -> Optional[str]:

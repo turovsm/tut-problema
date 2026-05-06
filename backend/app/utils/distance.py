@@ -1,6 +1,6 @@
 from math import radians, sin, cos, sqrt, atan2
 
-from app.config import settings
+from app.core.config import settings
 
 
 def calculate_distance_haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:

@@ -1,6 +1,7 @@
 from asyncio import sleep
 from typing import Optional, AsyncGenerator
 
+from app.core.config import settings
 from sqlalchemy import text, inspect
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
@@ -9,7 +10,6 @@ from sqlalchemy.ext.asyncio import (
     AsyncEngine
 )
 
-from app.config import settings
 from app.database.base import Base
 
 engine: Optional[AsyncEngine] = None
