@@ -1,0 +1,23 @@
+<div class="dashboard-container">
+  <mat-card class="filters-card">
+    <mat-form-field appearance="fill">
+      <mat-label>Тип проблемы</mat-label>
+      <mat-select [(value)]="selectedType" (selectionChange)="applyFilters()">
+        <mat-option value="">Все</mat-option>
+        <mat-option *ngFor="let t of types" [value]="t">{{t}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Район</mat-label>
+      <mat-select [(value)]="selectedDistrict" (selectionChange)="applyFilters()">
+        <mat-option value="">Все</mat-option>
+        <mat-option *ngFor="let d of districts" [value]="d">{{d}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="createComplaint()">Создать заявку</button>
+  </mat-card>
+
+  <div id="map" class="map-container"></div>
+</div>
