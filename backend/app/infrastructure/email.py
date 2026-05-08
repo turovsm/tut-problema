@@ -13,7 +13,9 @@ class EmailService:
             print("Email service disabled - no SMTP credentials provided")
 
     @staticmethod
-    def _send_email(to_email: str, subject: str, html_content: str, text_content: str) -> bool:
+    def _send_email(
+        to_email: str, subject: str, html_content: str, text_content: str
+    ) -> bool:
         try:
             msg = MIMEMultipart("alternative")
             msg["Subject"] = subject
@@ -37,9 +39,13 @@ class EmailService:
             print(f"Failed to send email to {to_email}: {e}")
             return False
 
-    def send_verification_email(self, to_email: str, to_name: str, token: str) -> bool:
+    def send_verification_email(
+        self, to_email: str, to_name: str, token: str
+    ) -> bool:
         # FIXED: Added /auth/ to the URL path
-        verification_url = f"{settings.FRONTEND_URL}/auth/verify-email?token={token}"
+        verification_url = (
+            f"{settings.FRONTEND_URL}/auth/verify-email?token={token}"
+        )
 
         html_content = f"""
         <!DOCTYPE html>
@@ -75,9 +81,13 @@ class EmailService:
 Команда ТутПроблема
 """
 
-        return self._send_email(to_email, "Подтверждение email адреса", html_content, text_content)
+        return self._send_email(
+            to_email, "Подтверждение email адреса", html_content, text_content
+        )
 
-    def send_password_reset_email(self, to_email: str, to_name: str, token: str) -> bool:
+    def send_password_reset_email(
+        self, to_email: str, to_name: str, token: str
+    ) -> bool:
         # FIXED: Added /auth/ to the URL path
         reset_url = f"{settings.FRONTEND_URL}/auth/reset-password?token={token}"
 
@@ -118,7 +128,9 @@ class EmailService:
 Команда ТутПроблема
 """
 
-        return self._send_email(to_email, "Сброс пароля", html_content, text_content)
+        return self._send_email(
+            to_email, "Сброс пароля", html_content, text_content
+        )
 
 
 email_service = EmailService()

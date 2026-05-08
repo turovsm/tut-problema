@@ -3,9 +3,10 @@ import sys
 from typing import Any
 
 import structlog
-from app.core.config import settings
 from structlog.contextvars import merge_contextvars
 from structlog.types import EventDict, Processor
+
+from app.core.config import settings
 
 
 def add_app_context(_: Any, __: Any, event_dict: EventDict) -> EventDict:
@@ -22,7 +23,10 @@ def drop_color_message_key(_: Any, __: Any, event_dict: EventDict) -> EventDict:
 
 def filter_health_check_logs(_, __, event_dict: EventDict) -> EventDict:
     path = event_dict.get("path", "")
-    if path in ["/health", "/health/detailed"] and event_dict.get("event") in ["Request started", "Request completed"]:
+    if path in ["/health", "/health/detailed"] and event_dict.get("event") in [
+        "Request started",
+        "Request completed",
+    ]:
         event_dict["_skip"] = True
     return event_dict
 
@@ -40,13 +44,15 @@ def setup_logging() -> None:
     if settings.LOG_INCLUDE_TIMESTAMP:
         shared_processors.append(structlog.processors.TimeStamper(fmt="iso"))
 
-    shared_processors.extend([
-        structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-        structlog.processors.UnicodeDecoder(),
-        drop_color_message_key,
-        add_app_context,
-    ])
+    shared_processors.extend(
+        [
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            structlog.processors.UnicodeDecoder(),
+            drop_color_message_key,
+            add_app_context,
+        ]
+    )
 
     if settings.LOG_FORMAT.lower() == "json":
         renderer = structlog.processors.JSONRenderer()
@@ -78,7 +84,11 @@ def setup_logging() -> None:
     logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
     logger = structlog.get_logger()
-    logger.info("Logging initialized", log_level=settings.LOG_LEVEL, log_format=settings.LOG_FORMAT)
+    logger.info(
+        "Logging initialized",
+        log_level=settings.LOG_LEVEL,
+        log_format=settings.LOG_FORMAT,
+    )
 
 
 def get_logger(name: str = None):

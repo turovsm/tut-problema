@@ -1,8 +1,8 @@
 import os
-import aiofiles
 from datetime import datetime
 from uuid import UUID
 
+import aiofiles
 from fastapi import UploadFile
 
 from app.core.config import settings
@@ -10,10 +10,12 @@ from app.core.config import settings
 
 async def save_upload_file(upload_file: UploadFile, report_id: UUID) -> str:
     safe_filename = os.path.basename(upload_file.filename)
-    file_ext = safe_filename.split('.')[-1].lower()
+    file_ext = safe_filename.split(".")[-1].lower()
 
     if file_ext not in settings.ALLOWED_EXTENSIONS:
-        raise ValueError(f"File type not allowed. Allowed: {', '.join(settings.ALLOWED_EXTENSIONS)}")
+        raise ValueError(
+            f"File type not allowed. Allowed: {', '.join(settings.ALLOWED_EXTENSIONS)}"
+        )
 
     report_dir = os.path.join(settings.UPLOAD_DIR, str(report_id))
     os.makedirs(report_dir, exist_ok=True)

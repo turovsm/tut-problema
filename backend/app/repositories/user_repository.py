@@ -12,9 +12,13 @@ class UserRepository(BaseRepository[User]):
         super().__init__(User, db)
 
     async def get_by_email(self, email: str) -> Optional[User]:
-        result = await self.db.execute(select(self.model).where(self.model.email == email))
+        result = await self.db.execute(
+            select(self.model).where(self.model.email == email)
+        )
         return result.scalar_one_or_none()
 
     async def get_by_username(self, username: str) -> Optional[User]:
-        result = await self.db.execute(select(self.model).where(self.model.username == username))
+        result = await self.db.execute(
+            select(self.model).where(self.model.username == username)
+        )
         return result.scalar_one_or_none()

@@ -1,15 +1,15 @@
 from asyncio import sleep
-from typing import Optional, AsyncGenerator
+from typing import AsyncGenerator, Optional
 
-from app.core.config import settings
-from sqlalchemy import text, inspect
+from sqlalchemy import inspect, text
 from sqlalchemy.ext.asyncio import (
-    create_async_engine,
+    AsyncEngine,
     AsyncSession,
     async_sessionmaker,
-    AsyncEngine
+    create_async_engine,
 )
 
+from app.core.config import settings
 from app.database.base import Base
 
 engine: Optional[AsyncEngine] = None
@@ -67,9 +67,13 @@ async def init_db(max_retries: int = None, delay: int = None) -> AsyncEngine:
             async with engine_instance.connect() as conn:
                 await conn.execute(text("SELECT 1"))
                 await conn.commit()
-                print(f"Successfully connected to database on attempt {attempt + 1}")
+                print(
+                    f"Successfully connected to database on attempt {attempt + 1}"
+                )
 
-                await conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
+                await conn.execute(
+                    text("CREATE EXTENSION IF NOT EXISTS postgis")
+                )
                 await conn.commit()
                 print("PostGIS extension created successfully")
 
@@ -92,7 +96,9 @@ async def create_tables() -> AsyncEngine:
         await conn.run_sync(Base.metadata.create_all)
 
     async with engine_instance.connect() as conn:
-        tables = await conn.run_sync(lambda sync_conn: inspect(sync_conn).get_table_names())
+        tables = await conn.run_sync(
+            lambda sync_conn: inspect(sync_conn).get_table_names()
+        )
         print(f"Tables created successfully: {tables}")
 
     return engine_instance

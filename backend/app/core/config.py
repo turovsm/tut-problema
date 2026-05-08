@@ -17,7 +17,9 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     # Database - Async URL
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@db:5432/tutproblema"
+    DATABASE_URL: str = (
+        "postgresql+asyncpg://postgres:postgres@db:5432/tutproblema"
+    )
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
     DB_POOL_PRE_PING: bool = True
@@ -43,7 +45,14 @@ class Settings(BaseSettings):
     # CORS Settings
     CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8000"]
     CORS_ALLOW_CREDENTIALS: bool = True
-    CORS_ALLOW_METHODS: List[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+    CORS_ALLOW_METHODS: List[str] = [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "OPTIONS",
+        "PATCH",
+    ]
     CORS_ALLOW_HEADERS: List[str] = ["*"]
     CORS_EXPOSE_HEADERS: List[str] = []
     CORS_MAX_AGE: int = 600
@@ -66,7 +75,7 @@ class Settings(BaseSettings):
     # Username Validation Settings
     USERNAME_MIN_LENGTH: int = 3
     USERNAME_MAX_LENGTH: int = 50
-    USERNAME_ALLOWED_PATTERN: str = r'^[a-zA-Z0-9_]+$'
+    USERNAME_ALLOWED_PATTERN: str = r"^[a-zA-Z0-9_]+$"
     USERNAME_ALLOWED_CHARS: str = "letters, numbers, underscore"
 
     # Email Settings
@@ -160,7 +169,12 @@ class Settings(BaseSettings):
     RATE_LIMIT_REPORT_CREATE_REQUESTS: int = 20
     RATE_LIMIT_REPORT_CREATE_PERIOD_SECONDS: int = 3600
 
-    @field_validator("CORS_ORIGINS", "CORS_ALLOW_METHODS", "CORS_ALLOW_HEADERS", mode="before")
+    @field_validator(
+        "CORS_ORIGINS",
+        "CORS_ALLOW_METHODS",
+        "CORS_ALLOW_HEADERS",
+        mode="before",
+    )
     @classmethod
     def parse_json_list(cls, v):
         if isinstance(v, str):
@@ -177,7 +191,7 @@ class Settings(BaseSettings):
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",
-        "case_sensitive": True
+        "case_sensitive": True,
     }
 
 
@@ -193,20 +207,39 @@ def load_common_passwords(file_path: str) -> List[str]:
 
         for path in possible_paths:
             if path.exists():
-                with open(path, 'r', encoding='utf-8') as f:
-                    passwords = [line.strip().lower() for line in f if line.strip()]
+                with open(path, "r", encoding="utf-8") as f:
+                    passwords = [
+                        line.strip().lower() for line in f if line.strip()
+                    ]
                 break
 
         if not passwords:
-            print(f"Warning: Common passwords file '{file_path}' not found in any location. Using default list.")
-            passwords = ["password", "password123", "12345678", "qwerty123",
-                         "admin123", "letmein123", "welcome123"]
+            print(
+                f"Warning: Common passwords file '{file_path}' not found in any location. Using default list."
+            )
+            passwords = [
+                "password",
+                "password123",
+                "12345678",
+                "qwerty123",
+                "admin123",
+                "letmein123",
+                "welcome123",
+            ]
     except Exception as e:
         print(f"Error loading common passwords file: {e}. Using default list.")
         import traceback
+
         traceback.print_exc()
-        passwords = ["password", "password123", "12345678", "qwerty123",
-                     "admin123", "letmein123", "welcome123"]
+        passwords = [
+            "password",
+            "password123",
+            "12345678",
+            "qwerty123",
+            "admin123",
+            "letmein123",
+            "welcome123",
+        ]
 
     return passwords
 
@@ -214,6 +247,8 @@ def load_common_passwords(file_path: str) -> List[str]:
 settings = Settings()
 
 if settings.PASSWORD_DISALLOW_COMMON:
-    settings.COMMON_PASSWORDS = load_common_passwords(settings.COMMON_PASSWORDS_FILE)
+    settings.COMMON_PASSWORDS = load_common_passwords(
+        settings.COMMON_PASSWORDS_FILE
+    )
 
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)

@@ -1,12 +1,15 @@
-from typing import Optional, List, Generic, TypeVar
+from typing import Generic, List, Optional, TypeVar
+
 from pydantic import BaseModel, Field, field_validator
 
 T = TypeVar("T")
+
 
 class SuccessResponse(BaseModel, Generic[T]):
     status: str = "success"
     data: Optional[T] = None
     message: Optional[str] = None
+
 
 class Location(BaseModel):
     type: str = "Point"
@@ -16,6 +19,8 @@ class Location(BaseModel):
     @classmethod
     def validate_coordinates(cls, v: List[float]) -> List[float]:
         lng, lat = v
-        if not (-180 <= lng <= 180): raise ValueError(f"Longitude error: {lng}")
-        if not (-90 <= lat <= 90): raise ValueError(f"Latitude error: {lat}")
+        if not (-180 <= lng <= 180):
+            raise ValueError(f"Longitude error: {lng}")
+        if not (-90 <= lat <= 90):
+            raise ValueError(f"Latitude error: {lat}")
         return v

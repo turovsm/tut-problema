@@ -10,8 +10,8 @@ from structlog.contextvars import bind_contextvars, clear_contextvars
 
 from app.api.v1.api import api_router
 from app.core.config import settings
-from app.core.logging_config import setup_logging, get_logger
-from app.database.session import init_db, create_tables, get_engine
+from app.core.logging_config import get_logger, setup_logging
+from app.database.session import create_tables, get_engine, init_db
 from app.infrastructure.redis import redis_client
 
 setup_logging()
@@ -70,7 +70,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         if not settings.DEBUG:
-            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains"
+            )
             response.headers["Content-Security-Policy"] = "default-src 'self'"
         return response
 
@@ -108,8 +110,7 @@ app.add_middleware(RequestIDMiddleware)
 
 if not settings.DEBUG:
     app.add_middleware(
-        TrustedHostMiddleware,
-        allowed_hosts=settings.ALLOWED_HOSTS
+        TrustedHostMiddleware, allowed_hosts=settings.ALLOWED_HOSTS
     )
 
 app.add_middleware(
@@ -145,8 +146,8 @@ async def detailed_health():
             "checked_in": pool.checkedin(),
             "overflow": pool.overflow(),
             "max_overflow": settings.DB_MAX_OVERFLOW,
-            "pool_pre_ping": settings.DB_POOL_PRE_PING
+            "pool_pre_ping": settings.DB_POOL_PRE_PING,
         },
-        "redis": "connected" if redis_client.is_enabled() else "disabled"
+        "redis": "connected" if redis_client.is_enabled() else "disabled",
     }
     return health_data

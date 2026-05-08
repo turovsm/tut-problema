@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar, Type, Optional, Any
+from typing import Any, Generic, Optional, Type, TypeVar
 from uuid import UUID
 
 from sqlalchemy import select
@@ -15,7 +15,9 @@ class BaseRepository(Generic[ModelType]):
         self.db = db
 
     async def get(self, id: UUID) -> Optional[ModelType]:
-        result = await self.db.execute(select(self.model).where(self.model.id == id))
+        result = await self.db.execute(
+            select(self.model).where(self.model.id == id)
+        )
         return result.scalar_one_or_none()
 
     async def get_all(self) -> list[ModelType]:

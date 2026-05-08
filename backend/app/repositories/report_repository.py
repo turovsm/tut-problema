@@ -1,10 +1,13 @@
-from uuid import UUID
 from typing import Optional
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from app.repositories.base import BaseRepository
+
 from app.database.models.report import Report, ReportPhoto
+from app.repositories.base import BaseRepository
+
 
 class ReportRepository(BaseRepository[Report]):
     def __init__(self, db: AsyncSession):
@@ -15,7 +18,7 @@ class ReportRepository(BaseRepository[Report]):
             select(self.model)
             .options(
                 selectinload(self.model.created_by),
-                selectinload(self.model.photos)
+                selectinload(self.model.photos),
             )
             .where(self.model.id == report_id)
         )

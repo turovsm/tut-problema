@@ -1,8 +1,9 @@
-from typing import Optional, Any
+from typing import Any, Optional
 
 import redis.asyncio as redis
-from app.core.config import settings
 from redis.asyncio import Redis
+
+from app.core.config import settings
 
 
 class AsyncRedisClient:
@@ -15,7 +16,9 @@ class AsyncRedisClient:
             try:
                 self.client = await redis.from_url(
                     f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.REDIS_DB}",
-                    password=settings.REDIS_PASSWORD if settings.REDIS_PASSWORD else None,
+                    password=settings.REDIS_PASSWORD
+                    if settings.REDIS_PASSWORD
+                    else None,
                     decode_responses=True,
                     socket_connect_timeout=settings.REDIS_SOCKET_CONNECT_TIMEOUT,
                     socket_timeout=settings.REDIS_SOCKET_TIMEOUT,
@@ -23,7 +26,9 @@ class AsyncRedisClient:
                     max_connections=settings.REDIS_MAX_CONNECTIONS,
                 )
                 await self.client.ping()
-                print(f"Connected to Redis at {settings.REDIS_HOST}:{settings.REDIS_PORT}")
+                print(
+                    f"Connected to Redis at {settings.REDIS_HOST}:{settings.REDIS_PORT}"
+                )
             except Exception as e:
                 print(f"Failed to connect to Redis: {e}")
                 print("Rate limiting will be disabled")
@@ -47,7 +52,9 @@ class AsyncRedisClient:
             print(f"Redis get error: {e}")
             return None
 
-    async def set(self, key: str, value: Any, expire_seconds: int = None) -> bool:
+    async def set(
+        self, key: str, value: Any, expire_seconds: int = None
+    ) -> bool:
         if not self.is_enabled():
             return False
         try:
@@ -94,10 +101,7 @@ class AsyncRedisClient:
             return False
 
     async def check_rate_limit(
-            self,
-            key: str,
-            limit: int,
-            window: int
+        self, key: str, limit: int, window: int
     ) -> tuple[bool, int]:
         if not self.is_enabled():
             return True, 0

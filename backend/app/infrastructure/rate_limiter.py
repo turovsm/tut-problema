@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import Request, HTTPException, status
+from fastapi import HTTPException, Request, status
 
 from app.core.config import settings
 from app.infrastructure.redis import redis_client
@@ -27,20 +27,27 @@ class RateLimiter:
         return f"rate_limit:{key_type}:ip:{client_ip}"
 
     async def check_rate_limit(
-            self,
-            request: Request,
-            key_type: str = "global",
-            limit: Optional[int] = None,
-            window: Optional[int] = None
+        self,
+        request: Request,
+        key_type: str = "global",
+        limit: Optional[int] = None,
+        window: Optional[int] = None,
     ) -> bool:
         if not self.enabled:
             return True
 
         if limit is None:
-            limit = getattr(settings, f"RATE_LIMIT_{key_type.upper()}_REQUESTS", settings.RATE_LIMIT_REQUESTS)
+            limit = getattr(
+                settings,
+                f"RATE_LIMIT_{key_type.upper()}_REQUESTS",
+                settings.RATE_LIMIT_REQUESTS,
+            )
         if window is None:
-            window = getattr(settings, f"RATE_LIMIT_{key_type.upper()}_PERIOD_SECONDS",
-                             settings.RATE_LIMIT_PERIOD_SECONDS)
+            window = getattr(
+                settings,
+                f"RATE_LIMIT_{key_type.upper()}_PERIOD_SECONDS",
+                settings.RATE_LIMIT_PERIOD_SECONDS,
+            )
 
         key = self._get_key(request, key_type)
 
@@ -53,11 +60,17 @@ class RateLimiter:
 
         return True
 
-    async def get_remaining(self, request: Request, key_type: str = "global") -> int:
+    async def get_remaining(
+        self, request: Request, key_type: str = "global"
+    ) -> int:
         if not self.enabled:
             return -1
 
-        limit = getattr(settings, f"RATE_LIMIT_{key_type.upper()}_REQUESTS", settings.RATE_LIMIT_REQUESTS)
+        limit = getattr(
+            settings,
+            f"RATE_LIMIT_{key_type.upper()}_REQUESTS",
+            settings.RATE_LIMIT_REQUESTS,
+        )
         key = self._get_key(request, key_type)
 
         current = await redis_client.get(key)
@@ -67,7 +80,9 @@ class RateLimiter:
         count = int(current)
         return max(0, limit - count)
 
-    async def reset_limit(self, request: Request, key_type: str = "global") -> bool:
+    async def reset_limit(
+        self, request: Request, key_type: str = "global"
+    ) -> bool:
         if not self.enabled:
             return False
 
@@ -84,7 +99,7 @@ async def rate_limit_global(request: Request):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail=f"Too many requests. Please try again in {retry_after} seconds.",
-            headers={"Retry-After": str(retry_after)}
+            headers={"Retry-After": str(retry_after)},
         )
 
 
@@ -94,7 +109,7 @@ async def rate_limit_auth(request: Request):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail=f"Too many authentication attempts. Please try again in {retry_after} seconds.",
-            headers={"Retry-After": str(retry_after)}
+            headers={"Retry-After": str(retry_after)},
         )
 
 
@@ -104,5 +119,5 @@ async def rate_limit_api(request: Request):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail=f"Too many requests. Please try again in {retry_after} seconds.",
-            headers={"Retry-After": str(retry_after)}
+            headers={"Retry-After": str(retry_after)},
         )

@@ -1,9 +1,11 @@
-from math import radians, sin, cos, sqrt, atan2
+from math import atan2, cos, radians, sin, sqrt
 
 from app.core.config import settings
 
 
-def calculate_distance_haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+def calculate_distance_haversine(
+    lat1: float, lon1: float, lat2: float, lon2: float
+) -> float:
     R = settings.EARTH_RADIUS_METERS
 
     lat1_rad = radians(lat1)
@@ -11,7 +13,10 @@ def calculate_distance_haversine(lat1: float, lon1: float, lat2: float, lon2: fl
     delta_lat = radians(lat2 - lat1)
     delta_lon = radians(lon2 - lon1)
 
-    a = sin(delta_lat / 2) ** 2 + cos(lat1_rad) * cos(lat2_rad) * sin(delta_lon / 2) ** 2
+    a = (
+        sin(delta_lat / 2) ** 2
+        + cos(lat1_rad) * cos(lat2_rad) * sin(delta_lon / 2) ** 2
+    )
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
     return R * c
