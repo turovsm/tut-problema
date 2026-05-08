@@ -42,7 +42,6 @@ export class MapWidget implements OnInit {
 
   ngOnInit(): void {
     this.initMap();
-    this.loadComplaints();
     this.loadReports();
     this.applyFilters();
   }
@@ -70,15 +69,6 @@ export class MapWidget implements OnInit {
     this.setSelectedPoint(event.latlng.lat, event.latlng.lng);
     
 });
-  }
-
-  loadComplaints() {
-    // Пример данных, потом заменить API вызовом
-    this.complaints = [
-      { id: 1, title: 'Неубранный снег', type: 'Снег', district: 'Север', lat: 55.78, lng: 37.62 },
-      { id: 2, title: 'Яма на дороге', type: 'Ямы', district: 'Центр', lat: 55.75, lng: 37.61 },
-      { id: 3, title: 'Не работает фонарь', type: 'Освещение', district: 'Юг', lat: 55.73, lng: 37.63 }
-    ];
   }
 
   applyFilters() {
@@ -116,7 +106,7 @@ export class MapWidget implements OnInit {
       this.selectedPointMarker.setLatLng([lat, lng]);
     } else {
       this.selectedPointMarker = L.marker([lat, lng], {
-        draggable: true
+        draggable: true,
       }).addTo(this.map);
 
       this.selectedPointMarker.on('dragend', () => {
@@ -125,10 +115,20 @@ export class MapWidget implements OnInit {
         this.selectedLng = position.lng;
       });
     }
+    const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'create-complaint-button';
+  button.textContent = 'Сообщить о проблеме';
 
-    this.selectedPointMarker.bindPopup(
-      `Выбранная точка:<br>${lat.toFixed(6)}, ${lng.toFixed(6)}`
-    ).openPopup();
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    this.createComplaint();
+  });
+
+  this.selectedPointMarker
+    .bindPopup(button)
+    .openPopup();
   }
 
   addDistricts() {
@@ -142,14 +142,8 @@ export class MapWidget implements OnInit {
             fillColor: '#3b82f6',   // заливка
             fillOpacity: 0.15       // прозрачность заливки
           },
-          onEachFeature: (feature, layer) => {
-            if (feature.properties && feature.properties.name) {
-              layer.bindPopup(feature.properties.name);
-            }
-          }
         }).addTo(this.map);
 
-        // Ограничим карту границами города
         const cityBounds = this.districtsLayer.getBounds();
         this.map.setMaxBounds(cityBounds);
         this.map.fitBounds(cityBounds);
