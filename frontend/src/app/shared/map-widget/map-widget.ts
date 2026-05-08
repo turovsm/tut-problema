@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
 import {MatButtonModule} from '@angular/material/button';
 import {MatCardModule} from '@angular/material/card';
 import {MatSelectModule} from '@angular/material/select';
@@ -6,6 +6,7 @@ import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import * as L from 'leaflet';
 import { CommonModule } from '@angular/common';
+import { MapWidgetApiService } from './map-widget-api.service';
 
 interface Complaint {
   id: number;
@@ -37,10 +38,12 @@ export class MapWidget implements OnInit {
   selectedLat?: number;
   selectedLng?: number;
   districtsLayer?: L.GeoJSON;
+  private readonly apiService = inject(MapWidgetApiService);
 
   ngOnInit(): void {
     this.initMap();
     this.loadComplaints();
+    this.loadReports();
     this.applyFilters();
   }
 
@@ -151,5 +154,22 @@ export class MapWidget implements OnInit {
         this.map.setMaxBounds(cityBounds);
         this.map.fitBounds(cityBounds);
       });
+  }
+
+  private loadReports(): void {
+    this.apiService.getNearbyReports().subscribe(reports => {
+      if (!reports) {
+        return;
+      }
+      reports.forEach(report => {
+        const [lng, lat] = report.location.coordinates;
+        const marker = L.marker([lat, lng]).addTo(this.map);
+        marker.bindPopup(`
+          <b>${report.title}</b><br>
+          ${report.description}<br>
+          Статус: ${report.status}
+        `);
+      });
+    });
   }
 }
