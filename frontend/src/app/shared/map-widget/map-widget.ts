@@ -1,12 +1,19 @@
-import { Component, inject, OnInit, ViewEncapsulation } from '@angular/core';
-import {MatButtonModule} from '@angular/material/button';
-import {MatCardModule} from '@angular/material/card';
-import {MatSelectModule} from '@angular/material/select';
-import {MatInputModule} from '@angular/material/input';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import * as L from 'leaflet';
+import { Component, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+
+import * as L from 'leaflet';
+
 import { MapWidgetApiService } from './map-widget-api.service';
+import {
+  ComplaintFormComponent,
+  ComplaintFormValue
+} from '../complaint-form/complaint-form';
 
 interface Complaint {
   id: number;
@@ -19,13 +26,23 @@ interface Complaint {
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
   templateUrl: './map-widget.html',
   styleUrls: ['./map-widget.less'],
   encapsulation: ViewEncapsulation.None,
-  imports:[ MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, CommonModule]
+  imports: [
+    CommonModule,
+    MatCardModule,
+    MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    ComplaintFormComponent
+  ]
 })
 export class MapWidget implements OnInit {
   map!: L.Map;
+
   complaints: Complaint[] = [];
   filteredComplaints: Complaint[] = [];
 
@@ -34,10 +51,18 @@ export class MapWidget implements OnInit {
 
   selectedType = '';
   selectedDistrict = '';
+
   selectedPointMarker?: L.Marker;
   selectedLat?: number;
   selectedLng?: number;
+
   districtsLayer?: L.GeoJSON;
+
+  isComplaintFormOpen = signal(false);
+
+  // TODO: заменить на реальную проверку авторизации через AuthService
+  isAuthorized = true;
+
   private readonly apiService = inject(MapWidgetApiService);
 
   ngOnInit(): void {
@@ -46,40 +71,41 @@ export class MapWidget implements OnInit {
     this.applyFilters();
   }
 
-  initMap() {
+  initMap(): void {
     const permBounds: L.LatLngBoundsExpression = [
-      [57.9, 56.0],  // юго-запад (southWest)
-      [58.1, 56.5]   // северо-восток (northEast)
+      [57.9, 56.0],
+      [58.1, 56.5]
     ];
 
     this.map = L.map('map', {
       center: [58.0, 56.25],
       zoom: 12,
-      maxBounds: permBounds,      // ограничение карты
+      maxBounds: permBounds,
       minZoom: 12,
-      maxBoundsViscosity: 1.0    // "липкость" границ, чем ближе к 1, тем сильнее ограничение
+      maxBoundsViscosity: 1.0
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(this.map);
-    
+
     this.addDistricts();
+
     this.map.on('click', (event: L.LeafletMouseEvent) => {
-    this.setSelectedPoint(event.latlng.lat, event.latlng.lng);
-    
-});
+      this.setSelectedPoint(event.latlng.lat, event.latlng.lng);
+    });
   }
 
-  applyFilters() {
-    this.filteredComplaints = this.complaints.filter(c => 
+  applyFilters(): void {
+    this.filteredComplaints = this.complaints.filter(c =>
       (this.selectedType ? c.type === this.selectedType : true) &&
       (this.selectedDistrict ? c.district === this.selectedDistrict : true)
     );
+
     this.updateMapMarkers();
   }
 
-  updateMapMarkers() {
+  updateMapMarkers(): void {
     this.map.eachLayer(layer => {
       if ((layer as any).options?.icon) {
         this.map.removeLayer(layer);
@@ -93,20 +119,74 @@ export class MapWidget implements OnInit {
     });
   }
 
-  createComplaint() {
-    alert('Переход на форму создания заявки');
-    // Можно добавить маршрутизацию: this.router.navigate(['/user/complaint/new'])
+  createComplaint(): void {
+  if (!this.isAuthorized) {
+    alert('Чтобы сообщить о проблеме, необходимо авторизоваться');
+    return;
   }
 
-  setSelectedPoint(lat: number, lng: number) {
+  if (this.selectedLat === undefined || this.selectedLng === undefined) {
+    alert('Выберите точку на карте');
+    return;
+  }
+
+  this.isComplaintFormOpen.set(true);
+  this.selectedPointMarker?.closePopup();
+
+  setTimeout(() => {
+    this.map.invalidateSize();
+  });
+}
+
+closeComplaintForm(): void {
+  this.isComplaintFormOpen.set(false);
+
+  setTimeout(() => {
+    this.map.invalidateSize();
+  });
+}
+
+  submitComplaint(value: ComplaintFormValue): void {
+    const formData = new FormData();
+
+    formData.append('type', value.type);
+    formData.append('description', value.description);
+    formData.append('lat', String(value.lat));
+    formData.append('lng', String(value.lng));
+
+    value.photos.forEach(photo => {
+      formData.append('photos', photo);
+    });
+
+    // TODO: заменить на реальный запрос на backend
+    // this.apiService.createComplaint(formData).subscribe(() => {
+    //   this.closeComplaintForm();
+    //   this.loadReports();
+    // });
+
+    console.log('Новая проблема ЖКХ:', value);
+
+    this.closeComplaintForm();
+  }
+
+  setSelectedPoint(lat: number, lng: number): void {
     this.selectedLat = lat;
     this.selectedLng = lng;
 
     if (this.selectedPointMarker) {
       this.selectedPointMarker.setLatLng([lat, lng]);
     } else {
+
+      const  pinIcon = L.icon({
+          iconUrl: 'assets/pin.svg',
+          iconSize: [40, 40],
+          iconAnchor: [20, 37],
+          popupAnchor:  [0, -40]
+      });
+
       this.selectedPointMarker = L.marker([lat, lng], {
         draggable: true,
+        icon: pinIcon,
       }).addTo(this.map);
 
       this.selectedPointMarker.on('dragend', () => {
@@ -115,33 +195,36 @@ export class MapWidget implements OnInit {
         this.selectedLng = position.lng;
       });
     }
+
     const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'create-complaint-button';
-  button.textContent = 'Сообщить о проблеме';
 
-  button.addEventListener('click', (event) => {
-    event.stopPropagation();
-    event.preventDefault();
-    this.createComplaint();
-  });
+    button.type = 'button';
+    button.className = 'create-complaint-button';
+    button.textContent = 'Сообщить о проблеме';
 
-  this.selectedPointMarker
-    .bindPopup(button)
-    .openPopup();
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      event.preventDefault();
+      this.createComplaint();
+    });
+    if (!this.isComplaintFormOpen()) {
+      this.selectedPointMarker
+        .bindPopup(button)
+        .openPopup();
+    }
   }
 
-  addDistricts() {
+  addDistricts(): void {
     fetch('assets/districts_perm.geojson')
       .then(res => res.json())
       .then(data => {
         this.districtsLayer = L.geoJSON(data, {
           style: {
-            color: '#2563eb',       // цвет границы
-            weight: 2,              // толщина линии
-            fillColor: '#3b82f6',   // заливка
-            fillOpacity: 0.15       // прозрачность заливки
-          },
+            color: '#2563eb',
+            weight: 2,
+            fillColor: '#3b82f6',
+            fillOpacity: 0.15
+          }
         }).addTo(this.map);
 
         const cityBounds = this.districtsLayer.getBounds();
@@ -155,9 +238,12 @@ export class MapWidget implements OnInit {
       if (!reports) {
         return;
       }
+
       reports.forEach(report => {
         const [lng, lat] = report.location.coordinates;
+
         const marker = L.marker([lat, lng]).addTo(this.map);
+
         marker.bindPopup(`
           <b>${report.title}</b><br>
           ${report.description}<br>

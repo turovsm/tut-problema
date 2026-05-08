@@ -1,0 +1,70 @@
+<mat-card class="complaint-form-card">
+  <h2>Сообщить о проблеме ЖКХ</h2>
+
+  <p class="point-info">
+    Точка на карте:
+    {{ lat | number:'1.5-5' }},
+    {{ lng | number:'1.5-5' }}
+  </p>
+
+  <form [formGroup]="complaintForm" (ngSubmit)="submit()">
+    <mat-form-field appearance="fill">
+      <mat-label>Тип проблемы</mat-label>
+
+      <mat-select formControlName="type">
+        <mat-option *ngFor="let type of types" [value]="type">
+          {{ type }}
+        </mat-option>
+      </mat-select>
+
+      <mat-error *ngIf="complaintForm.controls.type.hasError('required')">
+        Выберите тип проблемы
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Описание проблемы</mat-label>
+
+      <textarea
+        matInput
+        rows="5"
+        formControlName="description"
+        placeholder="Опишите проблему подробнее"
+      ></textarea>
+
+      <mat-error *ngIf="complaintForm.controls.description.hasError('required')">
+        Описание обязательно
+      </mat-error>
+
+      <mat-error *ngIf="complaintForm.controls.description.hasError('minlength')">
+        Минимум 10 символов
+      </mat-error>
+    </mat-form-field>
+
+    <div class="file-field">
+      <label for="photos">Фото проблемы</label>
+
+      <input
+        id="photos"
+        type="file"
+        multiple
+        accept="image/*"
+        (change)="onFilesSelected($event)"
+      />
+
+      <div class="files-info" *ngIf="selectedFiles.length">
+        Выбрано файлов: {{ selectedFiles.length }}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button mat-button type="button" (click)="close()">
+        Отмена
+      </button>
+
+      <button mat-raised-button color="primary" type="submit">
+        Отправить
+      </button>
+    </div>
+  </form>
+</mat-card>
