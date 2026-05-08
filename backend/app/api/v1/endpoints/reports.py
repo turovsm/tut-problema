@@ -29,8 +29,16 @@ async def list_reports(report_service: Annotated[ReportService, Depends(get_repo
     return ReportListResponse(items=[map_report_to_schema(r) for r in reports], total=total, page=page, limit=limit, has_next=page * limit < total)
 
 @router.get("/nearby", response_model=SuccessResponse[ReportItemsResponse])
-async def get_nearby_reports(report_service: Annotated[ReportService, Depends(get_report_service)], current_user: Annotated[User, Depends(get_current_active_user)], lat: float = Query(..., ge=-90, le=90), lon: float = Query(..., ge=-180, le=180), radius: int = Query(settings.DEFAULT_RADIUS_METERS, ge=settings.MIN_RADIUS_METERS, le=settings.MAX_RADIUS_METERS), limit: int = Query(settings.DEFAULT_PAGE_SIZE, ge=settings.MIN_PAGE_SIZE, le=settings.MAX_PAGE_SIZE)):
-    reports = await report_service.get_nearby_reports(lat, lon, radius, limit, current_user.id)
+async def get_nearby_reports(
+        report_service: Annotated[ReportService, Depends(get_report_service)],
+        current_user: Annotated[Optional[User], Depends(get_optional_current_user)],
+        lat: float = Query(..., ge=-90, le=90),
+        lon: float = Query(..., ge=-180, le=180),
+        radius: int = Query(settings.DEFAULT_RADIUS_METERS, ge=settings.MIN_RADIUS_METERS, le=settings.MAX_RADIUS_METERS),
+        limit: int = Query(settings.DEFAULT_PAGE_SIZE, ge=settings.MIN_PAGE_SIZE, le=settings.MAX_PAGE_SIZE)
+):
+    user_id = current_user.id if current_user else None
+    reports = await report_service.get_nearby_reports(lat, lon, radius, limit, user_id)
     return SuccessResponse(data={"items": [map_report_to_schema(r) for r in reports]})
 
 @router.post("", status_code=status.HTTP_201_CREATED, response_model=SuccessResponse[ReportIdResponse])
