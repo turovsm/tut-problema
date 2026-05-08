@@ -43,4 +43,17 @@ export class MapWidgetApiService {
       map(res => res.status === 'success' ? res.data.items : null)
     );
   }
+
+  loadAddress(lat: number, lng: number): Observable<{ display_name?: string }> {
+    const url = 'https://nominatim.openstreetmap.org/reverse';
+
+    return this.http.get<{ display_name?: string }>(url, {
+      params: {
+        format: 'jsonv2',
+        lat,
+        lon: lng,
+        'accept-language': 'ru'
+      }
+    })
+  }
 }

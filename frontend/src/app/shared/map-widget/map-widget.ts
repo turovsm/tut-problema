@@ -55,6 +55,7 @@ export class MapWidget implements OnInit {
   selectedPointMarker?: L.Marker;
   selectedLat?: number;
   selectedLng?: number;
+  selectedAddress = '';
 
   districtsLayer?: L.GeoJSON;
 
@@ -169,9 +170,10 @@ closeComplaintForm(): void {
     this.closeComplaintForm();
   }
 
-  setSelectedPoint(lat: number, lng: number): void {
+  private setSelectedPoint(lat: number, lng: number): void {
     this.selectedLat = lat;
     this.selectedLng = lng;
+    this.loadAddressFromCoords(this.selectedLat, this.selectedLng);
 
     if (this.selectedPointMarker) {
       this.selectedPointMarker.setLatLng([lat, lng]);
@@ -214,7 +216,7 @@ closeComplaintForm(): void {
     }
   }
 
-  addDistricts(): void {
+  private addDistricts(): void {
     fetch('assets/districts_perm.geojson')
       .then(res => res.json())
       .then(data => {
@@ -250,6 +252,19 @@ closeComplaintForm(): void {
           Статус: ${report.status}
         `);
       });
+    });
+  }
+
+  private loadAddressFromCoords(lat: number, lng: number) {
+     this.selectedAddress = 'Определяем адрес...';
+
+     this.apiService.loadAddress(lat, lng).subscribe({
+      next: data => {
+        this.selectedAddress = data.display_name || 'Адрес не найден';
+      },
+      error: () => {
+        this.selectedAddress = 'Адрес не найден';
+      }
     });
   }
 }

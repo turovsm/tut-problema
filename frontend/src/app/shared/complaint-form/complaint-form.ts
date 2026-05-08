@@ -37,6 +37,7 @@ export class ComplaintFormComponent {
   @Input({ required: true }) types: string[] = [];
   @Input({ required: true }) lat!: number;
   @Input({ required: true }) lng!: number;
+  @Input() address?: string;
 
   @Output() formSubmit = new EventEmitter<ComplaintFormValue>();
   @Output() cancel = new EventEmitter<void>();

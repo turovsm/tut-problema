@@ -6,6 +6,7 @@
     {{ lat | number:'1.5-5' }},
     {{ lng | number:'1.5-5' }}
   </p>
+  <p class="point-info">{{address}}</p>
 
   <form [formGroup]="complaintForm" (ngSubmit)="submit()">
     <mat-form-field appearance="fill">
