@@ -96,14 +96,15 @@
         </button>
       </mat-menu>
     } @else {
-      <button mat-button routerLink="/auth/login">
+      <button mat-button type="button" (click)="openLogin()">
         Войти
       </button>
 
       <button
         mat-raised-button
         color="primary"
-        routerLink="/auth/register"
+        type="button"
+        (click)="openRegister()"
       >
         Регистрация
       </button>

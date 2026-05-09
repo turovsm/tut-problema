@@ -1,16 +1,22 @@
-import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+
+import { AuthService } from '../../core/auth/auth.service';
+import { AuthComponent } from '../../features/auth/auth';
 
 @Component({
   selector: 'app-header',
   standalone: true,
+  templateUrl: './header.html',
+  styleUrls: ['./header.less'],
   imports: [
     CommonModule,
     RouterLink,
@@ -19,29 +25,57 @@ import { MatDividerModule } from '@angular/material/divider';
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
-    MatSidenavModule,
     MatDividerModule,
-  ],
-  templateUrl: './header.html',
-  styleUrls: ['./header.less'],
+    MatDialogModule
+  ]
 })
 export class HeaderComponent {
-  isMobileMenuOpen = signal(false);
+  private readonly authService = inject(AuthService);
+  private readonly dialog = inject(MatDialog);
 
-  user = signal({
-    name: 'Анна',
-    role: 'user',
-    isAuthenticated: true,
+  readonly isMobileMenuOpen = signal(false);
+
+  readonly user = computed(() => {
+    const currentUser = this.authService.currentUser();
+
+    return {
+      isAuthenticated: !!currentUser,
+      name: currentUser?.user.username ?? currentUser?.user.email ?? '',
+      role: currentUser?.user.role ?? null
+    };
   });
 
-  isGov = computed(() => this.user().role === 'gov_org');
-  isModerator = computed(() => this.user().role === 'moderator');
-
   toggleMobileMenu(): void {
-    this.isMobileMenuOpen.update(v => !v);
+    this.isMobileMenuOpen.update(value => !value);
+  }
+
+  openLogin(): void {
+    this.dialog.open(AuthComponent, {
+      data: { mode: 'login' },
+      width: '420px',
+      maxWidth: 'calc(100vw - 32px)',
+      panelClass: 'auth-dialog-panel'
+    });
+  }
+
+  openRegister(): void {
+    this.dialog.open(AuthComponent, {
+      data: { mode: 'register' },
+      width: '420px',
+      maxWidth: 'calc(100vw - 32px)',
+      panelClass: 'auth-dialog-panel'
+    });
   }
 
   logout(): void {
-    console.log('logout');
+    this.authService.logout().subscribe();
+  }
+
+  isGov(): boolean {
+    return this.user().role === 'gov';
+  }
+
+  isModerator(): boolean {
+    return this.user().role === 'moderator';
   }
 }

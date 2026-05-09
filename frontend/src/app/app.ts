@@ -9,5 +9,6 @@ import { HeaderComponent } from './core/layout/header';
   styleUrl: './app.less',
 })
 export class App {
-  protected title = 'frontend';
+  protected title = 'ТутПроблема';
+
 }

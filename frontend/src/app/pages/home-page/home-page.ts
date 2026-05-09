@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { MapWidget } from '../shared/map-widget/map-widget';
+import { MapWidget } from '../../shared/map-widget/map-widget';
 
 @Component({
   selector: 'app-home-page',
