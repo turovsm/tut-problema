@@ -4,11 +4,15 @@
 
   <form [formGroup]="form" (ngSubmit)="submit()">
     <mat-form-field appearance="fill">
-      <mat-label>Имя</mat-label>
+      <mat-label>Никнейм</mat-label>
       <input matInput formControlName="name" />
 
       @if (form.controls.name.hasError('required')) {
         <mat-error>Имя обязательно</mat-error>
+      }
+
+      @if (form.controls.name.hasError('minlength')) {
+        <mat-error>Минимум 3 символа</mat-error>
       }
     </mat-form-field>
 
@@ -50,23 +54,26 @@
       }
 
       @if (form.controls.password.hasError('minlength')) {
-        <mat-error>Минимум 6 символов</mat-error>
+        <mat-error>Минимум 8 символов</mat-error>
+      } @else if (form.controls.password.hasError('pattern')) {
+        <mat-error>Пароль должен содержать заглавную букву, цифру и спецсимвол</mat-error>
       }
     </mat-form-field>
 
-    @if (error) {
+    @if (error()) {
       <div class="auth-error">
-        {{ error }}
+        {{ error() }}
       </div>
     }
 
     <button
+      class="submit-button"
       mat-raised-button
       color="primary"
       type="submit"
-      [disabled]="loading"
+      [disabled]="isLoading()"
     >
-      {{ loading ? 'Создаём...' : 'Зарегистрироваться' }}
+      {{ isLoading() ? 'Создаём...' : 'Зарегистрироваться' }}
     </button>
   </form>
 

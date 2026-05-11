@@ -47,14 +47,29 @@
       </div>
     }
 
+    <mat-checkbox formControlName="remember_me">
+      Запомнить меня
+    </mat-checkbox>
+
+    @let loading = isLoading | async;
     <button
+      class="submit-button"
       mat-raised-button
       color="primary"
       type="submit"
       [disabled]="loading"
     >
-      {{ loading ? 'Входим...' : 'Войти' }}
-    </button>
+      @if (loading) {
+        <mat-progress-spinner
+          class="submit-spinner"
+          mode="indeterminate"
+          diameter="18"
+        />
+        <span>Входим...</span>
+      } @else {
+        <span>Войти</span>
+      }
+      </button>
   </form>
 
   <div class="auth-switch">

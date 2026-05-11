@@ -38,10 +38,11 @@ export class HeaderComponent {
   readonly user = computed(() => {
     const currentUser = this.authService.currentUser();
 
+    console.log(currentUser);
     return {
       isAuthenticated: !!currentUser,
-      name: currentUser?.user.username ?? currentUser?.user.email ?? '',
-      role: currentUser?.user.role ?? null
+      name: currentUser?.username ?? currentUser?.email ?? '',
+      role: currentUser?.role ?? null
     };
   });
 
@@ -52,7 +53,7 @@ export class HeaderComponent {
   openLogin(): void {
     this.dialog.open(AuthComponent, {
       data: { mode: 'login' },
-      width: '420px',
+      width: '480px',
       maxWidth: 'calc(100vw - 32px)',
       panelClass: 'auth-dialog-panel'
     });
@@ -61,7 +62,7 @@ export class HeaderComponent {
   openRegister(): void {
     this.dialog.open(AuthComponent, {
       data: { mode: 'register' },
-      width: '420px',
+      width: '480px',
       maxWidth: 'calc(100vw - 32px)',
       panelClass: 'auth-dialog-panel'
     });
@@ -72,7 +73,7 @@ export class HeaderComponent {
   }
 
   isGov(): boolean {
-    return this.user().role === 'gov';
+    return this.user().role === 'gov_org';
   }
 
   isModerator(): boolean {

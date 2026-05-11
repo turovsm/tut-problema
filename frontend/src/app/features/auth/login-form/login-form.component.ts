@@ -6,8 +6,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { AuthService } from '../../../core/auth/auth.service';
+import { BehaviorSubject, catchError, EMPTY, take, tap, throwError } from 'rxjs';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-login-form',
@@ -18,7 +21,9 @@ import { AuthService } from '../../../core/auth/auth.service';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule
+    MatIconModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './login-form.component.html',
   styleUrls: ['./login-form.component.less']
@@ -27,10 +32,11 @@ export class LoginFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
 
+  readonly isLoading = new BehaviorSubject(false);
+
   @Output() success = new EventEmitter<void>();
   @Output() goToRegister = new EventEmitter<void>();
 
-  loading = false;
   error = '';
   hidePassword = true;
 
@@ -46,22 +52,22 @@ export class LoginFormComponent {
       return;
     }
 
-    this.loading = true;
+    this.isLoading.next(true);
     this.error = '';
 
     this.authService.login({
       email: this.form.value.email ?? '',
       password: this.form.value.password ?? '',
       remember_me: this.form.value.remember_me ?? false
-    }).subscribe({
+    }).pipe(take(1),catchError(() => {
+        this.isLoading.next(false);
+        return throwError(() => new Error('Something went wrong.'));
+      })).subscribe({
       next: () => {
-        this.loading = false;
         this.success.emit();
       },
-      error: () => {
-        this.loading = false;
-        this.error = 'Не удалось войти. Проверьте email и пароль.';
-      }
+      error: () => {this.error = 'Не удалось войти. Проверьте email и пароль.';},
+      complete: () => {this.isLoading.next(false);}
     });
   }
 }

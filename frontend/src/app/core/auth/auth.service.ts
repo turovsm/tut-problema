@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { catchError, Observable, tap, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponseSuccess } from '../models/response.model';
 
@@ -17,15 +17,13 @@ export interface RegisterRequest {
 }
 
 export interface User {
-    user: {
-        email: string;
-        username: string;
-        id: string;
-        role: string;
-        is_active: boolean;
-        is_verified: boolean;
-        created_at: string;
-    }
+  email: string;
+  username: string;
+  id: string;
+  role: 'user' | 'gov_org' | 'moderator';
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
 }
 
 @Injectable({

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Output, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 
 import { AuthService } from '../../../core/auth/auth.service';
+import { take } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-register-form',
@@ -18,7 +20,7 @@ import { AuthService } from '../../../core/auth/auth.service';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatIconModule
+    MatIconModule,
   ],
   templateUrl: './register-form.component.html',
   styleUrls: ['./register-form.component.less']
@@ -27,17 +29,26 @@ export class RegisterFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
 
+  readonly isLoading = signal(false);
+  readonly error = signal('')
+
   @Output() success = new EventEmitter<void>();
   @Output() goToLogin = new EventEmitter<void>();
 
-  loading = false;
-  error = '';
   hidePassword = true;
 
   form = this.fb.group({
-    name: ['', Validators.required],
+    name: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]]
+    password: ['', [
+        Validators.required, 
+        Validators.minLength(8),
+        Validators.pattern(/[0-9]/),
+        Validators.pattern(/[a-z]/),
+        Validators.pattern(/[A-Z]/),
+        Validators.pattern(/[@$!%*?&]/)
+      ]
+    ]
   });
 
   submit(): void {
@@ -46,22 +57,31 @@ export class RegisterFormComponent {
       return;
     }
 
-    this.loading = true;
-    this.error = '';
+    this.isLoading.set(true);
+    this.error.set('');
 
     this.authService.register({
       username: this.form.value.name ?? '',
       email: this.form.value.email ?? '',
       password: this.form.value.password ?? ''
-    }).subscribe({
+    }).pipe(take(1)).subscribe({
       next: () => {
-        this.loading = false;
         this.success.emit();
+        this.isLoading.set(false);
       },
-      error: () => {
-        this.loading = false;
-        this.error = 'Не удалось зарегистрироваться.';
+      error: (err: HttpErrorResponse) => {
+        this.error.set(this.getErrorText(err));
+        this.isLoading.set(false);
       }
     });
+  }
+
+  getErrorText(err: HttpErrorResponse): string {
+    if (err.error?.detail === 'Email already registered') {
+      return 'На эту почту уже зарегистрирован аккаунт';
+    } else if (err.error?.detail === 'Username already taken') {
+      return 'Этот никнейм занят';
+    }
+    return 'Произошла ошибка регистрации';
   }
 }
