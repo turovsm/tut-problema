@@ -91,6 +91,5 @@ def setup_logging() -> None:
     )
 
 
-def get_logger(name: str = None):
-    logger = structlog.get_logger(name)
-    return logger
+def get_logger(name: str = None) -> Any:
+    return structlog.get_logger(name)

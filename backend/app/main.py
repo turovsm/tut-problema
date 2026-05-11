@@ -8,11 +8,12 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from structlog.contextvars import bind_contextvars, clear_contextvars
 
-from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.logging_config import get_logger, setup_logging
-from app.database.session import create_tables, get_engine, init_db
-from app.infrastructure.redis import redis_client
+from app.infrastructure.database.session import engine
+from app.infrastructure.redis.client import redis_client
+from app.presentation.api.errors import setup_exception_handlers
+from app.presentation.api.v1.api import api_router
 
 setup_logging()
 logger = get_logger("app.main")
@@ -88,13 +89,12 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     logger.info("Starting up application...")
-    await init_db()
-    await create_tables()
     await redis_client.connect()
     logger.info("Application startup complete")
     yield
     logger.info("Shutting down application...")
     await redis_client.disconnect()
+    await engine.dispose()
 
 
 app = FastAPI(
@@ -121,6 +121,8 @@ app.add_middleware(
     allow_headers=settings.CORS_ALLOW_HEADERS,
 )
 
+setup_exception_handlers(app)
+
 app.include_router(api_router, prefix=settings.API_PREFIX)
 
 
@@ -137,9 +139,8 @@ async def health():
 
 @app.get("/health/detailed")
 async def detailed_health():
-    engine = await get_engine()
     pool = engine.pool
-    health_data = {
+    return {
         "status": "healthy",
         "database": {
             "pool_size": pool.size(),
@@ -148,6 +149,6 @@ async def detailed_health():
             "max_overflow": settings.DB_MAX_OVERFLOW,
             "pool_pre_ping": settings.DB_POOL_PRE_PING,
         },
-        "redis": "connected" if redis_client.is_enabled() else "disabled",
+        "redis": "connected" if redis_client.is_active() else "disabled",
+        "environment": settings.APP_ENV,
     }
-    return health_data

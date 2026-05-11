@@ -4,9 +4,12 @@ from app.core.config import settings
 
 
 def calculate_distance_haversine(
-    lat1: float, lon1: float, lat2: float, lon2: float
+    lat1: float,
+    lon1: float,
+    lat2: float,
+    lon2: float,
+    earth_radius: float = 6371000.0,
 ) -> float:
-    R = settings.EARTH_RADIUS_METERS
 
     lat1_rad = radians(lat1)
     lat2_rad = radians(lat2)
@@ -19,4 +22,4 @@ def calculate_distance_haversine(
     )
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
-    return R * c
+    return earth_radius * c
