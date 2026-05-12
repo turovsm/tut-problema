@@ -11,6 +11,7 @@ from app.presentation.api.deps import (
     get_current_verified_user,
     get_delete_photo_use_case,
     get_photo_use_case,
+    get_resolution_photo_use_case,
 )
 from app.presentation.api.schemas.common import SuccessResponse
 from app.presentation.api.schemas.reports import ReportPhotoResponse
@@ -72,3 +73,15 @@ async def delete_photo(
         photo_id=photo_id, user_id=current_user.id, user_role=current_user.role
     )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/resolutions/{photo_id}")
+async def get_resolution_photo(
+    photo_id: UUID,
+    use_case: Annotated[Depends, Depends(get_resolution_photo_use_case)],
+):
+    photo_metadata = await use_case.execute(photo_id)
+
+    return FileResponse(
+        path=photo_metadata.file_path, filename=photo_metadata.file_name
+    )

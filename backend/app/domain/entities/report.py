@@ -19,6 +19,25 @@ class ReportPhoto:
 
 
 @dataclass
+class ResolutionPhoto:
+    file_name: str
+    file_path: str
+    resolution_id: UUID
+    id: UUID = field(default_factory=uuid4)
+    uploaded_at: datetime = field(default_factory=get_utc_now_naive)
+
+
+@dataclass
+class ReportResolution:
+    report_id: UUID
+    resolved_by_id: UUID
+    comment: str
+    id: UUID = field(default_factory=uuid4)
+    resolved_at: datetime = field(default_factory=get_utc_now_naive)
+    photos: list[ResolutionPhoto] = field(default_factory=list)
+
+
+@dataclass
 class Report:
     title: str
     issue_type: IssueType

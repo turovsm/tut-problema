@@ -2,7 +2,12 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from app.domain.entities.enums import IssueType, ReportStatus
-from app.domain.entities.report import Report, ReportPhoto
+from app.domain.entities.report import (
+    Report,
+    ReportPhoto,
+    ReportResolution,
+    ResolutionPhoto,
+)
 
 
 class IReportRepository(ABC):
@@ -42,3 +47,18 @@ class IReportRepository(ABC):
 
     @abstractmethod
     async def delete_photo(self, photo_id: UUID) -> None: ...
+
+    @abstractmethod
+    async def save_resolution(
+        self, resolution: ReportResolution
+    ) -> ReportResolution: ...
+
+    @abstractmethod
+    async def add_resolution_photo(
+        self, photo: ResolutionPhoto
+    ) -> ResolutionPhoto: ...
+
+    @abstractmethod
+    async def get_resolution_photo_by_id(
+        self, photo_id: UUID
+    ) -> ResolutionPhoto | None: ...

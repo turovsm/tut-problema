@@ -32,9 +32,49 @@ target_metadata = Base.metadata
 
 
 def include_object(object, name, type_, reflected, compare_to):
-    return True
-    if type_ == "table" and name not in target_metadata.tables:
-        return False
+    if type_ == "table":
+        postgis_tables = {
+            "spatial_ref_sys",
+            "topology",
+            "layer",
+            "addr",
+            "faces",
+            "edges",
+            "featnames",
+            "place",
+            "cousub",
+            "county",
+            "state",
+            "zcta5",
+            "tract",
+            "tabblock",
+            "bg",
+            "pagc_gaz",
+            "pagc_lex",
+            "pagc_rules",
+            "geocode_settings",
+            "geocode_settings_default",
+            "loader_variables",
+            "addrfeat",
+            "loader_lookuptables",
+            "zip_lookup",
+            "zip_state_loc",
+            "place_lookup",
+            "zip_state",
+            "state_lookup",
+            "zip_lookup_base",
+            "secondary_unit_lookup",
+            "direction_lookup",
+            "zip_lookup_all",
+            "tabblock20",
+            "county_lookup",
+            "street_type_lookup",
+            "countysub_lookup",
+            "loader_platform",
+        }
+        if name in postgis_tables:
+            return False
+
     return True
 
 

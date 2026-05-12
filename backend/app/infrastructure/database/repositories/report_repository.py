@@ -8,12 +8,22 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.domain.entities.location import Location
-from app.domain.entities.report import Report, ReportPhoto
+from app.domain.entities.report import (
+    Report,
+    ReportPhoto,
+    ReportResolution,
+    ResolutionPhoto,
+)
 from app.domain.entities.user import User
 from app.domain.interfaces.repositories.report_repository import (
     IReportRepository,
 )
-from app.infrastructure.database.models import ReportModel, ReportPhotoModel
+from app.infrastructure.database.models import (
+    ReportModel,
+    ReportPhotoModel,
+    ReportResolutionModel,
+    ResolutionPhotoModel,
+)
 from app.infrastructure.database.repositories.base import (
     BaseSQLAlchemyRepository,
 )
@@ -70,6 +80,47 @@ class ReportRepository(
             )
         else:
             report.created_by = None
+
+        if "assignee" not in state.unloaded and model.assignee:
+            report.assigned_to = User(
+                id=model.assignee.id,
+                email=model.assignee.email,
+                username=model.assignee.username,
+                password_hash=model.assignee.password_hash,
+                role=model.assignee.role,
+                is_active=model.assignee.is_active,
+                is_verified=model.assignee.is_verified,
+                created_at=model.assignee.created_at,
+            )
+            report.assigned_to_id = model.assignee.id
+        else:
+            report.assigned_to = None
+            report.assigned_to_id = model.assigned_to_id
+
+        if "resolution" not in state.unloaded and model.resolution:
+            res_state = inspect(model.resolution)
+            res_photos = []
+            if "photos" not in res_state.unloaded:
+                res_photos = [
+                    ResolutionPhoto(
+                        id=p.id,
+                        resolution_id=p.resolution_id,
+                        file_name=p.file_name,
+                        file_path=p.file_path,
+                        uploaded_at=p.uploaded_at,
+                    )
+                    for p in model.resolution.photos
+                ]
+            report.resolution = ReportResolution(
+                id=model.resolution.id,
+                report_id=model.resolution.report_id,
+                resolved_by_id=model.resolution.resolved_by_id,
+                comment=model.resolution.comment,
+                resolved_at=model.resolution.resolved_at,
+                photos=res_photos,
+            )
+        else:
+            report.resolution = None
         return report
 
     async def get_by_id(self, report_id: UUID) -> Report | None:
@@ -78,6 +129,10 @@ class ReportRepository(
             .options(
                 selectinload(self._model.photos),
                 selectinload(self._model.creator),
+                selectinload(self._model.assignee),
+                selectinload(self._model.resolution).selectinload(
+                    ReportResolutionModel.photos
+                ),
             )
             .where(self._model.id == report_id)
         )
@@ -88,7 +143,10 @@ class ReportRepository(
     async def save(self, report: Report) -> Report:
         query = (
             select(self._model)
-            .options(selectinload(self._model.creator))
+            .options(
+                selectinload(self._model.creator),
+                selectinload(self._model.assignee),
+            )
             .where(self._model.id == report.id)
         )
         result = await self._session.execute(query)
@@ -123,9 +181,12 @@ class ReportRepository(
             model.description = report.description
             model.status = report.status
             model.updated_at = report.updated_at
+            model.assigned_to_id = report.assigned_to_id
 
         await self._session.flush()
-        await self._session.refresh(model, ["creator"])
+        await self._session.refresh(
+            model, ["creator", "assignee", "updated_at"]
+        )
         await self._session.commit()
         return self._to_domain(model)
 
@@ -141,7 +202,12 @@ class ReportRepository(
         self, issue_type=None, status=None, limit=20, offset=0
     ) -> tuple[list[Report], int]:
         query = select(self._model).options(
-            selectinload(self._model.photos), selectinload(self._model.creator)
+            selectinload(self._model.photos),
+            selectinload(self._model.creator),
+            selectinload(self._model.assignee),
+            selectinload(self._model.resolution).selectinload(
+                ReportResolutionModel.photos
+            ),
         )
         if issue_type:
             query = query.where(self._model.issue_type == issue_type)
@@ -240,3 +306,53 @@ class ReportRepository(
         if m:
             await self._session.delete(m)
             await self._session.commit()
+
+    async def save_resolution(
+        self, resolution: ReportResolution
+    ) -> ReportResolution:
+        model = ReportResolutionModel(
+            id=resolution.id,
+            report_id=resolution.report_id,
+            resolved_by_id=resolution.resolved_by_id,
+            comment=resolution.comment,
+            resolved_at=resolution.resolved_at,
+        )
+        self._session.add(model)
+        await self._session.flush()
+        await self._session.commit()
+        return resolution
+
+    async def add_resolution_photo(
+        self, photo: ResolutionPhoto
+    ) -> ResolutionPhoto:
+        model = ResolutionPhotoModel(
+            id=photo.id,
+            resolution_id=photo.resolution_id,
+            file_name=photo.file_name,
+            file_path=photo.file_path,
+            uploaded_at=photo.uploaded_at,
+        )
+        self._session.add(model)
+        await self._session.flush()
+        await self._session.commit()
+        return photo
+
+    async def get_resolution_photo_by_id(
+        self, photo_id: UUID
+    ) -> ResolutionPhoto | None:
+        query = select(ResolutionPhotoModel).where(
+            ResolutionPhotoModel.id == photo_id
+        )
+        res = await self._session.execute(query)
+        m = res.scalar_one_or_none()
+        return (
+            ResolutionPhoto(
+                id=m.id,
+                resolution_id=m.resolution_id,
+                file_name=m.file_name,
+                file_path=m.file_path,
+                uploaded_at=m.uploaded_at,
+            )
+            if m
+            else None
+        )

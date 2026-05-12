@@ -73,6 +73,31 @@ class ReportCreateForm(BaseModel):
         )
 
 
+class ResolveReportForm(BaseModel):
+    comment: str = Field(
+        ..., min_length=5, max_length=2000, title="Resolution Comment"
+    )
+
+    @classmethod
+    def as_form(cls, comment: str = Form(..., min_length=5, max_length=2000)):
+        return cls(comment=comment)
+
+
+class ResolutionPhotoResponse(BaseModel):
+    id: UUID = Field(..., title="Id")
+    file_url: str = Field(..., title="File Url")
+    uploaded_at: datetime = Field(..., title="Uploaded At")
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ResolutionResponse(BaseModel):
+    id: UUID = Field(..., title="Id")
+    comment: str = Field(..., title="Comment")
+    resolved_at: datetime = Field(..., title="Resolved At")
+    photos: list[ResolutionPhotoResponse] = Field(default=[], title="Photos")
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ReportPhotoResponse(BaseModel):
     id: UUID = Field(..., title="Id")
     file_name: str = Field(..., title="File Name")
@@ -90,6 +115,8 @@ class ReportResponse(BaseModel):
     location: Location = Field(..., title="Location")
     status: ReportStatus = Field(..., title="ReportStatus")
     created_by: UserResponse = Field(..., title="Created By")
+    assigned_to: UserResponse | None = Field(None, title="Assigned To")
+    resolution: ResolutionResponse | None = Field(None, title="Resolution")
     created_at: datetime = Field(..., title="Created At")
     updated_at: datetime = Field(..., title="Updated At")
     photos: list[ReportPhotoResponse] = Field(default=[], title="Photos")
@@ -127,3 +154,4 @@ class ReportUpdate(BaseModel):
         title="Description",
     )
     status: ReportStatus | None = Field(None, title="Status")
+    assigned_to_id: UUID | None = Field(None, title="Assignee ID")

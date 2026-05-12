@@ -41,6 +41,12 @@ from app.application.use_cases.reports.get_report_by_id import (
     GetReportByIdUseCase,
 )
 from app.application.use_cases.reports.get_reports import GetReportsUseCase
+from app.application.use_cases.reports.get_resolution_photo import (
+    GetResolutionPhotoUseCase,
+)
+from app.application.use_cases.reports.resolve_report import (
+    ResolveReportUseCase,
+)
 from app.application.use_cases.reports.update_report import UpdateReportUseCase
 from app.application.use_cases.users.get_user_profile import (
     GetUserProfileUseCase,
@@ -238,6 +244,12 @@ def get_update_report_use_case(
     return UpdateReportUseCase(r_repo)
 
 
+def get_resolve_report_use_case(
+    r_repo: ReportRepository = Depends(get_report_repo),
+) -> ResolveReportUseCase:
+    return ResolveReportUseCase(r_repo, storage_provider)
+
+
 def get_delete_report_use_case(
     r_repo: ReportRepository = Depends(get_report_repo),
 ) -> DeleteReportUseCase:
@@ -264,6 +276,12 @@ def get_photo_use_case(
     r_repo: ReportRepository = Depends(get_report_repo),
 ) -> GetPhotoUseCase:
     return GetPhotoUseCase(r_repo)
+
+
+def get_resolution_photo_use_case(
+    r_repo: ReportRepository = Depends(get_report_repo),
+) -> GetResolutionPhotoUseCase:
+    return GetResolutionPhotoUseCase(r_repo)
 
 
 # --- VOTE USE CASES ---

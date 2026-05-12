@@ -14,6 +14,7 @@ from app.application.dto.reports import (
     CreateReportDTO,
     NearbyReportsDTO,
     ReportFilterDTO,
+    ResolveReportDTO,
     UpdateReportDTO,
 )
 from app.domain.entities.user import User
@@ -26,6 +27,7 @@ from app.presentation.api.deps import (
     get_nearby_reports_use_case,
     get_optional_current_user,
     get_report_by_id_use_case,
+    get_resolve_report_use_case,
     get_update_report_use_case,
 )
 from app.presentation.api.schemas.common import SuccessResponse
@@ -39,6 +41,7 @@ from app.presentation.api.schemas.reports import (
     ReportListResponse,
     ReportResponse,
     ReportUpdate,
+    ResolveReportForm,
 )
 from app.presentation.api.v1.mappers import ReportMapper
 
@@ -171,6 +174,7 @@ async def update_report(
             title=data.title,
             description=data.description,
             status=data.status,
+            assigned_to_id=data.assigned_to_id,
         )
     )
     return SuccessResponse(
@@ -187,3 +191,22 @@ async def delete_report(
 ):
     await use_case.execute(report_id, current_user.id, current_user.role)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/{report_id}/resolve", status_code=status.HTTP_201_CREATED)
+async def resolve_report(
+    report_id: UUID,
+    form_data: Annotated[ResolveReportForm, Depends(ResolveReportForm.as_form)],
+    current_user: Annotated[User, Depends(get_current_verified_user)],
+    use_case: Annotated[Depends, Depends(get_resolve_report_use_case)],
+    files: list[UploadFile] = File(default=[]),
+):
+    await use_case.execute(
+        ResolveReportDTO(
+            report_id=report_id,
+            resolved_by_id=current_user.id,
+            comment=form_data.comment,
+            files=files,
+        )
+    )
+    return SuccessResponse(message="Report successfully resolved")

@@ -6,6 +6,8 @@ from app.presentation.api.schemas.common import Location
 from app.presentation.api.schemas.reports import (
     ReportPhotoResponse,
     ReportResponse,
+    ResolutionPhotoResponse,
+    ResolutionResponse,
 )
 from app.presentation.api.schemas.votes import VoteResponse
 
@@ -38,6 +40,38 @@ class ReportMapper:
         if hasattr(report, "created_by") and report.created_by:
             creator_data = UserResponse.model_validate(report.created_by)
 
+        assignee_data = None
+        if getattr(report, "assigned_to", None):
+            assignee_data = UserResponse.model_validate(report.assigned_to)
+
+        resolution_data = None
+        if getattr(report, "resolution", None):
+            res_photos = [
+                ReportPhotoResponse(
+                    id=p.id,
+                    file_name=p.file_name,
+                    file_url=f"/api/uploads/resolutions/{p.id}",
+                    uploaded_at=p.uploaded_at,
+                )
+                for p in report.resolution.photos
+            ]
+
+            res_photos_schemas = [
+                ResolutionPhotoResponse(
+                    id=p.id,
+                    file_url=f"/api/uploads/resolutions/{p.id}",
+                    uploaded_at=p.uploaded_at,
+                )
+                for p in report.resolution.photos
+            ]
+
+            resolution_data = ResolutionResponse(
+                id=report.resolution.id,
+                comment=report.resolution.comment,
+                resolved_at=report.resolution.resolved_at,
+                photos=res_photos_schemas,
+            )
+
         return ReportResponse(
             id=report.id,
             title=report.title,
@@ -51,6 +85,8 @@ class ReportMapper:
             ),
             status=report.status,
             created_by=creator_data,
+            assigned_to=assignee_data,
+            resolution=resolution_data,
             created_at=report.created_at,
             updated_at=report.updated_at,
             photos=[cls.to_photo_response(p) for p in report.photos],
