@@ -52,11 +52,11 @@ class DeleteReportPhotoUseCase:
         if len(report.photos) <= self.min_photos:
             raise MinPhotosRequiredException(min_photos=self.min_photos)
 
-        # 5. Удаление физического файла через провайдер
+        # 5. Удаление записи из репозитория
+        await self.report_repo.delete_photo(photo_id)
+
+        # 6. Удаление физического файла через провайдер
         try:
             await self.storage_provider.delete_file(photo.file_path)
         except Exception:
             pass
-
-        # 6. Удаление записи из репозитория
-        await self.report_repo.delete_photo(photo_id)

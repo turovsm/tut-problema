@@ -70,7 +70,7 @@ from app.infrastructure.database.repositories.vote_repository import (
     VoteRepository,
 )
 from app.infrastructure.database.session import get_db
-from app.infrastructure.mail.console_email_provider import ConsoleEmailProvider
+from app.infrastructure.mail.smtp_email_provider import SmtpEmailProvider
 from app.infrastructure.security.auth_provider import JoseAuthProvider
 from app.infrastructure.storage.local_storage_provider import (
     LocalStorageProvider,
@@ -78,7 +78,7 @@ from app.infrastructure.storage.local_storage_provider import (
 
 # --- Infrastructure Providers ---
 auth_provider = JoseAuthProvider()
-email_provider = ConsoleEmailProvider()
+email_provider = SmtpEmailProvider()
 storage_provider = LocalStorageProvider()
 
 security = HTTPBearer(auto_error=False)
