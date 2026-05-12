@@ -18,4 +18,8 @@ class IUserRepository(ABC):
     async def save(self, user: User) -> User: ...
 
     @abstractmethod
-    async def get_all(self) -> list[User]: ...
+    async def get_all(
+        self,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> tuple[list[User], int]: ...

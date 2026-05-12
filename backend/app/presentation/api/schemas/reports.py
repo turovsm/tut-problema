@@ -5,12 +5,9 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.config import settings
 from app.domain.entities.enums import IssueType, ReportStatus, VoteType
-from app.presentation.api.schemas.auth import UserResponse
-from app.presentation.api.schemas.common import (
-    Location,
-    PaginatedResponse,
-    PaginationQuery,
-)
+
+from .auth import UserResponse
+from .common import Location, PaginatedResponse, PaginationQuery
 
 
 class ReportFilterQuery(PaginationQuery):

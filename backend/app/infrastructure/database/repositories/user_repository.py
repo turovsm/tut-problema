@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.domain.entities.user import User
@@ -43,9 +43,22 @@ class UserRepository(BaseSQLAlchemyRepository[UserModel], IUserRepository):
         model = result.scalar_one_or_none()
         return self._to_domain(model) if model else None
 
-    async def get_all(self) -> list[User]:
-        models = await self._get_all()
-        return [self._to_domain(m) for m in models]
+    async def get_all(self, limit: int = 20, offset: int = 0) -> list[User]:
+        count_query = select(func.count()).select_from(self._model)
+        total = await self._session.execute(count_query)
+
+        query = (
+            select(self._model)
+            .order_by(self._model.created_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+
+        result = await self._session.execute(query)
+
+        return [self._to_domain(m) for m in result.scalars().all()], (
+            total.scalar() or 0
+        )
 
     async def save(self, user: User) -> User:
         model = await self._get_by_id(user.id)

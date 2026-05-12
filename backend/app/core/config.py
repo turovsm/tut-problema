@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     ARGON2_HASH_LEN: int = 16
     ARGON2_PEPPER: str = "please-go-and-change-it-to-something-else"
 
-    # CORS - TODO
+    # CORS
     CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8000"]
     CORS_ALLOW_CREDENTIALS: bool = True
     CORS_ALLOW_METHODS: list[str] = [
@@ -48,11 +48,7 @@ class Settings(BaseSettings):
         "PATCH",
     ]
     CORS_ALLOW_HEADERS: list[str] = ["*"]
-    CORS_EXPOSE_HEADERS: list[str] = []
-    CORS_MAX_AGE: int = 600
     ALLOWED_HOSTS: list[str] = ["localhost", "127.0.0.1"]
-    RELOAD: bool = True
-    WORKERS: int = 1
 
     # Password Validation
     PASSWORD_MIN_LENGTH: int = 8
@@ -115,7 +111,7 @@ class Settings(BaseSettings):
     MIN_PAGE_SIZE: int = 1
     MAX_PAGE_SIZE: int = 100
 
-    # Logging - TODO
+    # Logging
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "json"
     LOG_INCLUDE_TIMESTAMP: bool = True
@@ -161,7 +157,6 @@ class Settings(BaseSettings):
         "CORS_ORIGINS",
         "CORS_ALLOW_METHODS",
         "CORS_ALLOW_HEADERS",
-        "CORS_EXPOSE_HEADERS",
         "ALLOWED_HOSTS",
         mode="before",
     )

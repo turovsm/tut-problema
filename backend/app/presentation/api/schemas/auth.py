@@ -7,6 +7,8 @@ from app.core.config import settings
 from app.domain.entities.enums import UserRole
 from app.domain.services.password_validator import PasswordValidator
 
+from .common import PaginatedResponse, PaginationQuery
+
 
 def validate_password_strength(v: str) -> str:
     PasswordValidator.validate(
@@ -35,9 +37,12 @@ class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True, extra="ignore")
 
 
-class UserListResponse(BaseModel):
-    items: list[UserResponse] = Field(..., title="Items")
-    total: int = Field(..., title="Total")
+class UserListQuery(PaginationQuery):
+    pass
+
+
+class UserListResponse(PaginatedResponse[UserResponse]):
+    pass
 
 
 class UserRegistration(BaseModel):

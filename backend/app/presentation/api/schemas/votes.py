@@ -5,11 +5,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.config import settings
 from app.domain.entities.enums import ReportStatus, VoteType
-from app.presentation.api.schemas.common import (
-    Location,
-    PaginatedResponse,
-    PaginationQuery,
-)
+
+from .common import PaginatedResponse, PaginationQuery
 
 
 class VoteCreate(BaseModel):

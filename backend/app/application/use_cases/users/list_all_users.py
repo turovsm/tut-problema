@@ -1,3 +1,4 @@
+from app.application.dto.users import ListUsersDTO
 from app.domain.entities.enums import UserRole
 from app.domain.entities.user import User
 from app.domain.exceptions.base import PermissionDeniedException
@@ -8,14 +9,17 @@ class ListAllUsersUseCase:
     def __init__(self, user_repo: IUserRepository):
         self.user_repo = user_repo
 
-    async def execute(self, user_role: str) -> list[User]:
+    async def execute(self, dto: ListUsersDTO) -> tuple[list[User], int]:
         # 1. Проверка прав доступа
-        if user_role not in [UserRole.MODERATOR, UserRole.GOV_ORG]:
+        if dto.user_role not in [UserRole.MODERATOR, UserRole.GOV_ORG]:
             raise PermissionDeniedException(
                 "Insufficient permissions to view all users"
             )
 
         # 2. Получение данных из репозитория
-        users = await self.user_repo.get_all()
+        offset = (dto.page - 1) * dto.limit
+        users, total = await self.user_repo.get_all(
+            limit=dto.limit, offset=offset
+        )
 
-        return users
+        return users, total

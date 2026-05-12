@@ -3,7 +3,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends
 
-from app.application.dto.users import GetUserVotesDTO, UpdateUserDTO
+from app.application.dto.users import (
+    GetUserVotesDTO,
+    ListUsersDTO,
+    UpdateUserDTO,
+)
 from app.domain.entities.user import User
 from app.presentation.api.deps import (
     get_current_moderator,
@@ -15,6 +19,7 @@ from app.presentation.api.deps import (
     get_user_votes_use_case,
 )
 from app.presentation.api.schemas.auth import (
+    UserListQuery,
     UserListResponse,
     UserResponse,
     UserUpdate,
@@ -88,12 +93,19 @@ async def get_user_profile(
 async def list_all_users(
     current_user: Annotated[User, Depends(get_current_moderator)],
     use_case: Annotated[Depends, Depends(get_list_all_users_use_case)],
+    data: UserListQuery = Depends(),
 ):
-    # TODO: добавить пагинацию
-    users = await use_case.execute(user_role=current_user.role)
+    users, total = await use_case.execute(
+        ListUsersDTO(
+            user_role=current_user.role, page=data.page, limit=data.limit
+        )
+    )
     return SuccessResponse(
         data=UserListResponse(
             items=[UserResponse.model_validate(u) for u in users],
-            total=len(users),
+            total=total,
+            page=data.page,
+            limit=data.limit,
+            has_next=data.page * data.limit < total,
         )
     )
