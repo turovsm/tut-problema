@@ -33,12 +33,12 @@ class DeleteReportUseCase:
                 "Not enough permissions to delete this report"
             )
 
-        # 3. Удаление физических файлов
+        # 3. Удаление записи из базы данных
+        await self.report_repo.delete(report_id)
+
+        # 4. Удаление физических файлов
         for photo in report.photos:
             try:
                 await self.storage_provider.delete_file(photo.file_path)
             except Exception:
                 pass
-
-        # 4. Удаление записи из базы данных
-        await self.report_repo.delete(report_id)
