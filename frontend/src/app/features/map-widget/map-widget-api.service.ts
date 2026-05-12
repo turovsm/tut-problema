@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { ApiResponseSuccess } from '../../core/models/response.model';
 
 export interface ReportsResponse {
     status: "success" | "error";
@@ -56,4 +57,12 @@ export class MapWidgetApiService {
       }
     })
   }
+
+  createComplaint(formData: FormData): Observable<ApiResponseSuccess<{id: string}>> {
+  return this.http.post<ApiResponseSuccess<{id: string}>>(
+    `${environment.apiUrl}/api/reports`,
+    formData,
+    {withCredentials: true}
+  );
+}
 }

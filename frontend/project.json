@@ -28,6 +28,7 @@
         ],
         "styles": [
           "./src/styles.less",
+          "./src/matherial-overrides.scss",
           "node_modules/leaflet/dist/leaflet.css"
         ]
       },

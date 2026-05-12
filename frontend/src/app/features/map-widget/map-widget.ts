@@ -55,11 +55,11 @@ export class MapWidget implements OnInit {
   selectedPointMarker?: L.Marker;
   selectedLat?: number;
   selectedLng?: number;
-  selectedAddress = '';
 
   districtsLayer?: L.GeoJSON;
 
   isComplaintFormOpen = signal(false);
+  selectedAddress = signal('Адрес точки');
 
   // TODO: заменить на реальную проверку авторизации через AuthService
   isAuthorized = true;
@@ -70,6 +70,7 @@ export class MapWidget implements OnInit {
     this.initMap();
     this.loadReports();
     this.applyFilters();
+    this.initUserLocationMarker();
   }
 
   initMap(): void {
@@ -148,27 +149,60 @@ closeComplaintForm(): void {
 }
 
   submitComplaint(value: ComplaintFormValue): void {
-    const formData = new FormData();
+      const formData = new FormData();
 
-    formData.append('type', value.type);
-    formData.append('description', value.description);
-    formData.append('lat', String(value.lat));
-    formData.append('lng', String(value.lng));
+      formData.append('title', value.title);
+      formData.append('description', value.description ?? '');
+      formData.append('issue_type', value.issue_type);
 
-    value.photos.forEach(photo => {
-      formData.append('photos', photo);
-    });
+      formData.append('location_lng', String(value.location_lng));
+      formData.append('location_lat', String(value.location_lat));
 
-    // TODO: заменить на реальный запрос на backend
-    // this.apiService.createComplaint(formData).subscribe(() => {
-    //   this.closeComplaintForm();
-    //   this.loadReports();
-    // });
+      formData.append('user_location_lng', String(value.location_lng));
+      formData.append('user_location_lat', String(value.location_lat));
 
-    console.log('Новая проблема ЖКХ:', value);
+      value.files.forEach(file => {
+        formData.append('files', file, file.name);
+      });
 
-    this.closeComplaintForm();
-  }
+      this.apiService.createComplaint(formData).subscribe({
+        next: response => {
+          if (response.status !== 'success') {
+            alert(response.message || 'Не удалось создать жалобу');
+            return;
+          }
+
+          alert('Жалоба успешно создана');
+          this.closeComplaintForm();
+          this.loadReports();
+        },
+        error: error => {
+          console.error('Ошибка создания жалобы:', error);
+
+          if (error.status === 400) {
+            alert(error.error?.message || 'Проверьте данные жалобы');
+            return;
+          }
+
+          if (error.status === 401) {
+            alert('Необходимо авторизоваться');
+            return;
+          }
+
+          if (error.status === 403) {
+            alert("Необходимо подтвердить почту");
+            return;
+          }
+
+          if (error.status === 409) {
+            alert('Похожая жалоба уже существует. Можно проголосовать за неё.');
+            return;
+          }
+
+          alert('Ошибка сервера при создании жалобы');
+        }
+      });
+}
 
   private setSelectedPoint(lat: number, lng: number): void {
     this.selectedLat = lat;
@@ -256,15 +290,40 @@ closeComplaintForm(): void {
   }
 
   private loadAddressFromCoords(lat: number, lng: number) {
-     this.selectedAddress = 'Определяем адрес...';
+     this.selectedAddress.set('Определяем адрес...');
 
      this.apiService.loadAddress(lat, lng).subscribe({
       next: data => {
-        this.selectedAddress = data.display_name || 'Адрес не найден';
+        this.selectedAddress.set(data.display_name || 'Адрес не найден');
       },
       error: () => {
-        this.selectedAddress = 'Адрес не найден';
+        this.selectedAddress.set('Адрес не найден');
       }
     });
+  }
+
+  private initUserLocationMarker(): void {
+    if (!navigator.geolocation) {
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        this.setSelectedPoint(lat, lng);
+
+        this.map.setView([lat, lng], 15);
+      },
+      error => {
+        console.warn('Пользователь не дал доступ к геолокации или произошла ошибка:', error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
   }
 }

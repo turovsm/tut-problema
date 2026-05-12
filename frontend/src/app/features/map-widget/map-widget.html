@@ -31,10 +31,9 @@
     @if(isComplaintFormOpen() && selectedLat && selectedLng) {
       <app-complaint-form
         class="complaint-panel"
-        [types]="types"
         [lat]="selectedLat"
         [lng]="selectedLng"
-        [address]="selectedAddress"
+        [address]="selectedAddress()"
         (formSubmit)="submitComplaint($event)"
         (cancel)="closeComplaintForm()"
       ></app-complaint-form>

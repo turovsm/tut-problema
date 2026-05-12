@@ -34,8 +34,8 @@
       <mat-label>Тип проблемы</mat-label>
 
       <mat-select formControlName="type">
-        <mat-option *ngFor="let type of types" [value]="type">
-          {{ type }}
+        <mat-option *ngFor="let type of types" [value]="type.value">
+          {{ type.label }}
         </mat-option>
       </mat-select>
 

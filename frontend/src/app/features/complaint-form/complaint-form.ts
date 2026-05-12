@@ -35,7 +35,18 @@ export interface ComplaintFormValue {
 export class ComplaintFormComponent {
   private readonly fb = inject(FormBuilder);
 
-  @Input({ required: true }) types: string[] = [];
+  types = [
+    { value: 'snow', label: 'Снег' },
+    { value: 'pothole', label: 'Яма' },
+    { value: 'road_obstruction', label: 'Препятствие на дороге' },
+    { value: 'flooding', label: 'Подтопление' },
+    { value: 'broken_streetlight', label: 'Неисправное освещение' },
+    { value: 'broken_sidewalk', label: 'Сломанный тротуар' },
+    { value: 'water_leak', label: 'Утечка воды' },
+    { value: 'sewer_overflow', label: 'Проблема с канализацией' },
+    { value: 'illegal_dumping', label: 'Незаконная свалка' },
+    { value: 'other', label: 'Другое' }
+  ];
   @Input({ required: true }) lat!: number;
   @Input({ required: true }) lng!: number;
   @Input() address?: string;
