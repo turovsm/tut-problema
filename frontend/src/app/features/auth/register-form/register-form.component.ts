@@ -30,9 +30,9 @@ export class RegisterFormComponent {
   private readonly authService = inject(AuthService);
 
   readonly isLoading = signal(false);
-  readonly error = signal('')
+  readonly error = signal('');
 
-  @Output() success = new EventEmitter<void>();
+  @Output() registered = new EventEmitter<string>();
   @Output() goToLogin = new EventEmitter<void>();
 
   hidePassword = true;
@@ -41,7 +41,7 @@ export class RegisterFormComponent {
     name: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [
-        Validators.required, 
+        Validators.required,
         Validators.minLength(8),
         Validators.pattern(/[0-9]/),
         Validators.pattern(/[a-z]/),
@@ -60,13 +60,15 @@ export class RegisterFormComponent {
     this.isLoading.set(true);
     this.error.set('');
 
+    const email = this.form.value.email ?? '';
+
     this.authService.register({
       username: this.form.value.name ?? '',
-      email: this.form.value.email ?? '',
+      email,
       password: this.form.value.password ?? ''
     }).pipe(take(1)).subscribe({
       next: () => {
-        this.success.emit();
+        this.registered.emit(email);
         this.isLoading.set(false);
       },
       error: (err: HttpErrorResponse) => {

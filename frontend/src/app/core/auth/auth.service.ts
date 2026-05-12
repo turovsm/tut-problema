@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, Observable, tap, throwError } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponseSuccess } from '../models/response.model';
 
@@ -14,6 +14,14 @@ export interface RegisterRequest {
   email: string;
   password: string;
   username: string;
+}
+
+export interface VerifyEmailRequest {
+  code: string;
+}
+
+export interface ResendVerificationRequest {
+  email: string;
 }
 
 export interface User {
@@ -38,19 +46,16 @@ export class AuthService {
 
   initializeAuth(): Promise<void> {
     return new Promise(resolve => {
-
-        this.me().subscribe({
+      this.me().subscribe({
         next: user => {
-            this.currentUserSignal.set(user.data);
-            resolve();
+          this.currentUserSignal.set(user.data);
+          resolve();
         },
-
         error: () => {
-            this.currentUserSignal.set(null);
-            resolve();
+          this.currentUserSignal.set(null);
+          resolve();
         }
-        });
-
+      });
     });
   }
 
@@ -88,33 +93,39 @@ export class AuthService {
 
   verifyEmail(token: string): Observable<ApiResponseSuccess<null>> {
     return this.http.post<ApiResponseSuccess<null>>(`${environment.apiUrl}/api/auth/verify-email`, {
-        token
-    })
+      token
+    }, {
+      withCredentials: true
+    });
   }
 
   sendVerification(email: string): Observable<ApiResponseSuccess<null>> {
     return this.http.post<ApiResponseSuccess<null>>(`${environment.apiUrl}/api/auth/resend-verification`, {
-        email
-    })
+      email
+    }, {
+      withCredentials: true
+    });
   }
 
   changePassword(currentPassword: string, newPassword: string): Observable<ApiResponseSuccess<null>> {
-    return this.http.post<ApiResponseSuccess<null>>(`${environment.apiUrl}/api/auth/change-password`,{
-        current_password: currentPassword,
-        new_pasword: newPassword
-    })
+    return this.http.post<ApiResponseSuccess<null>>(`${environment.apiUrl}/api/auth/change-password`, {
+      current_password: currentPassword,
+      new_password: newPassword
+    }, {
+      withCredentials: true
+    });
   }
 
   forgotPassword(email: string): Observable<ApiResponseSuccess<null>> {
-    return this.http.post<ApiResponseSuccess<null>>(`${environment.apiUrl}/api/auth/change-password`,{
-        email
-    })
+    return this.http.post<ApiResponseSuccess<null>>(`${environment.apiUrl}/api/auth/forgot-password`, {
+      email
+    });
   }
 
-  resetPassword(token: string, newPassword: string):  Observable<ApiResponseSuccess<null>> {
-    return this.http.post<ApiResponseSuccess<null>>(`${environment.apiUrl}/api/auth/reset-password`,{
-        token,
-        new_password: newPassword
-    })
+  resetPassword(token: string, newPassword: string): Observable<ApiResponseSuccess<null>> {
+    return this.http.post<ApiResponseSuccess<null>>(`${environment.apiUrl}/api/auth/reset-password`, {
+      token,
+      new_password: newPassword
+    });
   }
 }

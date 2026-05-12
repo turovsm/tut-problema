@@ -6,8 +6,9 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { LoginFormComponent } from './login-form/login-form.component';
 import { RegisterFormComponent } from './register-form/register-form.component';
+import { VerifyEmailComponent } from './verify-email/verify-email.component';
 
-export type AuthDialogMode = 'login' | 'register';
+export type AuthDialogMode = 'login' | 'register' | 'verify-email';
 
 export interface AuthDialogData {
   mode: AuthDialogMode;
@@ -22,7 +23,8 @@ export interface AuthDialogData {
     MatButtonModule,
     MatIconModule,
     LoginFormComponent,
-    RegisterFormComponent
+    RegisterFormComponent,
+    VerifyEmailComponent
   ],
   templateUrl: './auth.html',
   styleUrls: ['./auth.less']
@@ -32,6 +34,7 @@ export class AuthComponent {
   private readonly dialogRef = inject(MatDialogRef<AuthComponent>);
 
   mode = signal<AuthDialogMode>(this.data.mode);
+  verificationEmail = signal('');
 
   switchToLogin(): void {
     this.mode.set('login');
@@ -39,6 +42,11 @@ export class AuthComponent {
 
   switchToRegister(): void {
     this.mode.set('register');
+  }
+
+  switchToVerifyEmail(email: string): void {
+    this.verificationEmail.set(email);
+    this.mode.set('verify-email');
   }
 
   close(): void {
