@@ -126,10 +126,16 @@ class ReportRepository(
 
         await self._session.flush()
         await self._session.refresh(model, ["creator"])
+        await self._session.commit()
         return self._to_domain(model)
 
     async def delete(self, report_id: UUID) -> None:
-        await self._delete_by_id(report_id)
+        query = select(self._model).where(self._model.id == report_id)
+        res = await self._session.execute(query)
+        model = res.scalar_one_or_none()
+        if model:
+            await self._session.delete(model)
+            await self._session.commit()
 
     async def get_list(
         self, issue_type=None, status=None, limit=20, offset=0
@@ -208,6 +214,7 @@ class ReportRepository(
         )
         self._session.add(model)
         await self._session.flush()
+        await self._session.commit()
         return photo
 
     async def get_photo_by_id(self, photo_id: UUID) -> ReportPhoto | None:
@@ -232,4 +239,4 @@ class ReportRepository(
         m = res.scalar_one_or_none()
         if m:
             await self._session.delete(m)
-            await self._session.flush()
+            await self._session.commit()

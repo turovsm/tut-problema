@@ -80,7 +80,7 @@ async def list_reports(
 async def create_report(
     current_user: Annotated[User, Depends(get_current_verified_user)],
     use_case: Annotated[Depends, Depends(get_create_report_use_case)],
-    data: ReportCreateForm = Depends(),
+    data: Annotated[ReportCreateForm, Depends(ReportCreateForm.as_form)],
     files: list[UploadFile] = File(...),
 ):
     report = await use_case.execute(
@@ -159,9 +159,9 @@ async def get_report(
 @router.put("/{report_id}", response_model=SuccessResponse[ReportResponse])
 async def update_report(
     report_id: UUID,
+    data: ReportUpdate,
     current_user: Annotated[User, Depends(get_current_verified_user)],
     use_case: Annotated[Depends, Depends(get_update_report_use_case)],
-    data: ReportUpdate = Depends(),
 ):
     report = await use_case.execute(
         UpdateReportDTO(

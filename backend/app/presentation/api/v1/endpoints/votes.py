@@ -31,9 +31,9 @@ router = APIRouter()
 )
 async def vote_for_report(
     report_id: UUID,
+    data: VoteCreate,
     current_user: Annotated[User, Depends(get_current_verified_user)],
     use_case: Annotated[Depends, Depends(get_cast_vote_use_case)],
-    data: VoteCreate = Depends(),
 ):
     vote = await use_case.execute(
         CastVoteDTO(

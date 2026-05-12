@@ -1,6 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
+from fastapi import Form
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.config import settings
@@ -49,6 +50,27 @@ class ReportCreateForm(BaseModel):
     location_lat: float = Field(..., title="Location Lat")
     user_location_lng: float = Field(..., title="User Location Lng")
     user_location_lat: float = Field(..., title="User Location Lat")
+
+    @classmethod
+    def as_form(
+        cls,
+        title: str = Form(...),
+        description: str | None = Form(None),
+        issue_type: IssueType = Form(...),
+        location_lng: float = Form(...),
+        location_lat: float = Form(...),
+        user_location_lng: float = Form(...),
+        user_location_lat: float = Form(...),
+    ):
+        return cls(
+            title=title,
+            issue_type=issue_type,
+            location_lng=location_lng,
+            location_lat=location_lat,
+            user_location_lng=user_location_lng,
+            user_location_lat=user_location_lat,
+            description=description,
+        )
 
 
 class ReportPhotoResponse(BaseModel):
