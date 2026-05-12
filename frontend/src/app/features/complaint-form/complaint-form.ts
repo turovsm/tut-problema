@@ -9,11 +9,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
 export interface ComplaintFormValue {
-  type: string;
-  description: string;
-  photos: File[];
-  lat: number;
-  lng: number;
+  title: string;
+  description: string | null;
+  issue_type: string;
+  files: File[];
+  location_lat: number;
+  location_lng: number;
 }
 
 @Component({
@@ -44,27 +45,29 @@ export class ComplaintFormComponent {
 
   selectedFiles: File[] = [];
 
+
   complaintForm = this.fb.group({
+    title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
     type: ['', Validators.required],
     description: ['', [Validators.required, Validators.minLength(10)]],
-    photos: [[] as File[]]
+    files: [[] as File[]]
   });
 
   onFilesSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
+  const input = event.target as HTMLInputElement;
 
-    if (!input.files?.length) {
-      this.selectedFiles = [];
-      this.complaintForm.patchValue({ photos: [] });
-      return;
-    }
-
-    this.selectedFiles = Array.from(input.files);
-
-    this.complaintForm.patchValue({
-      photos: this.selectedFiles
-    });
+  if (!input.files?.length) {
+    this.selectedFiles = [];
+    this.complaintForm.patchValue({ files: [] });
+    return;
   }
+
+  this.selectedFiles = Array.from(input.files);
+
+  this.complaintForm.patchValue({
+    files: this.selectedFiles
+  });
+}
 
   submit(): void {
     if (this.complaintForm.invalid) {
@@ -73,11 +76,12 @@ export class ComplaintFormComponent {
     }
 
     this.formSubmit.emit({
-      type: this.complaintForm.value.type ?? '',
-      description: this.complaintForm.value.description ?? '',
-      photos: this.selectedFiles,
-      lat: this.lat,
-      lng: this.lng
+      title: this.complaintForm.value.title ?? '',
+      description: this.complaintForm.value.description || null,
+      issue_type: this.complaintForm.value.type ?? '',
+      files: this.selectedFiles,
+      location_lat: this.lat,
+      location_lng: this.lng
     });
   }
 

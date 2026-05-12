@@ -11,6 +11,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AuthService } from '../../../core/auth/auth.service';
 import { BehaviorSubject, catchError, EMPTY, take, tap, throwError } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-login-form',
@@ -23,7 +24,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatInputModule,
     MatIconModule,
     MatCheckboxModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './login-form.component.html',
   styleUrls: ['./login-form.component.less']
@@ -31,6 +33,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 export class LoginFormComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly isLoading = new BehaviorSubject(false);
 
@@ -64,6 +67,12 @@ export class LoginFormComponent {
         return throwError(() => new Error('Something went wrong.'));
       })).subscribe({
       next: () => {
+        this.snackBar.open('Вы успешно вошли', 'Закрыть', {
+          duration: 3000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
         this.success.emit();
       },
       error: () => {this.error = 'Не удалось войти. Проверьте email и пароль.';},
