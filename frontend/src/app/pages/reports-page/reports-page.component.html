@@ -1,0 +1,71 @@
+<div class="reports-page">
+  <section class="reports-hero">
+    <div>
+      <p class="eyebrow">Жалобы пользователей</p>
+      <h1>Все жалобы</h1>
+      <p>
+        Здесь отображаются обращения от всех пользователей. Каждая карточка сама загружает статистику голосов.
+      </p>
+    </div>
+
+    <button mat-raised-button color="primary" routerLink="/">
+      Сообщить о проблеме
+    </button>
+  </section>
+
+  @if (isLoadingReports()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Загрузка жалоб...</p>
+    </div>
+  }
+
+  @if (!isLoadingReports() && errorMessage()) {
+    <mat-card class="state-card error-card">
+      <p>{{ errorMessage() }}</p>
+
+      <button mat-raised-button color="primary" type="button" (click)="loadReports()">
+        Повторить
+      </button>
+    </mat-card>
+  }
+
+  @if (!isLoadingReports() && !errorMessage() && !reports().length) {
+    <mat-card class="state-card empty-card">
+      <h2>Жалоб пока нет</h2>
+      <p>Будьте первым, кто отметит проблему на карте.</p>
+
+      <button mat-raised-button color="primary" routerLink="/">
+        Открыть карту
+      </button>
+    </mat-card>
+  }
+
+  @if (!isLoadingReports() && !errorMessage() && reports().length) {
+    <section class="reports-section">
+      <div class="section-header">
+        <h2>Найдено жалоб: {{ total() }}</h2>
+      </div>
+
+      <div class="reports-list">
+        @for (report of reports(); track report.id) {
+          <app-report-card [report]="report"></app-report-card>
+        }
+      </div>
+
+      @if (hasNext()) {
+        <div class="load-more-wrapper">
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            [disabled]="isLoadingMoreReports()"
+            (click)="loadMoreReports()"
+          >
+            {{ isLoadingMoreReports() ? 'Загрузка...' : 'Показать ещё' }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+</div>

@@ -3,3 +3,11 @@ export interface ApiResponseSuccess<T> {
     data: T;
     message: string;
 }
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  has_next: boolean;
+}

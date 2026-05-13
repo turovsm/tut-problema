@@ -73,46 +73,7 @@
       @if (!isLoadingReports() && !errorMessage && reports.length) {
         <div class="reports-list">
           @for (report of reports; track report.id) {
-            <mat-card class="report-card" [routerLink]="['/reports', report.id]">
-              <div class="report-main">
-                @if (report.photos?.length) {
-                  <img
-                    class="report-photo"
-                    [src]="getReportPhotoUrl(report)"
-                    [alt]="report.title"
-                    loading="lazy"
-                  />
-                }
-
-                <div class="report-content">
-                  <h3>{{ report.title }}</h3>
-
-                  <p class="report-description">
-                    {{ report.description || 'Без описания' }}
-                  </p>
-
-                  <div class="report-tags">
-                    <mat-chip>
-                      {{ getIssueTypeLabel(report) }}
-                    </mat-chip>
-
-                    <mat-chip [ngClass]="'status-' + report.status">
-                      {{ getStatusLabel(report.status) }}
-                    </mat-chip>
-                  </div>
-                </div>
-              </div>
-
-              <div class="report-footer">
-                <span>
-                  Создано: {{ report.created_at | date:'dd.MM.yyyy HH:mm' }}
-                </span>
-
-                <span>
-                  Обновлено: {{ report.updated_at | date:'dd.MM.yyyy HH:mm' }}
-                </span>
-              </div>
-            </mat-card>
+            <app-report-card [report]="report"></app-report-card>
           }
         </div>
       }
