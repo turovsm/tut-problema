@@ -21,7 +21,7 @@ import {
 import { from } from 'rxjs';
 
 interface Complaint {
-  id: number;
+  id: string;
   title: string;
   type: IssueType;
   district: string;
@@ -149,9 +149,14 @@ export class MapWidget implements OnInit {
 
       marker
         .bindPopup(`
-          <b>${c.title}</b><br>
-          Тип: ${this.getIssueLabel(c.type)}<br>
-          Район: ${c.district}
+          <div class="complaint-popup">
+            <b>${c.title}</b><br>
+            Тип: ${this.getIssueLabel(c.type)}<br>
+            Район: ${c.district || 'не указан'}<br><br>
+            <a href="/reports/${c.id}" class="popup-details-link">
+              Подробнее
+            </a>
+          </div>
         `)
         .addTo(this.complaintMarkersLayer);
     });

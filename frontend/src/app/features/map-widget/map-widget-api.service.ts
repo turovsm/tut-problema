@@ -6,11 +6,11 @@ import { ApiResponseSuccess } from '../../core/models/response.model';
 import { IssueType } from '../../core/models/issue-type';
 
 export interface ReportsResponse {
-    status: "success" | "error";
-    data: {
-        items: [Report]
-    };
-    message: string;
+  status: 'success' | 'error';
+  data: {
+    items: Report[];
+  };
+  message: string;
 }
 
 export interface Report {
@@ -26,7 +26,56 @@ export interface Report {
   created_at: string;
   updated_at: string;
   photos: string[];
-  user_vote: string;
+  user_vote: 'confirm' | 'reject' | null;
+}
+
+export interface ReportPhoto {
+  id: string;
+  file_name: string;
+  file_url: string;
+  uploaded_at: string;
+}
+
+export interface ReportCreatedBy {
+  email: string;
+  username: string;
+  id: string;
+  role: string;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+}
+
+export interface ReportDetails {
+  id: string;
+  title: string;
+  description: string;
+  issue_type: IssueType;
+  location: {
+    type: string;
+    coordinates: [number, number]; // [lng, lat]
+  };
+  status: string;
+  created_by: ReportCreatedBy;
+  created_at: string;
+  updated_at: string;
+  photos: ReportPhoto[];
+  user_vote: 'confirm' | 'reject' | null;
+}
+
+export interface VoteReportBody {
+  vote_type: 'confirm' | 'reject';
+  user_location_lng: number;
+  user_location_lat: number;
+  accuracy: number;
+}
+
+export interface VoteReportResponse {
+  id: string;
+  report_id: string;
+  vote_type: 'confirm' | 'reject';
+  is_verified: boolean;
+  created_at: string;
 }
 
 @Injectable({
@@ -36,8 +85,39 @@ export class MapWidgetApiService {
   private readonly http = inject(HttpClient);
 
   getNearbyReports(): Observable<Report[] | null> {
-    return this.http.get<ReportsResponse>(`${environment.apiUrl}/api/reports`,).pipe(
-      map(res => res.status === 'success' ? res.data.items : null)
+    return this.http
+      .get<ReportsResponse>(`${environment.apiUrl}/api/reports`)
+      .pipe(
+        map(res => res.status === 'success' ? res.data.items : null)
+      );
+  }
+
+  getReportById(reportId: string): Observable<ReportDetails> {
+    return this.http
+      .get<ApiResponseSuccess<ReportDetails>>(
+        `${environment.apiUrl}/api/reports/${reportId}`,
+        { withCredentials: true }
+      )
+      .pipe(map(res => res.data));
+  }
+
+  voteForReport(
+    reportId: string,
+    body: VoteReportBody
+  ): Observable<VoteReportResponse> {
+    return this.http
+      .post<ApiResponseSuccess<VoteReportResponse>>(
+        `${environment.apiUrl}/api/votes/reports/${reportId}`,
+        body,
+        { withCredentials: true }
+      )
+      .pipe(map(res => res.data));
+  }
+
+  removeReportVote(reportId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${environment.apiUrl}/api/votes/reports/${reportId}`,
+      { withCredentials: true }
     );
   }
 
@@ -51,14 +131,14 @@ export class MapWidgetApiService {
         lon: lng,
         'accept-language': 'ru'
       }
-    })
+    });
   }
 
-  createComplaint(formData: FormData): Observable<ApiResponseSuccess<{id: string}>> {
-  return this.http.post<ApiResponseSuccess<{id: string}>>(
-    `${environment.apiUrl}/api/reports`,
-    formData,
-    {withCredentials: true}
-  );
-}
+  createComplaint(formData: FormData): Observable<ApiResponseSuccess<{ id: string }>> {
+    return this.http.post<ApiResponseSuccess<{ id: string }>>(
+      `${environment.apiUrl}/api/reports`,
+      formData,
+      { withCredentials: true }
+    );
+  }
 }

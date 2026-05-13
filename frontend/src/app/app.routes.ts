@@ -16,5 +16,11 @@ export const appRoutes: Route[] = [
         loadComponent: () =>
             import('./pages/profile-page/profile')
             .then(m => m.ProfilePageComponent)
-    }
+    },
+    {
+    path: 'reports/:report_id',
+    loadComponent: () =>
+      import('./features/report-details/report-details')
+        .then(m => m.ReportDetailsComponent)
+  }
 ];
