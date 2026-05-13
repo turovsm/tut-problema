@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.application.dto.auth import AuthResultDTO, RefreshTokenDTO
 from app.domain.entities.token import RefreshToken
@@ -48,7 +48,7 @@ class RefreshTokenUseCase:
         if stored_token.revoked_at:
             raise UnauthorizedException("Refresh token has been revoked")
 
-        if stored_token.expires_at < datetime.now(timezone.utc):
+        if stored_token.expires_at < datetime.now(UTC):
             raise UnauthorizedException("Refresh token expired")
 
         # 4. Проверка пользователя
@@ -61,7 +61,7 @@ class RefreshTokenUseCase:
             raise UserInactiveException()
 
         # 5. Отзыв текущего токена
-        stored_token.revoked_at = datetime.now(timezone.utc)
+        stored_token.revoked_at = datetime.now(UTC)
         await self.token_repo.save_refresh_token(stored_token)
 
         # 6. Генерация новой пары токенов
@@ -77,7 +77,7 @@ class RefreshTokenUseCase:
         )
 
         # 7. Сохранение нового Refresh токена
-        new_expires_at = datetime.now(timezone.utc) + timedelta(
+        new_expires_at = datetime.now(UTC) + timedelta(
             days=self.refresh_expiry_days
         )
         new_token_entity = RefreshToken(

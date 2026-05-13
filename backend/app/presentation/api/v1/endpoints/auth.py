@@ -108,7 +108,8 @@ async def refresh(
     result = await use_case.execute(RefreshTokenDTO(refresh_token=token or ""))
     set_auth_cookies(response, result)
     return SuccessResponse(
-        data=UserResponse.model_validate(result.user), message="Token refreshed"
+        data=UserResponse.model_validate(result.user),
+        message="Token refreshed",
     )
 
 
@@ -140,7 +141,9 @@ async def resend_verification(
     use_case: Annotated[Depends, Depends(get_resend_verification_use_case)],
 ):
     await use_case.execute(ResendVerificationDTO(email=data.email))
-    return SuccessResponse(message="If email exists and unverified, link sent.")
+    return SuccessResponse(
+        message="If email exists and unverified, link sent."
+    )
 
 
 @router.post("/change-password", response_model=SuccessResponse[None])

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from app.utils.datetime import get_utc_now_naive
+from app.core.utils.datetime import get_utc_now_naive
 
 from .location import Location
 

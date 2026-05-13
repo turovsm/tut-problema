@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.application.dto.auth import ResendVerificationDTO
 from app.domain.entities.token import VerificationToken
@@ -35,7 +35,7 @@ class ResendVerificationUseCase:
         await self.token_repo.delete_verification_tokens_by_user(user.id)
 
         # 4. Генерация нового токена
-        expires_at = datetime.now(timezone.utc) + timedelta(
+        expires_at = datetime.now(UTC) + timedelta(
             hours=self.token_expiry_hours
         )
         new_token = VerificationToken(

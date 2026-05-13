@@ -1,13 +1,13 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     USER = "user"
     MODERATOR = "moderator"
     GOV_ORG = "gov_org"
 
 
-class IssueType(str, Enum):
+class IssueType(StrEnum):
     SNOW = "snow"
     POTHOLE = "pothole"
     ROAD_OBSTRUCTION = "road_obstruction"
@@ -20,13 +20,13 @@ class IssueType(str, Enum):
     OTHER = "other"
 
 
-class ReportStatus(str, Enum):
+class ReportStatus(StrEnum):
     PENDING = "pending"
     CONFIRMED = "confirmed"
     DISMISSED = "dismissed"
     RESOLVED = "resolved"
 
 
-class VoteType(str, Enum):
+class VoteType(StrEnum):
     CONFIRM = "confirm"
     DISMISS = "dismiss"

@@ -99,7 +99,9 @@ async def get_vote_repo(db: AsyncSession = Depends(get_db)) -> VoteRepository:
     return VoteRepository(db)
 
 
-async def get_token_repo(db: AsyncSession = Depends(get_db)) -> TokenRepository:
+async def get_token_repo(
+    db: AsyncSession = Depends(get_db),
+) -> TokenRepository:
     return TokenRepository(db)
 
 
@@ -346,7 +348,8 @@ async def get_current_user(
 
     if not token:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated"
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
         )
 
     payload = auth_provider.decode_token(token)

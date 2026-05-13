@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -29,9 +29,7 @@ class JoseAuthProvider(IAuthProvider):
 
     def create_token(self, payload: dict, expires_delta_minutes: int) -> str:
         to_encode = payload.copy()
-        expire = datetime.now(timezone.utc) + timedelta(
-            minutes=expires_delta_minutes
-        )
+        expire = datetime.now(UTC) + timedelta(minutes=expires_delta_minutes)
         to_encode.update({"exp": expire})
 
         encoded_jwt = jwt.encode(

@@ -1,7 +1,5 @@
 import json
-import os
 from pathlib import Path
-from typing import List, Optional, Set
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings
@@ -24,10 +22,10 @@ class Settings(BaseSettings):
     DB_ECHO: bool = False
 
     # JWT
-    SECRET_KEY: str = "please-go-and-change-it-to-something-else"
+    SECRET_KEY: str = "please-go-and-change-it-to-something-else"  # noqa: S105
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    TOKEN_ALGORITHM: str = "HS256"
+    TOKEN_ALGORITHM: str = "HS256"  # noqa: S105
 
     # Argon2
     ARGON2_TIME_COST: int = 1
@@ -37,7 +35,10 @@ class Settings(BaseSettings):
     ARGON2_PEPPER: str = "please-go-and-change-it-to-something-else"
 
     # CORS
-    CORS_ORIGINS: list[str] = ["http://localhost:3000", "http://localhost:8000"]
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+    ]
     CORS_ALLOW_CREDENTIALS: bool = True
     CORS_ALLOW_METHODS: list[str] = [
         "GET",
@@ -57,7 +58,7 @@ class Settings(BaseSettings):
     PASSWORD_REQUIRE_LOWERCASE: bool = True
     PASSWORD_REQUIRE_DIGITS: bool = True
     PASSWORD_REQUIRE_SPECIAL: bool = True
-    PASSWORD_SPECIAL_CHARS: str = "@$!%*?&#"
+    PASSWORD_SPECIAL_CHARS: str = "@$!%*?&#"  # noqa: S105
     PASSWORD_DISALLOW_COMMON: bool = True
     COMMON_PASSWORDS_FILE: str = "common-passwords.txt"
     COMMON_PASSWORDS: list[str] = []
@@ -77,7 +78,7 @@ class Settings(BaseSettings):
     SMTP_HOST: str = "smtp.gmail.com"
     SMTP_PORT: int = 587
     SMTP_USER: str = "temp@gmail.com"
-    SMTP_PASSWORD: str = "abcd efgh ijkl mnop"
+    SMTP_PASSWORD: str = "abcd efgh ijkl mnop"  # noqa: S105
     SMTP_USE_TLS: bool = True
     SMTP_USE_SSL: bool = False
     FRONTEND_URL: str = "http://localhost:3000"
@@ -181,7 +182,7 @@ class Settings(BaseSettings):
     }
 
 
-def load_common_passwords(file_path: str) -> List[str]:
+def load_common_passwords(file_path: str) -> list[str]:
     passwords = []
     try:
         possible_paths = [
@@ -193,7 +194,7 @@ def load_common_passwords(file_path: str) -> List[str]:
 
         for path in possible_paths:
             if path.exists():
-                with open(path, "r", encoding="utf-8") as f:
+                with open(path, encoding="utf-8") as f:
                     passwords = [
                         line.strip().lower() for line in f if line.strip()
                     ]
@@ -236,5 +237,3 @@ if settings.PASSWORD_DISALLOW_COMMON:
     settings.COMMON_PASSWORDS = load_common_passwords(
         settings.COMMON_PASSWORDS_FILE
     )
-
-os.makedirs(settings.UPLOAD_DIR, exist_ok=True)

@@ -7,10 +7,12 @@ from app.core.config import settings
 class AsyncRedisClient:
     def __init__(self):
         self.client: Redis | None = None
-        self.enabled = settings.RATE_LIMIT_ENABLED
 
     async def connect(self) -> None:
-        if self.enabled and not self.client:
+        if not settings.RATE_LIMIT_ENABLED:
+            return
+
+        if not self.client:
             try:
                 self.client = await redis.from_url(
                     f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.REDIS_DB}",
@@ -30,7 +32,6 @@ class AsyncRedisClient:
                 print(
                     f"Failed to connect to Redis: {e}. Rate limiting disabled."
                 )
-                self.enabled = False
                 self.client = None
 
     async def disconnect(self) -> None:
@@ -39,7 +40,7 @@ class AsyncRedisClient:
             self.client = None
 
     def is_active(self) -> bool:
-        return self.enabled and self.client is not None
+        return settings.RATE_LIMIT_ENABLED and self.client is not None
 
     async def check_rate_limit(
         self, key: str, limit: int, window: int

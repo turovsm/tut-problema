@@ -31,6 +31,6 @@ class PermissionDeniedException(DomainException):
 
 
 class BusinessRuleException(DomainException):
-    """Нарушение специфичного бизнес-правила (например, слишком большое расстояние)."""
+    """Нарушение специфичного бизнес-правила."""
 
     pass

@@ -1,4 +1,5 @@
 from app.application.dto.reports import CreateReportDTO
+from app.core.utils.distance import calculate_distance_haversine
 from app.domain.entities.location import Location
 from app.domain.entities.report import Report, ReportPhoto
 from app.domain.exceptions.report import DistanceTooFarException
@@ -6,7 +7,6 @@ from app.domain.interfaces.providers.storage_provider import IStorageProvider
 from app.domain.interfaces.repositories.report_repository import (
     IReportRepository,
 )
-from app.utils.distance import calculate_distance_haversine
 
 
 class CreateReportUseCase:

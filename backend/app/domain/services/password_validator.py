@@ -20,7 +20,9 @@ class PasswordValidator:
             )
 
         if len(password) > max_length:
-            raise WeakPasswordException(f"at most {max_length} characters long")
+            raise WeakPasswordException(
+                f"at most {max_length} characters long"
+            )
 
         if require_uppercase and not any(c.isupper() for c in password):
             raise WeakPasswordException("at least one uppercase letter")

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.application.dto.auth import ResetPasswordDTO
 from app.domain.exceptions.base import BusinessRuleException
@@ -29,7 +29,7 @@ class ResetPasswordUseCase:
         if not token_entity:
             raise BusinessRuleException("Invalid or expired reset token")
 
-        if token_entity.expires_at < datetime.now(timezone.utc):
+        if token_entity.expires_at < datetime.now(UTC):
             # Удаляем просроченный токен
             await self.token_repo.delete_verification_token(token_entity.token)
             raise BusinessRuleException("Invalid or expired reset token")

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.application.dto.auth import RefreshTokenDTO
 from app.domain.interfaces.providers.auth_provider import IAuthProvider
@@ -29,5 +29,5 @@ class LogoutUserUseCase:
 
         # 3. Если токен найден и еще не отозван — отзываем его
         if stored_token and not stored_token.revoked_at:
-            stored_token.revoked_at = datetime.now(timezone.utc)
+            stored_token.revoked_at = datetime.now(UTC)
             await self.token_repo.save_refresh_token(stored_token)

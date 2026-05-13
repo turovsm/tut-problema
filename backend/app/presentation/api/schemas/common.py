@@ -1,13 +1,9 @@
-from typing import Generic, TypeVar
-
 from pydantic import BaseModel, Field
 
 from app.core.config import settings
 
-T = TypeVar("T")
 
-
-class SuccessResponse(BaseModel, Generic[T]):
+class SuccessResponse[T](BaseModel):
     status: str = Field(default="success", title="Status")
     data: T | None = Field(default=None, title="Data")
     message: str | None = Field(default=None, title="Message")
@@ -46,7 +42,7 @@ class PaginationQuery(BaseModel):
     )
 
 
-class PaginatedResponse(BaseModel, Generic[T]):
+class PaginatedResponse[T](BaseModel):
     items: list[T] = Field(..., title="Items")
     total: int = Field(..., title="Total")
     page: int = Field(..., title="Page")

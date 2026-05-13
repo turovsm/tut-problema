@@ -62,7 +62,8 @@ async def delete_my_vote(
 
 
 @router.get(
-    "/reports/{report_id}/my-vote", response_model=SuccessResponse[VoteResponse]
+    "/reports/{report_id}/my-vote",
+    response_model=SuccessResponse[VoteResponse],
 )
 async def get_my_vote(
     report_id: UUID,

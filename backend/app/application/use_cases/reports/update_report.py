@@ -1,6 +1,5 @@
-from datetime import datetime, timezone
-
 from app.application.dto.reports import UpdateReportDTO
+from app.core.utils.datetime import get_utc_now_naive
 from app.domain.entities.enums import UserRole
 from app.domain.entities.report import Report
 from app.domain.exceptions.base import PermissionDeniedException
@@ -8,7 +7,6 @@ from app.domain.exceptions.report import ReportNotFoundException
 from app.domain.interfaces.repositories.report_repository import (
     IReportRepository,
 )
-from app.utils.datetime import get_utc_now_naive
 
 
 class UpdateReportUseCase:

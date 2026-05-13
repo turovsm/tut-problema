@@ -38,8 +38,8 @@ class SmtpEmailProvider(IEmailProvider):
                 msg,
                 hostname=self.host,
                 port=self.port,
-                username=self.user,
-                password=self.password,
+                username=self.user if self.user else None,
+                password=self.password if self.password else None,
                 start_tls=self.use_tls,
             )
             return True

@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from app.core.logging_config import get_logger
 from app.domain.entities.enums import UserRole
 from app.domain.exceptions.base import (
     EntityNotFoundException,
@@ -13,6 +14,8 @@ from app.domain.interfaces.providers.storage_provider import IStorageProvider
 from app.domain.interfaces.repositories.report_repository import (
     IReportRepository,
 )
+
+logger = get_logger(__name__)
 
 
 class DeleteReportPhotoUseCase:
@@ -58,5 +61,10 @@ class DeleteReportPhotoUseCase:
         # 6. Удаление физического файла через провайдер
         try:
             await self.storage_provider.delete_file(photo.file_path)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(
+                "Failed to delete physical photo file",
+                photo_id=str(photo_id),
+                file_path=photo.file_path,
+                error=str(e),
+            )

@@ -16,7 +16,9 @@ class VoteMapper:
         return VoteResponse(
             id=vote.id,
             report_id=vote.report_id,
-            vote_type=VoteType.CONFIRM if vote.is_confirm else VoteType.DISMISS,
+            vote_type=VoteType.CONFIRM
+            if vote.is_confirm
+            else VoteType.DISMISS,
             is_verified=vote.is_verified,
             created_at=vote.created_at,
         )
