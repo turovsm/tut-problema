@@ -15,10 +15,15 @@ import {
   ComplaintFormValue
 } from '../complaint-form/complaint-form';
 
+import {
+  IssueType,
+  ISSUE_TYPE_LABELS} from '../../core/models/issue-type';
+import { from } from 'rxjs';
+
 interface Complaint {
   id: number;
   title: string;
-  type: string;
+  type: IssueType;
   district: string;
   lat: number;
   lng: number;
@@ -46,10 +51,22 @@ export class MapWidget implements OnInit {
   complaints: Complaint[] = [];
   filteredComplaints: Complaint[] = [];
 
-  types = ['Снег', 'Ямы', 'Освещение'];
+  types: IssueType[] = [
+    'snow',
+    'pothole',
+    'road_obstruction',
+    'flooding',
+    'broken_streetlight',
+    'broken_sidewalk',
+    'water_leak',
+    'sewer_overflow',
+    'illegal_dumping',
+    'other'
+  ];
+
   districts = ['Центр', 'Север', 'Юг', 'Восток', 'Запад'];
 
-  selectedType = '';
+  selectedType: IssueType | '' = '';
   selectedDistrict = '';
 
   selectedPointMarker?: L.Marker;
@@ -65,6 +82,21 @@ export class MapWidget implements OnInit {
   isAuthorized = true;
 
   private readonly apiService = inject(MapWidgetApiService);
+
+  private readonly complaintMarkersLayer = L.layerGroup();
+
+  private readonly issueTypeColors: Record<IssueType, string> = {
+    snow: '#60a5fa',
+    pothole: '#f97316',
+    road_obstruction: '#ef4444',
+    flooding: '#06b6d4',
+    broken_streetlight: '#facc15',
+    broken_sidewalk: '#a855f7',
+    water_leak: '#0ea5e9',
+    sewer_overflow: '#64748b',
+    illegal_dumping: '#22c55e',
+    other: '#9ca3af'
+  };
 
   ngOnInit(): void {
     this.initMap();
@@ -91,6 +123,8 @@ export class MapWidget implements OnInit {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(this.map);
 
+    this.complaintMarkersLayer.addTo(this.map);
+
     this.addDistricts();
 
     this.map.on('click', (event: L.LeafletMouseEvent) => {
@@ -108,101 +142,127 @@ export class MapWidget implements OnInit {
   }
 
   updateMapMarkers(): void {
-    this.map.eachLayer(layer => {
-      if ((layer as any).options?.icon) {
-        this.map.removeLayer(layer);
-      }
-    });
+    this.complaintMarkersLayer.clearLayers();
 
     this.filteredComplaints.forEach(c => {
-      L.marker([c.lat, c.lng])
-        .addTo(this.map)
-        .bindPopup(`<b>${c.title}</b><br>${c.type}, ${c.district}`);
+      const marker = this.createComplaintCircleMarker(c.lat, c.lng, c.type);
+
+      marker
+        .bindPopup(`
+          <b>${c.title}</b><br>
+          Тип: ${this.getIssueLabel(c.type)}<br>
+          Район: ${c.district}
+        `)
+        .addTo(this.complaintMarkersLayer);
     });
   }
 
   createComplaint(): void {
-  if (!this.isAuthorized) {
-    alert('Чтобы сообщить о проблеме, необходимо авторизоваться');
-    return;
+    if (!this.isAuthorized) {
+      alert('Чтобы сообщить о проблеме, необходимо авторизоваться');
+      return;
+    }
+
+    if (this.selectedLat === undefined || this.selectedLng === undefined) {
+      alert('Выберите точку на карте');
+      return;
+    }
+
+    this.isComplaintFormOpen.set(true);
+    this.selectedPointMarker?.closePopup();
+
+    setTimeout(() => {
+      this.map.invalidateSize();
+    });
   }
 
-  if (this.selectedLat === undefined || this.selectedLng === undefined) {
-    alert('Выберите точку на карте');
-    return;
+  closeComplaintForm(): void {
+    this.isComplaintFormOpen.set(false);
+
+    setTimeout(() => {
+      this.map.invalidateSize();
+    });
   }
-
-  this.isComplaintFormOpen.set(true);
-  this.selectedPointMarker?.closePopup();
-
-  setTimeout(() => {
-    this.map.invalidateSize();
-  });
-}
-
-closeComplaintForm(): void {
-  this.isComplaintFormOpen.set(false);
-
-  setTimeout(() => {
-    this.map.invalidateSize();
-  });
-}
 
   submitComplaint(value: ComplaintFormValue): void {
-      const formData = new FormData();
+    const formData = new FormData();
 
-      formData.append('title', value.title);
-      formData.append('description', value.description ?? '');
-      formData.append('issue_type', value.issue_type);
+    formData.append('title', value.title);
+    formData.append('description', value.description ?? '');
+    formData.append('issue_type', value.issue_type);
 
-      formData.append('location_lng', String(value.location_lng));
-      formData.append('location_lat', String(value.location_lat));
+    formData.append('location_lng', String(value.location_lng));
+    formData.append('location_lat', String(value.location_lat));
 
-      formData.append('user_location_lng', String(value.location_lng));
-      formData.append('user_location_lat', String(value.location_lat));
+    formData.append('user_location_lng', String(value.location_lng));
+    formData.append('user_location_lat', String(value.location_lat));
 
-      value.files.forEach(file => {
-        formData.append('files', file, file.name);
-      });
+    value.files.forEach(file => {
+      formData.append('files', file, file.name);
+    });
 
-      this.apiService.createComplaint(formData).subscribe({
-        next: response => {
-          if (response.status !== 'success') {
-            alert(response.message || 'Не удалось создать жалобу');
-            return;
-          }
-
-          alert('Жалоба успешно создана');
-          this.closeComplaintForm();
-          this.loadReports();
-        },
-        error: error => {
-          console.error('Ошибка создания жалобы:', error);
-
-          if (error.status === 400) {
-            alert(error.error?.message || 'Проверьте данные жалобы');
-            return;
-          }
-
-          if (error.status === 401) {
-            alert('Необходимо авторизоваться');
-            return;
-          }
-
-          if (error.status === 403) {
-            alert("Необходимо подтвердить почту");
-            return;
-          }
-
-          if (error.status === 409) {
-            alert('Похожая жалоба уже существует. Можно проголосовать за неё.');
-            return;
-          }
-
-          alert('Ошибка сервера при создании жалобы');
+    this.apiService.createComplaint(formData).subscribe({
+      next: response => {
+        if (response.status !== 'success') {
+          alert(response.message || 'Не удалось создать жалобу');
+          return;
         }
-      });
-}
+
+        alert('Жалоба успешно создана');
+        this.closeComplaintForm();
+        this.loadReports();
+      },
+      error: error => {
+        console.error('Ошибка создания жалобы:', error);
+
+        if (error.status === 400) {
+          alert(error.error?.message || 'Проверьте данные жалобы');
+          return;
+        }
+
+        if (error.status === 401) {
+          alert('Необходимо авторизоваться');
+          return;
+        }
+
+        if (error.status === 403) {
+          alert('Необходимо подтвердить почту');
+          return;
+        }
+
+        if (error.status === 409) {
+          alert('Похожая жалоба уже существует. Можно проголосовать за неё.');
+          return;
+        }
+
+        alert('Ошибка сервера при создании жалобы');
+      }
+    });
+  }
+
+  getIssueLabel(type: IssueType | string): string {
+    return ISSUE_TYPE_LABELS[type as IssueType] ?? type;
+  }
+
+  private getIssueColor(type: IssueType | string): string {
+    return this.issueTypeColors[type as IssueType] ?? this.issueTypeColors['other'];
+  }
+
+  private createComplaintCircleMarker(
+    lat: number,
+    lng: number,
+    type: IssueType | string
+  ): L.CircleMarker {
+    const color = this.getIssueColor(type);
+
+    return L.circleMarker([lat, lng], {
+      radius: 9,
+      color,
+      fillColor: color,
+      fillOpacity: 0.85,
+      weight: 2
+    });
+  }
 
   private setSelectedPoint(lat: number, lng: number): void {
     this.selectedLat = lat;
@@ -212,23 +272,23 @@ closeComplaintForm(): void {
     if (this.selectedPointMarker) {
       this.selectedPointMarker.setLatLng([lat, lng]);
     } else {
-
-      const  pinIcon = L.icon({
-          iconUrl: 'assets/pin.svg',
-          iconSize: [40, 40],
-          iconAnchor: [20, 37],
-          popupAnchor:  [0, -40]
+      const pinIcon = L.icon({
+        iconUrl: 'assets/pin.svg',
+        iconSize: [40, 40],
+        iconAnchor: [20, 37],
+        popupAnchor: [0, -40]
       });
 
       this.selectedPointMarker = L.marker([lat, lng], {
         draggable: true,
-        icon: pinIcon,
+        icon: pinIcon
       }).addTo(this.map);
 
       this.selectedPointMarker.on('dragend', () => {
         const position = this.selectedPointMarker!.getLatLng();
         this.selectedLat = position.lat;
         this.selectedLng = position.lng;
+        this.loadAddressFromCoords(position.lat, position.lng);
       });
     }
 
@@ -243,6 +303,7 @@ closeComplaintForm(): void {
       event.preventDefault();
       this.createComplaint();
     });
+
     if (!this.isComplaintFormOpen()) {
       this.selectedPointMarker
         .bindPopup(button)
@@ -275,24 +336,27 @@ closeComplaintForm(): void {
         return;
       }
 
-      reports.forEach(report => {
+      this.complaints = reports.map((report: any) => {
         const [lng, lat] = report.location.coordinates;
 
-        const marker = L.marker([lat, lng]).addTo(this.map);
-
-        marker.bindPopup(`
-          <b>${report.title}</b><br>
-          ${report.description}<br>
-          Статус: ${report.status}
-        `);
+        return {
+          id: report.id,
+          title: report.title,
+          type: report.issue_type ?? 'other',
+          district: report.district ?? '',
+          lat,
+          lng
+        };
       });
+
+      this.applyFilters();
     });
   }
 
-  private loadAddressFromCoords(lat: number, lng: number) {
-     this.selectedAddress.set('Определяем адрес...');
+  private loadAddressFromCoords(lat: number, lng: number): void {
+    this.selectedAddress.set('Определяем адрес...');
 
-     this.apiService.loadAddress(lat, lng).subscribe({
+    this.apiService.loadAddress(lat, lng).subscribe({
       next: data => {
         this.selectedAddress.set(data.display_name || 'Адрес не найден');
       },
@@ -317,7 +381,10 @@ closeComplaintForm(): void {
         this.map.setView([lat, lng], 15);
       },
       error => {
-        console.warn('Пользователь не дал доступ к геолокации или произошла ошибка:', error);
+        console.warn(
+          'Пользователь не дал доступ к геолокации или произошла ошибка:',
+          error
+        );
       },
       {
         enableHighAccuracy: true,

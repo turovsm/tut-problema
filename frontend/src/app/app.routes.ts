@@ -10,5 +10,11 @@ export const appRoutes: Route[] = [
     {
         path: 'auth/verify-email',
         component: VerifyEmailPage
+    },
+    {
+        path: 'profile',
+        loadComponent: () =>
+            import('./pages/profile-page/profile')
+            .then(m => m.ProfilePageComponent)
     }
 ];

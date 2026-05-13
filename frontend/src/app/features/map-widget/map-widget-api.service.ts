@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ApiResponseSuccess } from '../../core/models/response.model';
+import { IssueType } from '../../core/models/issue-type';
 
 export interface ReportsResponse {
     status: "success" | "error";
@@ -16,7 +17,7 @@ export interface Report {
   id: string;
   title: string;
   description: string;
-  issue_type: string;
+  issue_type: IssueType;
   location: {
     type: string;
     coordinates: [number, number]; // [lng, lat]
@@ -34,13 +35,8 @@ export interface Report {
 export class MapWidgetApiService {
   private readonly http = inject(HttpClient);
 
-  getNearbyReports(lat=58.0, lon=56.25): Observable<Report[] | null> {
-    return this.http.get<ReportsResponse>(`${environment.apiUrl}/api/reports/nearby`,
-        {params: {
-            lat,
-            lon
-        }}
-    ).pipe(
+  getNearbyReports(): Observable<Report[] | null> {
+    return this.http.get<ReportsResponse>(`${environment.apiUrl}/api/reports`,).pipe(
       map(res => res.status === 'success' ? res.data.items : null)
     );
   }
