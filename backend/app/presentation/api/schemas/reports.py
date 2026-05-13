@@ -75,11 +75,21 @@ class ReportCreateForm(BaseModel):
 
 class ResolveReportForm(BaseModel):
     comment: str = Field(
-        ..., min_length=5, max_length=2000, title="Resolution Comment"
+        ...,
+        min_length=settings.RESOLUTION_COMMENT_MIN_LENGTH,
+        max_length=settings.RESOLUTION_COMMENT_MAX_LENGTH,
+        title="Resolution Comment",
     )
 
     @classmethod
-    def as_form(cls, comment: str = Form(..., min_length=5, max_length=2000)):
+    def as_form(
+        cls,
+        comment: str = Form(
+            ...,
+            min_length=settings.RESOLUTION_COMMENT_MIN_LENGTH,
+            max_length=settings.RESOLUTION_COMMENT_MAX_LENGTH,
+        ),
+    ):
         return cls(comment=comment)
 
 
