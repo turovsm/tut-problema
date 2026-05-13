@@ -42,6 +42,13 @@ class UpdateReportUseCase:
                 )
             report.status = dto.status
 
+        if dto.assigned_to_id is not None:
+            if not is_staff:
+                raise PermissionDeniedException(
+                    "Not enough permissions to assign reports"
+                )
+            report.assigned_to_id = dto.assigned_to_id
+
         # Обновляем метку времени изменения
         report.updated_at = get_utc_now_naive()
 

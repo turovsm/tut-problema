@@ -44,6 +44,15 @@ class UpdateReportDTO:
     title: str | None = None
     description: str | None = None
     status: ReportStatus | None = None
+    assigned_to_id: UUID | None = None
+
+
+@dataclass(frozen=True)
+class ResolveReportDTO:
+    report_id: UUID
+    resolved_by_id: UUID
+    comment: str
+    files: list[Any] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

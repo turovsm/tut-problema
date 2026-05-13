@@ -45,7 +45,11 @@ class UserModel(Base):
         DateTime, server_default=func.now()
     )
 
-    reports = relationship("ReportModel", back_populates="creator")
+    reports = relationship(
+        "ReportModel",
+        back_populates="creator",
+        foreign_keys="[ReportModel.created_by_id]",
+    )
     votes = relationship("VoteModel", back_populates="user")
 
 
@@ -74,6 +78,9 @@ class ReportModel(Base):
     created_by_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("users.id"), nullable=False, index=True
     )
+    assigned_to_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), index=True
     )
@@ -81,7 +88,11 @@ class ReportModel(Base):
         DateTime, server_default=func.now(), onupdate=func.now()
     )
 
-    creator = relationship("UserModel", back_populates="reports")
+    creator = relationship(
+        "UserModel", back_populates="reports", foreign_keys=[created_by_id]
+    )
+    assignee = relationship("UserModel", foreign_keys=[assigned_to_id])
+
     photos = relationship(
         "ReportPhotoModel",
         back_populates="report",
@@ -89,6 +100,12 @@ class ReportModel(Base):
     )
     votes = relationship(
         "VoteModel", back_populates="report", cascade="all, delete-orphan"
+    )
+    resolution = relationship(
+        "ReportResolutionModel",
+        back_populates="report",
+        uselist=False,
+        cascade="all, delete-orphan",
     )
 
 
@@ -175,3 +192,45 @@ class VerificationTokenModel(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+
+class ReportResolutionModel(Base):
+    __tablename__ = "report_resolutions"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    report_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("reports.id", ondelete="CASCADE"), unique=True
+    )
+    resolved_by_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id"))
+    comment: Mapped[str] = mapped_column(Text, nullable=False)
+    resolved_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now()
+    )
+
+    report = relationship("ReportModel", back_populates="resolution")
+    resolved_by = relationship("UserModel", foreign_keys=[resolved_by_id])
+    photos = relationship(
+        "ResolutionPhotoModel",
+        back_populates="resolution",
+        cascade="all, delete-orphan",
+    )
+
+
+class ResolutionPhotoModel(Base):
+    __tablename__ = "resolution_photos"
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
+    )
+    resolution_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("report_resolutions.id", ondelete="CASCADE")
+    )
+    file_name: Mapped[str] = mapped_column(String(255), nullable=False)
+    file_path: Mapped[str] = mapped_column(String(500), nullable=False)
+    uploaded_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now()
+    )
+
+    resolution = relationship("ReportResolutionModel", back_populates="photos")

@@ -41,6 +41,18 @@ from app.application.use_cases.reports.get_report_by_id import (
     GetReportByIdUseCase,
 )
 from app.application.use_cases.reports.get_reports import GetReportsUseCase
+from app.application.use_cases.reports.get_resolution_photo import (
+    GetResolutionPhotoUseCase,
+)
+from app.application.use_cases.reports.resolve_report import (
+    ResolveReportUseCase,
+)
+from app.application.use_cases.reports.add_resolution_photo import (
+    AddResolutionPhotoUseCase,
+)
+from app.application.use_cases.reports.delete_resolution_photo import (
+    DeleteResolutionPhotoUseCase,
+)
 from app.application.use_cases.reports.update_report import UpdateReportUseCase
 from app.application.use_cases.users.get_user_profile import (
     GetUserProfileUseCase,
@@ -240,6 +252,12 @@ def get_update_report_use_case(
     return UpdateReportUseCase(r_repo)
 
 
+def get_resolve_report_use_case(
+    r_repo: ReportRepository = Depends(get_report_repo),
+) -> ResolveReportUseCase:
+    return ResolveReportUseCase(r_repo, storage_provider, settings.MAX_PHOTOS_PER_REPORT)
+
+
 def get_delete_report_use_case(
     r_repo: ReportRepository = Depends(get_report_repo),
 ) -> DeleteReportUseCase:
@@ -266,6 +284,24 @@ def get_photo_use_case(
     r_repo: ReportRepository = Depends(get_report_repo),
 ) -> GetPhotoUseCase:
     return GetPhotoUseCase(r_repo)
+
+
+def get_resolution_photo_use_case(
+    r_repo: ReportRepository = Depends(get_report_repo),
+) -> GetResolutionPhotoUseCase:
+    return GetResolutionPhotoUseCase(r_repo)
+
+
+def get_add_resolution_photo_use_case(
+    r_repo: ReportRepository = Depends(get_report_repo),
+) -> AddResolutionPhotoUseCase:
+    return AddResolutionPhotoUseCase(r_repo, storage_provider, settings.MAX_PHOTOS_PER_REPORT)
+
+
+def get_delete_resolution_photo_use_case(
+    r_repo: ReportRepository = Depends(get_report_repo),
+) -> DeleteResolutionPhotoUseCase:
+    return DeleteResolutionPhotoUseCase(r_repo, storage_provider)
 
 
 # --- VOTE USE CASES ---
@@ -399,5 +435,16 @@ def get_current_moderator(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Insufficient permissions",
+        )
+    return current_user
+
+
+def get_strict_moderator(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    if current_user.role != UserRole.MODERATOR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only moderators can perform this action",
         )
     return current_user
