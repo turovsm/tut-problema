@@ -5,7 +5,7 @@ from app.domain.exceptions.base import (
     BusinessRuleException,
     PermissionDeniedException,
 )
-from app.domain.exceptions.report import ReportNotFoundException
+from app.domain.exceptions.report import ReportNotFoundException, PhotoLimitExceededException
 from app.domain.interfaces.providers.storage_provider import IStorageProvider
 from app.domain.interfaces.repositories.report_repository import (
     IReportRepository,
@@ -14,10 +14,11 @@ from app.domain.interfaces.repositories.report_repository import (
 
 class ResolveReportUseCase:
     def __init__(
-        self, report_repo: IReportRepository, storage_provider: IStorageProvider
+        self, report_repo: IReportRepository, storage_provider: IStorageProvider, max_photos: int
     ):
         self.report_repo = report_repo
         self.storage_provider = storage_provider
+        self.max_photos = max_photos
 
     async def execute(self, dto: ResolveReportDTO) -> ReportResolution:
         report = await self.report_repo.get_by_id(dto.report_id)
@@ -34,6 +35,9 @@ class ResolveReportUseCase:
             raise PermissionDeniedException(
                 "You can only resolve reports assigned to you"
             )
+
+        if len(dto.files) > self.max_photos:
+            raise PhotoLimitExceededException(max_photos=self.max_photos)
 
         report.status = ReportStatus.RESOLVED
         await self.report_repo.save(report)

@@ -62,3 +62,11 @@ class IReportRepository(ABC):
     async def get_resolution_photo_by_id(
         self, photo_id: UUID
     ) -> ResolutionPhoto | None: ...
+
+    @abstractmethod
+    async def get_resolution_by_id(
+            self, resolution_id: UUID
+    ) -> ReportResolution | None: ...
+
+    @abstractmethod
+    async def delete_resolution_photo(self, photo_id: UUID) -> None: ...

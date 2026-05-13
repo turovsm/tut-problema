@@ -3,7 +3,7 @@ from uuid import UUID
 from geoalchemy2.functions import ST_Distance, ST_DWithin
 from geoalchemy2.shape import from_shape, to_shape
 from shapely.geometry import Point
-from sqlalchemy import func, inspect, select
+from sqlalchemy import func, inspect, select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -356,3 +356,42 @@ class ReportRepository(
             if m
             else None
         )
+
+    async def get_resolution_by_id(
+            self, resolution_id: UUID
+    ) -> ReportResolution | None:
+        query = (
+            select(ReportResolutionModel)
+            .options(selectinload(ReportResolutionModel.photos))
+            .where(ReportResolutionModel.id == resolution_id)
+        )
+        res = await self._session.execute(query)
+        m = res.scalar_one_or_none()
+
+        if not m:
+            return None
+
+        return ReportResolution(
+            id=m.id,
+            report_id=m.report_id,
+            resolved_by_id=m.resolved_by_id,
+            comment=m.comment,
+            resolved_at=m.resolved_at,
+            photos=[
+                ResolutionPhoto(
+                    id=p.id,
+                    resolution_id=p.resolution_id,
+                    file_name=p.file_name,
+                    file_path=p.file_path,
+                    uploaded_at=p.uploaded_at,
+                )
+                for p in m.photos
+            ],
+        )
+
+    async def delete_resolution_photo(self, photo_id: UUID) -> None:
+        query = delete(ResolutionPhotoModel).where(
+            ResolutionPhotoModel.id == photo_id
+        )
+        await self._session.execute(query)
+        await self._session.commit()
