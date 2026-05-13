@@ -78,6 +78,12 @@ export interface VoteReportResponse {
   created_at: string;
 }
 
+export interface UpdateReportBody {
+  title?: string;
+  description?: string;
+  status?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -138,6 +144,26 @@ export class MapWidgetApiService {
     return this.http.post<ApiResponseSuccess<{ id: string }>>(
       `${environment.apiUrl}/api/reports`,
       formData,
+      { withCredentials: true }
+    );
+  }
+
+  updateReport(
+    reportId: string,
+    body: UpdateReportBody
+  ): Observable<ReportDetails> {
+    return this.http
+      .put<ApiResponseSuccess<ReportDetails>>(
+        `${environment.apiUrl}/api/reports/${reportId}`,
+        body,
+        { withCredentials: true }
+      )
+      .pipe(map(res => res.data));
+  }
+
+  deleteReport(reportId: string): Observable<void> {
+    return this.http.delete<void>(
+      `${environment.apiUrl}/api/reports/${reportId}`,
       { withCredentials: true }
     );
   }

@@ -23,13 +23,6 @@
       </a>
 
       <a
-        routerLink="/reports/create"
-        routerLinkActive="active"
-      >
-        Создать заявку
-      </a>
-
-      <a
         routerLink="/reports"
         routerLinkActive="active"
       >
@@ -115,7 +108,6 @@
 @if (isMobileMenuOpen()) {
   <div class="mobile-menu">
     <a routerLink="/">Карта</a>
-    <a routerLink="/reports/create">Создать заявку</a>
     <a routerLink="/reports">Жалобы</a>
 
     @if (isGov()) {

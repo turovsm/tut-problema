@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -36,6 +36,7 @@ export class ReportDetailsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly apiService = inject(MapWidgetApiService);
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   report = signal<ReportDetails | null>(null);
   isLoading = signal(false);
@@ -170,11 +171,15 @@ export class ReportDetailsComponent implements OnInit {
   }
 
   editReport(): void {
-    // Пока без действий.
-    // Потом сюда можно добавить router.navigate(['/reports', id, 'edit'])
-    console.log('Редактирование жалобы пока не реализовано');
-  }
+    const report = this.report();
 
+    if (!report) {
+      return;
+    }
+
+    this.router.navigate(['/reports', report.id, 'edit']);
+  }
+  
   getIssueLabel(type: IssueType | string): string {
     return ISSUE_TYPE_LABELS[type as IssueType] ?? type;
   }

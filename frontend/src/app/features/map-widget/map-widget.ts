@@ -18,7 +18,7 @@ import {
 import {
   IssueType,
   ISSUE_TYPE_LABELS} from '../../core/models/issue-type';
-import { from } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface Complaint {
   id: string;
@@ -27,6 +27,7 @@ interface Complaint {
   district: string;
   lat: number;
   lng: number;
+  status: 'pending'| 'confirmed'| 'dismissed' | 'resolved';
 }
 
 @Component({
@@ -47,27 +48,18 @@ interface Complaint {
 })
 export class MapWidget implements OnInit {
   map!: L.Map;
+  private readonly authService = inject(AuthService);
+  types = Object.keys(ISSUE_TYPE_LABELS) as IssueType[];
 
   complaints: Complaint[] = [];
   filteredComplaints: Complaint[] = [];
 
-  types: IssueType[] = [
-    'snow',
-    'pothole',
-    'road_obstruction',
-    'flooding',
-    'broken_streetlight',
-    'broken_sidewalk',
-    'water_leak',
-    'sewer_overflow',
-    'illegal_dumping',
-    'other'
-  ];
+  statuses = ['pending', 'confirmed', 'dismissed', 'resolved']
 
-  districts = ['Центр', 'Север', 'Юг', 'Восток', 'Запад'];
+  labels = ISSUE_TYPE_LABELS;
 
   selectedType: IssueType | '' = '';
-  selectedDistrict = '';
+  selectedStatus: 'pending'| 'confirmed'| 'dismissed' | 'resolved' | '' = '';
 
   selectedPointMarker?: L.Marker;
   selectedLat?: number;
@@ -77,9 +69,6 @@ export class MapWidget implements OnInit {
 
   isComplaintFormOpen = signal(false);
   selectedAddress = signal('Адрес точки');
-
-  // TODO: заменить на реальную проверку авторизации через AuthService
-  isAuthorized = true;
 
   private readonly apiService = inject(MapWidgetApiService);
 
@@ -135,7 +124,7 @@ export class MapWidget implements OnInit {
   applyFilters(): void {
     this.filteredComplaints = this.complaints.filter(c =>
       (this.selectedType ? c.type === this.selectedType : true) &&
-      (this.selectedDistrict ? c.district === this.selectedDistrict : true)
+      (this.selectedStatus ? c.status === this.selectedStatus : true)
     );
 
     this.updateMapMarkers();
@@ -163,7 +152,7 @@ export class MapWidget implements OnInit {
   }
 
   createComplaint(): void {
-    if (!this.isAuthorized) {
+    if (!this.authService.isAuthenticated()) {
       alert('Чтобы сообщить о проблеме, необходимо авторизоваться');
       return;
     }
@@ -350,7 +339,8 @@ export class MapWidget implements OnInit {
           type: report.issue_type ?? 'other',
           district: report.district ?? '',
           lat,
-          lng
+          lng,
+          status: report.status ?? 'pending'
         };
       });
 

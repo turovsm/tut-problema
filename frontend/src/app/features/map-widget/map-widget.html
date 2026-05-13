@@ -13,14 +13,15 @@
     </mat-form-field>
 
     <mat-form-field appearance="fill">
-      <mat-label>Район</mat-label>
+      <mat-label>Статус</mat-label>
 
-      <mat-select [(value)]="selectedDistrict" (selectionChange)="applyFilters()">
+      <mat-select [(value)]="selectedStatus" (selectionChange)="applyFilters()">
         <mat-option value="">Все</mat-option>
-
-        <mat-option *ngFor="let d of districts" [value]="d">
-          {{ d }}
-        </mat-option>
+        @for (status of statuses; track status) {
+          <mat-option [value]="status">
+            {{ status }}
+          </mat-option>
+        }
       </mat-select>
     </mat-form-field>
   </mat-card>
