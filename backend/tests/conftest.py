@@ -102,6 +102,7 @@ async def client(db_session) -> AsyncGenerator[AsyncClient, None]:
 
     deps.email_provider = SmtpEmailProvider()
 
+    await redis_client.disconnect()
     await redis_client.connect()
 
     async with AsyncClient(
@@ -109,4 +110,5 @@ async def client(db_session) -> AsyncGenerator[AsyncClient, None]:
     ) as ac:
         yield ac
 
+    await redis_client.disconnect()
     app.dependency_overrides.clear()

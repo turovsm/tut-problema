@@ -25,10 +25,16 @@ from app.application.use_cases.auth.verify_email import VerifyEmailUseCase
 from app.application.use_cases.reports.add_report_photo import (
     AddReportPhotoUseCase,
 )
+from app.application.use_cases.reports.add_resolution_photo import (
+    AddResolutionPhotoUseCase,
+)
 from app.application.use_cases.reports.create_report import CreateReportUseCase
 from app.application.use_cases.reports.delete_report import DeleteReportUseCase
 from app.application.use_cases.reports.delete_report_photo import (
     DeleteReportPhotoUseCase,
+)
+from app.application.use_cases.reports.delete_resolution_photo import (
+    DeleteResolutionPhotoUseCase,
 )
 from app.application.use_cases.reports.get_my_reports import (
     GetMyReportsUseCase,
@@ -46,12 +52,6 @@ from app.application.use_cases.reports.get_resolution_photo import (
 )
 from app.application.use_cases.reports.resolve_report import (
     ResolveReportUseCase,
-)
-from app.application.use_cases.reports.add_resolution_photo import (
-    AddResolutionPhotoUseCase,
-)
-from app.application.use_cases.reports.delete_resolution_photo import (
-    DeleteResolutionPhotoUseCase,
 )
 from app.application.use_cases.reports.update_report import UpdateReportUseCase
 from app.application.use_cases.users.get_user_profile import (
@@ -255,7 +255,9 @@ def get_update_report_use_case(
 def get_resolve_report_use_case(
     r_repo: ReportRepository = Depends(get_report_repo),
 ) -> ResolveReportUseCase:
-    return ResolveReportUseCase(r_repo, storage_provider, settings.MAX_PHOTOS_PER_REPORT)
+    return ResolveReportUseCase(
+        r_repo, storage_provider, settings.MAX_PHOTOS_PER_REPORT
+    )
 
 
 def get_delete_report_use_case(
@@ -295,7 +297,9 @@ def get_resolution_photo_use_case(
 def get_add_resolution_photo_use_case(
     r_repo: ReportRepository = Depends(get_report_repo),
 ) -> AddResolutionPhotoUseCase:
-    return AddResolutionPhotoUseCase(r_repo, storage_provider, settings.MAX_PHOTOS_PER_REPORT)
+    return AddResolutionPhotoUseCase(
+        r_repo, storage_provider, settings.MAX_PHOTOS_PER_REPORT
+    )
 
 
 def get_delete_resolution_photo_use_case(

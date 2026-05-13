@@ -5,12 +5,17 @@ from app.domain.entities.report import ResolutionPhoto
 from app.domain.exceptions.base import EntityNotFoundException
 from app.domain.exceptions.report import PhotoLimitExceededException
 from app.domain.interfaces.providers.storage_provider import IStorageProvider
-from app.domain.interfaces.repositories.report_repository import IReportRepository
+from app.domain.interfaces.repositories.report_repository import (
+    IReportRepository,
+)
 
 
 class AddResolutionPhotoUseCase:
     def __init__(
-            self, report_repo: IReportRepository, storage_provider: IStorageProvider, max_photos: int
+        self,
+        report_repo: IReportRepository,
+        storage_provider: IStorageProvider,
+        max_photos: int,
     ):
         self.report_repo = report_repo
         self.storage_provider = storage_provider

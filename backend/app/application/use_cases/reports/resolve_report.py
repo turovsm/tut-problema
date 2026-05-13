@@ -5,7 +5,10 @@ from app.domain.exceptions.base import (
     BusinessRuleException,
     PermissionDeniedException,
 )
-from app.domain.exceptions.report import ReportNotFoundException, PhotoLimitExceededException
+from app.domain.exceptions.report import (
+    PhotoLimitExceededException,
+    ReportNotFoundException,
+)
 from app.domain.interfaces.providers.storage_provider import IStorageProvider
 from app.domain.interfaces.repositories.report_repository import (
     IReportRepository,
@@ -14,7 +17,10 @@ from app.domain.interfaces.repositories.report_repository import (
 
 class ResolveReportUseCase:
     def __init__(
-        self, report_repo: IReportRepository, storage_provider: IStorageProvider, max_photos: int
+        self,
+        report_repo: IReportRepository,
+        storage_provider: IStorageProvider,
+        max_photos: int,
     ):
         self.report_repo = report_repo
         self.storage_provider = storage_provider
