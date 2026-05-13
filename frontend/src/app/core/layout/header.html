@@ -37,15 +37,6 @@
           Dashboard
         </a>
       }
-
-      @if (isModerator()) {
-        <a
-          routerLink="/moderation"
-          routerLinkActive="active"
-        >
-          Модерация
-        </a>
-      }
     </nav>
   </div>
 
@@ -112,10 +103,6 @@
 
     @if (isGov()) {
       <a routerLink="/gov/dashboard">Dashboard</a>
-    }
-
-    @if (isModerator()) {
-      <a routerLink="/moderation">Модерация</a>
     }
   </div>
 }

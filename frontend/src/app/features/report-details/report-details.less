@@ -206,3 +206,107 @@ h2 {
     font-size: 26px;
   }
 }
+.photo-item {
+  position: relative;
+}
+
+.delete-photo-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.delete-photo-button:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.delete-photo-button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.moderation-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 20px;
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+  background: #eff6ff;
+}
+
+.moderation-section p {
+  margin: 0;
+  color: #475569;
+}
+
+.resolve-comment-field {
+  width: 100%;
+}
+
+.resolve-files {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.file-upload-label {
+  display: inline-flex;
+  width: fit-content;
+  flex-direction: column;
+  gap: 8px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.file-upload-label input {
+  font-weight: 400;
+}
+
+.selected-files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selected-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+}
+
+.moderation-message {
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.moderation-success {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.moderation-error {
+  color: #991b1b;
+  background: #fee2e2;
+}

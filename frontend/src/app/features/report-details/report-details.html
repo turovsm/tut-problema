@@ -88,19 +88,105 @@
 
           <div class="photos-grid">
             @for (photo of r.photos; track photo.id) {
-              <a
-                class="photo-link"
-                [href]="getPhotoUrl(photo.file_url)"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <img
-                  [src]="getPhotoUrl(photo.file_url)"
-                  [alt]="photo.file_name"
-                />
-              </a>
+              <div class="photo-item">
+                <a
+                  class="photo-link"
+                  [href]="getPhotoUrl(photo.file_url)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    [src]="getPhotoUrl(photo.file_url)"
+                    [alt]="photo.file_name"
+                  />
+                </a>
+
+                @if (isModerator()) {
+                  <button
+                    class="delete-photo-button"
+                    type="button"
+                    aria-label="Удалить фото"
+                    title="Удалить фото"
+                    [disabled]="isDeletingPhoto()"
+                    (click)="deletePhoto(photo.id)"
+                  >
+                    ×
+                  </button>
+                }
+              </div>
             }
           </div>
+        </div>
+      }
+
+      @if (isModerator()) {
+        <div class="moderation-section">
+          <div>
+            <h2>Модерация</h2>
+            <p>Удалите неподходящие фото или закройте жалобу с комментарием и фотографиями результата.</p>
+          </div>
+
+          @if (moderationSuccessMessage()) {
+            <div class="moderation-message moderation-success">
+              {{ moderationSuccessMessage() }}
+            </div>
+          }
+
+          @if (moderationErrorMessage()) {
+            <div class="moderation-message moderation-error">
+              {{ moderationErrorMessage() }}
+            </div>
+          }
+
+          <mat-form-field appearance="outline" class="resolve-comment-field">
+            <mat-label>Комментарий к закрытию</mat-label>
+            <textarea
+              matInput
+              rows="4"
+              [value]="resolveComment()"
+              (input)="resolveComment.set($any($event.target).value)"
+              placeholder="Например: проблему устранили, территория очищена"
+            ></textarea>
+          </mat-form-field>
+
+          <div class="resolve-files">
+            <label class="file-upload-label">
+              Фото от модератора
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                (change)="onResolveFilesSelected($event)"
+              />
+            </label>
+
+            @if (resolveFiles().length) {
+              <div class="selected-files">
+                @for (file of resolveFiles(); track file.name) {
+                  <span class="selected-file">
+                    {{ file.name }}
+                    <button
+                      mat-button
+                      type="button"
+                      (click)="removeResolveFile(file)"
+                    >
+                      Убрать
+                    </button>
+                  </span>
+                }
+              </div>
+            }
+          </div>
+
+          <button
+            mat-flat-button
+            color="primary"
+            type="button"
+            [disabled]="isResolvingReport() || r.status === 'resolved' || r.status === 'closed'"
+            (click)="resolveReport()"
+          >
+            {{ isResolvingReport() ? 'Закрываем...' : 'Закрыть жалобу' }}
+          </button>
         </div>
       }
 

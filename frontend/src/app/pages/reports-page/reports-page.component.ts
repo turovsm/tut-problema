@@ -4,10 +4,14 @@ import { RouterLink } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 
-import { ReportsApiService } from './reports-page-api.service';
+import { ReportsApiService, ReportsFilters } from './reports-page-api.service';
 import { ReportCardComponent } from '../../shared/report-card/report-card.component';
+import { ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
 import { MyReport } from '../../core/models/report.models';
 import { PaginatedResponse } from '../../core/models/response.model';
 
@@ -19,7 +23,10 @@ import { PaginatedResponse } from '../../core/models/response.model';
     RouterLink,
     MatButtonModule,
     MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     ReportCardComponent
   ],
   templateUrl: './reports-page.component.html',
@@ -27,15 +34,32 @@ import { PaginatedResponse } from '../../core/models/response.model';
 })
 export class ReportsPageComponent implements OnInit {
   private readonly reportsApiService = inject(ReportsApiService);
+
   readonly reports = signal<MyReport[]>([]);
   readonly isLoadingReports = signal(false);
   readonly isLoadingMoreReports = signal(false);
   readonly errorMessage = signal('');
 
+  readonly selectedStatus = signal('');
+  readonly selectedDistrict = signal('');
+  readonly selectedIssueType = signal('');
+
   readonly page = signal(1);
   readonly limit = 20;
   readonly total = signal(0);
   readonly hasNext = signal(false);
+
+  readonly statusOptions = [
+    { value: 'pending', label: 'Ожидает' },
+    { value: 'confirmed', label: 'Подтверждена' },
+    { value: 'dismissed', label: 'Отклонена' },
+    { value: 'resolved', label: 'Решена' }
+  ];
+
+  readonly issueTypeOptions = Object.entries(ISSUE_TYPE_LABELS).map(([value, label]) => ({
+    value,
+    label
+  }));
 
   ngOnInit(): void {
     this.loadReports();
@@ -47,11 +71,12 @@ export class ReportsPageComponent implements OnInit {
     if (isFirstPage) {
       this.isLoadingReports.set(true);
       this.errorMessage.set('');
+      this.reports.set([]);
     } else {
       this.isLoadingMoreReports.set(true);
     }
 
-    this.reportsApiService.getReports(page, this.limit).subscribe({
+    this.reportsApiService.getReports(page, this.limit, this.getFilters()).subscribe({
       next: response => {
         this.applyReportsResponse(response, isFirstPage);
         this.isLoadingReports.set(false);
@@ -72,6 +97,45 @@ export class ReportsPageComponent implements OnInit {
     }
 
     this.loadReports(this.page() + 1);
+  }
+
+  onStatusChange(status: string): void {
+    this.selectedStatus.set(status);
+    this.loadReports();
+  }
+
+  onIssueTypeChange(issueType: string): void {
+    this.selectedIssueType.set(issueType);
+    this.loadReports();
+  }
+
+  onDistrictChange(event: Event): void {
+    const district = (event.target as HTMLInputElement).value.trim();
+    this.selectedDistrict.set(district);
+    this.loadReports();
+  }
+
+  resetFilters(): void {
+    this.selectedStatus.set('');
+    this.selectedDistrict.set('');
+    this.selectedIssueType.set('');
+    this.loadReports();
+  }
+
+  hasActiveFilters(): boolean {
+    return Boolean(
+      this.selectedStatus() ||
+      this.selectedDistrict() ||
+      this.selectedIssueType()
+    );
+  }
+
+  private getFilters(): ReportsFilters {
+    return {
+      status: this.selectedStatus() || undefined,
+      district: this.selectedDistrict() || undefined,
+      issue_type: this.selectedIssueType() || undefined
+    };
   }
 
   private applyReportsResponse(response: PaginatedResponse<MyReport>, isFirstPage: boolean): void {

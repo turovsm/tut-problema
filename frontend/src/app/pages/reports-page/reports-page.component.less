@@ -36,6 +36,26 @@
   color: rgba(0, 0, 0, 0.5) !important;
 }
 
+.filters-card {
+  margin-bottom: 24px;
+  padding: 18px;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.filters-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .reports-section {
   margin-top: 24px;
 }
@@ -89,6 +109,12 @@
   margin-top: 24px;
 }
 
+@media (max-width: 820px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .reports-page {
     padding: 16px;
@@ -101,5 +127,13 @@
 
   .reports-hero {
     padding: 18px;
+  }
+
+  .filters-actions {
+    justify-content: stretch;
+
+    button {
+      width: 100%;
+    }
   }
 }
