@@ -76,6 +76,14 @@ export class ReportDetailsComponent implements OnInit {
     return report.created_by.id === this.currentUserId;
   });
 
+  isAssignedToMe = computed(() => {
+    const report = this.report();
+    if (!report || !this.currentUserId) {
+      return false;
+    }
+    return report.assigned_to?.id === this.currentUserId;
+  })
+
   canVote = computed(() => {
     return Boolean(this.report()) && !this.isOwnReport() && !this.isVoting();
   });
@@ -111,7 +119,7 @@ export class ReportDetailsComponent implements OnInit {
     });
   }
 
-  vote(voteType: 'confirm' | 'reject'): void {
+  vote(voteType: 'confirm' | 'dismiss'): void {
     const report = this.report();
     const coords = this.userLocation();
 
@@ -223,7 +231,7 @@ export class ReportDetailsComponent implements OnInit {
     this.moderationSuccessMessage.set('');
 
     this.http
-      .delete(`${environment.apiUrl}/api/uploads/resolutions/photos/${photoId}`, {
+      .delete(`${environment.apiUrl}/api/uploads/photos/${photoId}`, {
         withCredentials: true
       })
       .subscribe({
@@ -242,26 +250,82 @@ export class ReportDetailsComponent implements OnInit {
       });
   }
 
+  isUploadingResPhoto = signal(false);
+
+  deleteResolutionPhoto(photoId: string): void {
+    if (!this.isModerator()) return;
+    if (!confirm('Удалить это фото из отчёта?')) return;
+
+    this.http
+      .delete(`${environment.apiUrl}/api/uploads/resolutions/photos/${photoId}`, {
+        withCredentials: true
+      })
+      .subscribe({
+        next: () => {
+          this.loadReport();
+        },
+        error: error => {
+          console.error('Ошибка удаления фото отчёта:', error);
+          alert(error.error?.detail || error.error?.message || 'Не удалось удалить фото');
+        }
+      });
+  }
+
+  uploadResolutionPhoto(event: Event, resolutionId: string): void {
+    if (!this.isModerator()) return;
+
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    this.isUploadingResPhoto.set(true);
+
+    this.http
+      .post(`${environment.apiUrl}/api/uploads/resolutions/${resolutionId}/photos`, formData, {
+        withCredentials: true
+      })
+      .subscribe({
+        next: () => {
+          this.isUploadingResPhoto.set(false);
+          input.value = '';
+          this.loadReport();
+        },
+        error: error => {
+          console.error('Ошибка загрузки фото отчёта:', error);
+          this.isUploadingResPhoto.set(false);
+          input.value = '';
+          alert(error.error?.detail || error.error?.message || 'Не удалось загрузить фото');
+        }
+      });
+  }
+
   resolveReport(): void {
     const report = this.report();
 
-    if (!report || !this.isModerator()) {
+    if (!report || !this.isAssignedToMe()) {
       return;
     }
 
     const comment = this.resolveComment().trim();
 
     if (!comment) {
-      this.moderationErrorMessage.set('Добавьте комментарий к закрытию жалобы');
+      this.moderationErrorMessage.set('Добавьте комментарий к выполнению');
       return;
     }
 
     const formData = new FormData();
     formData.append('comment', comment);
 
-    this.resolveFiles().forEach(file => {
-      formData.append('files', file);
-    });
+    const files = this.resolveFiles();
+
+    if (files.length > 0) {
+      files.forEach(file => {
+        formData.append('files', file, file.name);
+      });
+    }
 
     this.isResolvingReport.set(true);
     this.moderationErrorMessage.set('');
@@ -276,14 +340,14 @@ export class ReportDetailsComponent implements OnInit {
           this.isResolvingReport.set(false);
           this.resolveComment.set('');
           this.resolveFiles.set([]);
-          this.moderationSuccessMessage.set('Жалоба закрыта');
+          this.moderationSuccessMessage.set('Отчет отправлен, жалоба закрыта');
           this.loadReport();
         },
         error: error => {
-          console.error('Ошибка закрытия жалобы:', error);
+          console.error('Ошибка отправки отчета:', error);
           this.isResolvingReport.set(false);
           this.moderationErrorMessage.set(
-            error.error?.message || 'Не удалось закрыть жалобу'
+            error.error?.message || 'Не удалось отправить отчет'
           );
         }
       });
@@ -298,20 +362,19 @@ export class ReportDetailsComponent implements OnInit {
     const labels: Record<string, string> = {
       pending: 'На рассмотрении',
       confirmed: 'Подтверждена',
-      rejected: 'Отклонена',
-      resolved: 'Решена',
-      closed: 'Закрыта'
+      dismissed: 'Отклонена',
+      resolved: 'Решена'
     };
 
     return labels[status] ?? status;
   }
 
-  getVoteLabel(vote: 'confirm' | 'reject' | null): string {
+  getVoteLabel(vote: 'confirm' | 'dismiss' | null): string {
     if (vote === 'confirm') {
       return 'подтверждение';
     }
 
-    if (vote === 'reject') {
+    if (vote === 'dismiss') {
       return 'отклонение';
     }
 

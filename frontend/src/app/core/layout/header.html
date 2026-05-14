@@ -37,6 +37,15 @@
           Dashboard
         </a>
       }
+
+      @if (isModerator()) {
+        <a
+          routerLink="/admin/dashboard"
+          routerLinkActive="active"
+        >
+          Админ-панель
+        </a>
+      }
     </nav>
   </div>
 
@@ -103,6 +112,9 @@
 
     @if (isGov()) {
       <a routerLink="/gov/dashboard">Dashboard</a>
+    }
+    @if (isModerator()) {
+      <a routerLink="/admin/dashboard">Админ-панель</a>
     }
   </div>
 }

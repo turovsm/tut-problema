@@ -46,6 +46,8 @@ export class ReportEditComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly apiService = inject(MapWidgetApiService);
 
+  govOrgs = signal<any[]>([]);
+  isLoadingGovOrgs = signal(false);
   report = signal<ReportDetails | null>(null);
   isLoading = signal(false);
   isSaving = signal(false);
@@ -59,15 +61,15 @@ export class ReportEditComponent implements OnInit {
   statuses = [
     { value: 'pending', label: 'На рассмотрении' },
     { value: 'confirmed', label: 'Подтверждена' },
-    { value: 'rejected', label: 'Отклонена' },
-    { value: 'resolved', label: 'Решена' },
-    { value: 'closed', label: 'Закрыта' }
+    { value: 'dismissed', label: 'Отклонена' },
+    { value: 'resolved', label: 'Решена' }
   ];
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.maxLength(120)]],
     description: ['', [Validators.required, Validators.maxLength(2000)]],
-    status: ['pending', [Validators.required]]
+    status: ['pending', [Validators.required]],
+    assigned_to_id: ['']
   });
 
   isOwnReport = computed(() => {
@@ -101,6 +103,20 @@ export class ReportEditComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadReport();
+    if (this.currentUserRole === 'moderator') {
+      this.loadGovOrgs();
+    }
+  }
+
+  loadGovOrgs(): void {
+    this.isLoadingGovOrgs.set(true);
+    this.apiService.getGovOrgs().subscribe({
+      next: orgs => {
+        this.govOrgs.set(orgs);
+        this.isLoadingGovOrgs.set(false);
+      },
+      error: () => this.isLoadingGovOrgs.set(false)
+    });
   }
 
   loadReport(): void {
@@ -121,7 +137,8 @@ export class ReportEditComponent implements OnInit {
         this.form.patchValue({
           title: report.title,
           description: report.description,
-          status: report.status
+          status: report.status,
+          assigned_to_id: report.assigned_to?.id || ''
         });
 
         this.applyPermissionsToForm();
@@ -166,6 +183,10 @@ export class ReportEditComponent implements OnInit {
 
     if (this.canEditStatus()) {
       body.status = formValue.status ?? report.status;
+    }
+
+    if (this.currentUserRole === 'moderator' && formValue.assigned_to_id) {
+      body.assigned_to_id = formValue.assigned_to_id;
     }
 
     this.isSaving.set(true);

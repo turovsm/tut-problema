@@ -1,6 +1,6 @@
 <mat-card class="report-card" [routerLink]="['/reports', report.id]">
   <div class="report-main">
-    @if (report.photos?.length) {
+    @if (report.photos.length) {
       <img
         class="report-photo"
         [src]="getReportPhotoUrl(report)"

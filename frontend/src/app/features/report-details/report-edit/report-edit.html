@@ -107,6 +107,26 @@
           </mat-form-field>
         </section>
 
+        @if (currentUserRole === 'moderator') {
+          <section class="section">
+            <h2>Исполнитель (УК)</h2>
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Назначить на</mat-label>
+
+              <mat-select formControlName="assigned_to_id">
+                <mat-option value="">Не назначено</mat-option>
+
+                @for (org of govOrgs(); track org.id) {
+                  <mat-option [value]="org.id">
+                    {{ org.username }} ({{ org.email }})
+                  </mat-option>
+                }
+              </mat-select>
+
+            </mat-form-field>
+          </section>
+        }
+
         <div class="info-box">
           <div>
             <span>Автор</span>
