@@ -50,16 +50,6 @@
   </div>
 
   <div class="header__right">
-    <button
-      mat-stroked-button
-      color="primary"
-      routerLink="/reports/create"
-      class="desktop-only"
-    >
-      <mat-icon>add_location_alt</mat-icon>
-      Сообщить
-    </button>
-
     @if (user().isAuthenticated) {
       <button mat-icon-button>
         <mat-icon>notifications</mat-icon>

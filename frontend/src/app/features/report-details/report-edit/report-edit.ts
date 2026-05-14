@@ -82,19 +82,16 @@ export class ReportEditComponent implements OnInit {
     return report.created_by.id === this.currentUserId;
   });
 
-  isModeratorOrJkh = computed(() => {
-    return [
-      'gov_org',
-      'moderator',
-    ].includes(this.currentUserRole);
+  isModerator = computed(() => {
+    return 'moderator' === this.currentUserRole
   });
 
   canEditTitleAndDescription = computed(() => {
-    return this.isOwnReport();
+    return this.isOwnReport() || this.isModerator();
   });
 
   canEditStatus = computed(() => {
-    return this.isModeratorOrJkh();
+    return this.isModerator();
   });
 
   canEditAnything = computed(() => {
