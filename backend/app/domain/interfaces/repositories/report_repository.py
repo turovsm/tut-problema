@@ -70,3 +70,8 @@ class IReportRepository(ABC):
 
     @abstractmethod
     async def delete_resolution_photo(self, photo_id: UUID) -> None: ...
+
+    @abstractmethod
+    async def delete_resolution_by_report_id(
+        self, report_id: UUID
+    ) -> None: ...

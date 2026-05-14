@@ -14,6 +14,7 @@ from .common import Location, PaginatedResponse, PaginationQuery
 class ReportFilterQuery(PaginationQuery):
     issue_type: IssueType | None = Field(None, title="Issue Type")
     status_filter: ReportStatus | None = Field(None, title="Status Filter")
+    assigned_to_me: bool = Field(False, title="Assigned To Me")
 
 
 class NearbyReportQuery(BaseModel):

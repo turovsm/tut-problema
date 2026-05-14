@@ -77,6 +77,10 @@ class UserUpdate(BaseModel):
     )
 
 
+class UserStatusUpdate(BaseModel):
+    is_active: bool = Field(..., title="Is Active")
+
+
 class LoginRequest(BaseModel):
     email: EmailStr = Field(..., title="Email")
     password: str = Field(..., title="Password")

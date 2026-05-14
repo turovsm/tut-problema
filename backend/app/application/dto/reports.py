@@ -12,6 +12,7 @@ class ReportFilterDTO:
     page: int = 1
     limit: int = 20
     current_user_id: UUID | None = None
+    assignee_id: UUID | None = None
 
 
 @dataclass(frozen=True)

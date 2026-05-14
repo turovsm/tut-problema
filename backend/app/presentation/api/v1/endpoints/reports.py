@@ -54,6 +54,10 @@ async def list_reports(
     current_user: Annotated[User | None, Depends(get_optional_current_user)],
     data: ReportFilterQuery = Depends(),
 ):
+    assignee_id = None
+    if data.assigned_to_me and current_user:
+        assignee_id = current_user.id
+
     reports, total = await use_case.execute(
         ReportFilterDTO(
             issue_type=data.issue_type,
@@ -61,6 +65,7 @@ async def list_reports(
             page=data.page,
             limit=data.limit,
             current_user_id=current_user.id if current_user else None,
+            assignee_id=assignee_id,
         )
     )
 

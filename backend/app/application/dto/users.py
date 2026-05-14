@@ -22,3 +22,10 @@ class ListUsersDTO:
     user_role: UserRole
     page: int = 1
     limit: int = 20
+
+
+@dataclass(frozen=True)
+class ToggleUserStatusDTO:
+    target_user_id: UUID
+    is_active: bool
+    current_user_role: UserRole

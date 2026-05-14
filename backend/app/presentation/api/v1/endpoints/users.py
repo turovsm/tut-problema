@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends
 from app.application.dto.users import (
     GetUserVotesDTO,
     ListUsersDTO,
+    ToggleUserStatusDTO,
     UpdateUserDTO,
 )
 from app.domain.entities.user import User
@@ -14,6 +15,8 @@ from app.presentation.api.deps import (
     get_current_user,
     get_current_verified_user,
     get_list_all_users_use_case,
+    get_strict_moderator,
+    get_toggle_user_status_use_case,
     get_update_user_use_case,
     get_user_profile_use_case,
     get_user_votes_use_case,
@@ -22,6 +25,7 @@ from app.presentation.api.schemas.auth import (
     UserListQuery,
     UserListResponse,
     UserResponse,
+    UserStatusUpdate,
     UserUpdate,
 )
 from app.presentation.api.schemas.common import SuccessResponse
@@ -108,4 +112,27 @@ async def list_all_users(
             limit=data.limit,
             has_next=data.page * data.limit < total,
         )
+    )
+
+
+@router.patch(
+    "/admin/users/{user_id}/status",
+    response_model=SuccessResponse[UserResponse],
+)
+async def toggle_user_status(
+    user_id: UUID,
+    data: UserStatusUpdate,
+    current_user: Annotated[User, Depends(get_strict_moderator)],
+    use_case: Annotated[Depends, Depends(get_toggle_user_status_use_case)],
+):
+    user = await use_case.execute(
+        ToggleUserStatusDTO(
+            target_user_id=user_id,
+            is_active=data.is_active,
+            current_user_role=current_user.role,
+        )
+    )
+    return SuccessResponse(
+        data=UserResponse.model_validate(user),
+        message="User status updated successfully",
     )

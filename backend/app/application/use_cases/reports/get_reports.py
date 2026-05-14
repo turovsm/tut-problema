@@ -22,6 +22,7 @@ class GetReportsUseCase:
         reports, total = await self.report_repo.get_list(
             issue_type=dto.issue_type,
             status=dto.status_filter,
+            assignee_id=dto.assignee_id,
             limit=dto.limit,
             offset=offset,
         )
