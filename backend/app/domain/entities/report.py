@@ -1,0 +1,57 @@
+from dataclasses import dataclass, field
+from datetime import datetime
+from uuid import UUID, uuid4
+
+from app.core.utils.datetime import get_utc_now_naive
+
+from .enums import IssueType, ReportStatus, VoteType
+from .location import Location
+from .user import User
+
+
+@dataclass
+class ReportPhoto:
+    file_name: str
+    file_path: str
+    report_id: UUID
+    id: UUID = field(default_factory=uuid4)
+    uploaded_at: datetime = field(default_factory=get_utc_now_naive)
+
+
+@dataclass
+class ResolutionPhoto:
+    file_name: str
+    file_path: str
+    resolution_id: UUID
+    id: UUID = field(default_factory=uuid4)
+    uploaded_at: datetime = field(default_factory=get_utc_now_naive)
+
+
+@dataclass
+class ReportResolution:
+    report_id: UUID
+    resolved_by_id: UUID
+    comment: str
+    id: UUID = field(default_factory=uuid4)
+    resolved_at: datetime = field(default_factory=get_utc_now_naive)
+    photos: list[ResolutionPhoto] = field(default_factory=list)
+
+
+@dataclass
+class Report:
+    title: str
+    issue_type: IssueType
+    location: Location
+    user_location: Location
+    created_by_id: UUID
+    assigned_to_id: UUID | None = None
+    description: str | None = None
+    status: ReportStatus = ReportStatus.PENDING
+    id: UUID = field(default_factory=uuid4)
+    created_at: datetime = field(default_factory=get_utc_now_naive)
+    updated_at: datetime = field(default_factory=get_utc_now_naive)
+    photos: list[ReportPhoto] = field(default_factory=list)
+    created_by: User | None = None
+    assigned_to: User | None = None
+    resolution: ReportResolution | None = None
+    current_user_vote: VoteType | None = None

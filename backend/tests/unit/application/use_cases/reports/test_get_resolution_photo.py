@@ -1,0 +1,58 @@
+import uuid
+from unittest.mock import AsyncMock
+
+import pytest
+
+from app.application.use_cases.reports.get_resolution_photo import (
+    GetResolutionPhotoUseCase,
+)
+from app.domain.entities.report import ResolutionPhoto
+from app.domain.exceptions.base import EntityNotFoundException
+
+
+class TestGetResolutionPhotoUseCase:
+    @pytest.fixture
+    def mock_report_repo(self):
+        return AsyncMock()
+
+    @pytest.fixture
+    def use_case(self, mock_report_repo):
+        return GetResolutionPhotoUseCase(report_repo=mock_report_repo)
+
+    async def test_get_resolution_photo_success(
+        self, use_case, mock_report_repo
+    ):
+        photo_id = uuid.uuid4()
+        resolution_id = uuid.uuid4()
+        expected_photo = ResolutionPhoto(
+            id=photo_id,
+            resolution_id=resolution_id,
+            file_name="fixed_road.jpg",
+            file_path="uploads/resolutions/abc/fixed_road.jpg",
+        )
+        mock_report_repo.get_resolution_photo_by_id.return_value = (
+            expected_photo
+        )
+
+        result = await use_case.execute(photo_id)
+
+        assert result == expected_photo
+        assert result.id == photo_id
+        assert result.file_name == "fixed_road.jpg"
+        mock_report_repo.get_resolution_photo_by_id.assert_called_once_with(
+            photo_id
+        )
+
+    async def test_get_resolution_photo_not_found(
+        self, use_case, mock_report_repo
+    ):
+        photo_id = uuid.uuid4()
+        mock_report_repo.get_resolution_photo_by_id.return_value = None
+
+        with pytest.raises(EntityNotFoundException) as exc:
+            await use_case.execute(photo_id)
+
+        assert "Resolution photo not found" in exc.value.message
+        mock_report_repo.get_resolution_photo_by_id.assert_called_once_with(
+            photo_id
+        )
