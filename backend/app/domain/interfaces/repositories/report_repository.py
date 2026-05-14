@@ -65,7 +65,7 @@ class IReportRepository(ABC):
 
     @abstractmethod
     async def get_resolution_by_id(
-            self, resolution_id: UUID
+        self, resolution_id: UUID
     ) -> ReportResolution | None: ...
 
     @abstractmethod

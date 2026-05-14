@@ -1,5 +1,6 @@
 from uuid import UUID
 
+from app.core.logging_config import get_logger
 from app.domain.entities.enums import UserRole
 from app.domain.exceptions.base import PermissionDeniedException
 from app.domain.exceptions.report import ReportNotFoundException
@@ -8,10 +9,14 @@ from app.domain.interfaces.repositories.report_repository import (
     IReportRepository,
 )
 
+logger = get_logger(__name__)
+
 
 class DeleteReportUseCase:
     def __init__(
-        self, report_repo: IReportRepository, storage_provider: IStorageProvider
+        self,
+        report_repo: IReportRepository,
+        storage_provider: IStorageProvider,
     ):
         self.report_repo = report_repo
         self.storage_provider = storage_provider
@@ -37,8 +42,19 @@ class DeleteReportUseCase:
         await self.report_repo.delete(report_id)
 
         # 4. Удаление физических файлов
-        for photo in report.photos:
+        files_to_delete = [p.file_path for p in report.photos]
+        if report.resolution and report.resolution.photos:
+            files_to_delete.extend(
+                [p.file_path for p in report.resolution.photos]
+            )
+
+        for file_path in files_to_delete:
             try:
-                await self.storage_provider.delete_file(photo.file_path)
-            except Exception:
-                pass
+                await self.storage_provider.delete_file(file_path)
+            except Exception as e:
+                logger.warning(
+                    "Could not delete physical file during report deletion",
+                    report_id=str(report_id),
+                    file_path=file_path,
+                    error=str(e),
+                )

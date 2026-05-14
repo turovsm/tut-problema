@@ -1,4 +1,5 @@
 from app.application.dto.votes import CastVoteDTO
+from app.core.utils.distance import calculate_distance_haversine
 from app.domain.entities.enums import VoteType
 from app.domain.entities.location import Location
 from app.domain.entities.vote import Vote
@@ -11,7 +12,6 @@ from app.domain.interfaces.repositories.report_repository import (
     IReportRepository,
 )
 from app.domain.interfaces.repositories.vote_repository import IVoteRepository
-from app.utils.distance import calculate_distance_haversine
 
 
 class CastVoteUseCase:

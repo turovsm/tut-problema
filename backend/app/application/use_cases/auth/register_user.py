@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.application.dto.auth import RegisterUserDTO
 from app.domain.entities.enums import UserRole
@@ -58,7 +58,7 @@ class RegisterUserUseCase:
         user = await self.user_repo.save(user)
 
         # 6. Генерация токена
-        expires_at = datetime.now(timezone.utc) + timedelta(
+        expires_at = datetime.now(UTC) + timedelta(
             hours=self.token_expiry_hours
         )
         verification_token = VerificationToken(

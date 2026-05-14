@@ -41,8 +41,6 @@ class LocalStorageProvider(IStorageProvider):
     async def delete_file(self, file_path: str) -> None:
         if os.path.exists(file_path):
             os.remove(file_path)
-
-            # Если папка отчета пуста — удаляем и её
             report_dir = os.path.dirname(file_path)
             if os.path.isdir(report_dir) and not os.listdir(report_dir):
                 shutil.rmtree(report_dir, ignore_errors=True)

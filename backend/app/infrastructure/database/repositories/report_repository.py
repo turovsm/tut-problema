@@ -3,7 +3,7 @@ from uuid import UUID
 from geoalchemy2.functions import ST_Distance, ST_DWithin
 from geoalchemy2.shape import from_shape, to_shape
 from shapely.geometry import Point
-from sqlalchemy import func, inspect, select, delete
+from sqlalchemy import delete, func, inspect, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -174,6 +174,7 @@ class ReportRepository(
                 status=report.status,
                 created_by_id=report.created_by_id,
                 created_at=report.created_at,
+                assigned_to_id=report.assigned_to_id,
             )
             self._session.add(model)
         else:
@@ -358,7 +359,7 @@ class ReportRepository(
         )
 
     async def get_resolution_by_id(
-            self, resolution_id: UUID
+        self, resolution_id: UUID
     ) -> ReportResolution | None:
         query = (
             select(ReportResolutionModel)

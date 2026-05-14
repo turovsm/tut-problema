@@ -116,7 +116,9 @@ class ReportPhotoModel(Base):
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
     report_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("reports.id", ondelete="CASCADE"), nullable=False, index=True
+        ForeignKey("reports.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     file_name: Mapped[str] = mapped_column(String(255), nullable=False)
     file_path: Mapped[str] = mapped_column(String(500), nullable=False)

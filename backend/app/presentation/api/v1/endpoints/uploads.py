@@ -8,16 +8,19 @@ from app.application.dto.reports import ReportPhotoDTO
 from app.domain.entities.user import User
 from app.presentation.api.deps import (
     get_add_photo_use_case,
+    get_add_resolution_photo_use_case,
     get_current_verified_user,
-    get_strict_moderator,
     get_delete_photo_use_case,
+    get_delete_resolution_photo_use_case,
     get_photo_use_case,
     get_resolution_photo_use_case,
-    get_add_resolution_photo_use_case,
-    get_delete_resolution_photo_use_case,
+    get_strict_moderator,
 )
 from app.presentation.api.schemas.common import SuccessResponse
-from app.presentation.api.schemas.reports import ReportPhotoResponse, ResolutionPhotoResponse
+from app.presentation.api.schemas.reports import (
+    ReportPhotoResponse,
+    ResolutionPhotoResponse,
+)
 
 router = APIRouter()
 
@@ -114,11 +117,15 @@ async def upload_resolution_photo_moderator(
     )
 
 
-@router.delete("/resolutions/photos/{photo_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/resolutions/photos/{photo_id}", status_code=status.HTTP_204_NO_CONTENT
+)
 async def delete_resolution_photo_moderator(
     photo_id: UUID,
     _: Annotated[User, Depends(get_strict_moderator)],
-    use_case: Annotated[Depends, Depends(get_delete_resolution_photo_use_case)],
+    use_case: Annotated[
+        Depends, Depends(get_delete_resolution_photo_use_case)
+    ],
 ):
     await use_case.execute(photo_id=photo_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

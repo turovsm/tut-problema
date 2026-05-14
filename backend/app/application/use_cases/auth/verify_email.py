@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.application.dto.auth import VerifyEmailDTO
 from app.domain.exceptions.base import BusinessRuleException
@@ -24,14 +24,18 @@ class VerifyEmailUseCase:
 
         # 2. Проверка существования токена
         if not verification_token:
-            raise BusinessRuleException("Invalid or expired verification token")
+            raise BusinessRuleException(
+                "Invalid or expired verification token"
+            )
 
         # 3. Проверка срока действия токена
-        if verification_token.expires_at < datetime.now(timezone.utc):
+        if verification_token.expires_at < datetime.now(UTC):
             await self.token_repo.delete_verification_token(
                 verification_token.token
             )
-            raise BusinessRuleException("Invalid or expired verification token")
+            raise BusinessRuleException(
+                "Invalid or expired verification token"
+            )
 
         # 4. Получение пользователя, связанного с токеном
         user = await self.user_repo.get_by_id(verification_token.user_id)

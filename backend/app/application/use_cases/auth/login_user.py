@@ -1,13 +1,10 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from app.application.dto.auth import AuthResultDTO, LoginDTO
 from app.domain.entities.token import RefreshToken
 from app.domain.exceptions.base import UnauthorizedException
-from app.domain.exceptions.user import (
-    EmailNotVerifiedException,
-    UserInactiveException,
-)
+from app.domain.exceptions.user import UserInactiveException
 from app.domain.interfaces.providers.auth_provider import IAuthProvider
 from app.domain.interfaces.repositories.token_repository import (
     ITokenRepository,
@@ -58,7 +55,7 @@ class LoginUserUseCase:
         )
 
         # 6. Сохранение Refresh токена
-        expires_at = datetime.now(timezone.utc) + timedelta(
+        expires_at = datetime.now(UTC) + timedelta(
             days=self.refresh_expiry_days
         )
         refresh_token_entity = RefreshToken(

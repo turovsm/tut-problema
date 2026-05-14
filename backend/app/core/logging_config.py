@@ -16,7 +16,9 @@ def add_app_context(_: Any, __: Any, event_dict: EventDict) -> EventDict:
     return event_dict
 
 
-def drop_color_message_key(_: Any, __: Any, event_dict: EventDict) -> EventDict:
+def drop_color_message_key(
+    _: Any, __: Any, event_dict: EventDict
+) -> EventDict:
     event_dict.pop("color_message", None)
     return event_dict
 

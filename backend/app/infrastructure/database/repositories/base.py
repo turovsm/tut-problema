@@ -1,4 +1,4 @@
-from typing import Any, Generic, Type, TypeVar
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import delete, select
@@ -6,11 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.infrastructure.database.models import Base
 
-ModelType = TypeVar("ModelType", bound=Base)
 
-
-class BaseSQLAlchemyRepository(Generic[ModelType]):
-    def __init__(self, model: Type[ModelType], session: AsyncSession):
+class BaseSQLAlchemyRepository[ModelType: Base]:
+    def __init__(self, model: type[ModelType], session: AsyncSession):
         self._model = model
         self._session = session
 

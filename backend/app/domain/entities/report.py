@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from app.utils.datetime import get_utc_now_naive
+from app.core.utils.datetime import get_utc_now_naive
 
 from .enums import IssueType, ReportStatus, VoteType
 from .location import Location
@@ -44,6 +44,7 @@ class Report:
     location: Location
     user_location: Location
     created_by_id: UUID
+    assigned_to_id: UUID | None = None
     description: str | None = None
     status: ReportStatus = ReportStatus.PENDING
     id: UUID = field(default_factory=uuid4)
@@ -51,4 +52,6 @@ class Report:
     updated_at: datetime = field(default_factory=get_utc_now_naive)
     photos: list[ReportPhoto] = field(default_factory=list)
     created_by: User | None = None
+    assigned_to: User | None = None
+    resolution: ReportResolution | None = None
     current_user_vote: VoteType | None = None

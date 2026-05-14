@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.domain.exceptions.base import (
     AlreadyExistsException,
@@ -34,5 +36,36 @@ async def domain_exception_handler(request: Request, exc: DomainException):
     )
 
 
+async def http_exception_handler(
+    request: Request, exc: StarletteHTTPException
+):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "status": "error",
+            "error": exc.detail,
+            "code": exc.status_code,
+        },
+    )
+
+
+async def validation_exception_handler(
+    request: Request, exc: RequestValidationError
+):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={
+            "status": "error",
+            "error": "Validation error",
+            "details": exc.errors(),
+            "code": 422,
+        },
+    )
+
+
 def setup_exception_handlers(app: FastAPI):
     app.add_exception_handler(DomainException, domain_exception_handler)
+    app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+    app.add_exception_handler(
+        RequestValidationError, validation_exception_handler
+    )

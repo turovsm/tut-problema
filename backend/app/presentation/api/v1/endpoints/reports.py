@@ -196,7 +196,9 @@ async def delete_report(
 @router.post("/{report_id}/resolve", status_code=status.HTTP_201_CREATED)
 async def resolve_report(
     report_id: UUID,
-    form_data: Annotated[ResolveReportForm, Depends(ResolveReportForm.as_form)],
+    form_data: Annotated[
+        ResolveReportForm, Depends(ResolveReportForm.as_form)
+    ],
     current_user: Annotated[User, Depends(get_current_verified_user)],
     use_case: Annotated[Depends, Depends(get_resolve_report_use_case)],
     files: list[UploadFile] = File(default=[]),

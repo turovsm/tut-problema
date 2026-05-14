@@ -16,7 +16,7 @@ class ConsoleEmailProvider(IEmailProvider):
         print("\n" + "=" * 50)
         print("[CONSOLE EMAIL] ПОДТВЕРЖДЕНИЕ EMAIL")
         print(f"Кому: {name} <{email}>")
-        print(f"Тема: Подтверждение регистрации на ТутПроблема")
+        print("Тема: Подтверждение регистрации на ТутПроблема")
         print(f"Ссылка: {verification_url}")
         print("=" * 50 + "\n")
 
@@ -30,7 +30,7 @@ class ConsoleEmailProvider(IEmailProvider):
         print("\n" + "=" * 50)
         print("[CONSOLE EMAIL] СБРОС ПАРОЛЯ")
         print(f"Кому: {name} <{email}>")
-        print(f"Тема: Запрос на восстановление пароля")
+        print("Тема: Запрос на восстановление пароля")
         print(f"Ссылка: {reset_url}")
         print("=" * 50 + "\n")
 
