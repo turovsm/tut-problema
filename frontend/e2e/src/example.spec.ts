@@ -1,8 +1,12 @@
 import { test, expect } from '@playwright/test';
 
-test('has title', async ({ page }) => {
+test('should load the map page correctly', async ({ page }) => {
+  // Move to main page
   await page.goto('/');
 
-  // Expect h1 to contain a substring.
-  expect(await page.locator('h1').innerText()).toContain('Welcome');
+  // Check logo
+  await expect(page.locator('.logo__text')).toContainText('ТутПроблема');
+
+  // Check if map is rendered
+  await expect(page.locator('#map')).toBeVisible();
 });

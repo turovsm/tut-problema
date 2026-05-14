@@ -319,8 +319,11 @@ export class MapWidget implements OnInit {
         }).addTo(this.map);
 
         const cityBounds = this.districtsLayer.getBounds();
-        this.map.setMaxBounds(cityBounds);
-        this.map.fitBounds(cityBounds);
+
+        if (cityBounds.isValid()) {
+          this.map.setMaxBounds(cityBounds);
+          this.map.fitBounds(cityBounds);
+        }
       });
   }
 
