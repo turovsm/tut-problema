@@ -1,17 +1,26 @@
 from app.application.dto.reports import UpdateReportDTO
+from app.core.logging_config import get_logger
 from app.core.utils.datetime import get_utc_now_naive
-from app.domain.entities.enums import UserRole
+from app.domain.entities.enums import ReportStatus, UserRole
 from app.domain.entities.report import Report
 from app.domain.exceptions.base import PermissionDeniedException
 from app.domain.exceptions.report import ReportNotFoundException
+from app.domain.interfaces.providers.storage_provider import IStorageProvider
 from app.domain.interfaces.repositories.report_repository import (
     IReportRepository,
 )
 
+logger = get_logger(__name__)
+
 
 class UpdateReportUseCase:
-    def __init__(self, report_repo: IReportRepository):
+    def __init__(
+        self,
+        report_repo: IReportRepository,
+        storage_provider: IStorageProvider,
+    ):
         self.report_repo = report_repo
+        self.storage_provider = storage_provider
 
     async def execute(self, dto: UpdateReportDTO) -> Report:
         # 1. Поиск отчета в репозитории
@@ -40,6 +49,33 @@ class UpdateReportUseCase:
                 raise PermissionDeniedException(
                     "Not enough permissions to update this report"
                 )
+
+            if (
+                report.status == ReportStatus.RESOLVED
+                and dto.status != ReportStatus.RESOLVED
+            ):
+                if report.resolution:
+                    # Удаляем файлы с жесткого диска
+                    for photo in report.resolution.photos:
+                        try:
+                            await self.storage_provider.delete_file(
+                                photo.file_path
+                            )
+                        except Exception as e:
+                            logger.warning(
+                                "Failed to delete physical photo file during report update",
+                                report_id=str(report.id),
+                                file_path=photo.file_path,
+                                error=str(e),
+                            )
+                    # Удаляем запись из БД (фото удалятся каскадно)
+                    await self.report_repo.delete_resolution_by_report_id(
+                        report.id
+                    )
+
+                    # Обнуляем объект в памяти
+                    report.resolution = None
+
             report.status = dto.status
 
         if dto.assigned_to_id is not None:

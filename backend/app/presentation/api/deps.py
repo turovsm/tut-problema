@@ -59,6 +59,9 @@ from app.application.use_cases.users.get_user_profile import (
 )
 from app.application.use_cases.users.get_user_votes import GetUserVotesUseCase
 from app.application.use_cases.users.list_all_users import ListAllUsersUseCase
+from app.application.use_cases.users.toggle_user_status import (
+    ToggleUserStatusUseCase,
+)
 from app.application.use_cases.users.update_user import UpdateUserUseCase
 from app.application.use_cases.votes.cast_vote import CastVoteUseCase
 from app.application.use_cases.votes.get_my_vote import GetMyVoteUseCase
@@ -249,7 +252,7 @@ def get_my_reports_use_case(
 def get_update_report_use_case(
     r_repo: ReportRepository = Depends(get_report_repo),
 ) -> UpdateReportUseCase:
-    return UpdateReportUseCase(r_repo)
+    return UpdateReportUseCase(r_repo, storage_provider)
 
 
 def get_resolve_report_use_case(
@@ -352,6 +355,12 @@ def get_update_user_use_case(
     u_repo: UserRepository = Depends(get_user_repo),
 ) -> UpdateUserUseCase:
     return UpdateUserUseCase(u_repo)
+
+
+def get_toggle_user_status_use_case(
+    u_repo: UserRepository = Depends(get_user_repo),
+) -> ToggleUserStatusUseCase:
+    return ToggleUserStatusUseCase(u_repo)
 
 
 def get_user_votes_use_case(

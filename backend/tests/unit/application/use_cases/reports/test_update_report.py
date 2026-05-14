@@ -20,8 +20,15 @@ class TestUpdateReportUseCase:
         return repo
 
     @pytest.fixture
-    def use_case(self, mock_report_repo):
-        return UpdateReportUseCase(report_repo=mock_report_repo)
+    def mock_storage_provider(self):
+        return AsyncMock()
+
+    @pytest.fixture
+    def use_case(self, mock_report_repo, mock_storage_provider):
+        return UpdateReportUseCase(
+            report_repo=mock_report_repo,
+            storage_provider=mock_storage_provider,
+        )
 
     @pytest.fixture
     def sample_report(self):

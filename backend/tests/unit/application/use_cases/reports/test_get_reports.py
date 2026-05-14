@@ -64,7 +64,7 @@ class TestGetReportsUseCase:
         assert len(reports) == 2
         assert reports[0].current_user_vote is None
         mock_report_repo.get_list.assert_called_once_with(
-            issue_type=None, status=None, limit=5, offset=0
+            issue_type=None, status=None, assignee_id=None, limit=5, offset=0
         )
 
     async def test_get_reports_with_user_enrichment(
@@ -95,7 +95,7 @@ class TestGetReportsUseCase:
         assert reports[1].current_user_vote is None
 
         mock_report_repo.get_list.assert_called_once_with(
-            issue_type=None, status=None, limit=10, offset=10
+            issue_type=None, status=None, assignee_id=None, limit=10, offset=10
         )
         mock_vote_repo.get_votes_for_reports.assert_called_once_with(
             user_id=user_id, report_ids=[rep1.id, rep2.id]
@@ -113,6 +113,7 @@ class TestGetReportsUseCase:
         mock_report_repo.get_list.assert_called_once_with(
             issue_type=IssueType.FLOODING,
             status=ReportStatus.CONFIRMED,
+            assignee_id=None,
             limit=20,
             offset=0,
         )

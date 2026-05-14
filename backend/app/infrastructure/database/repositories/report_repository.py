@@ -200,7 +200,12 @@ class ReportRepository(
             await self._session.commit()
 
     async def get_list(
-        self, issue_type=None, status=None, limit=20, offset=0
+        self,
+        issue_type=None,
+        status=None,
+        assignee_id=None,
+        limit=20,
+        offset=0,
     ) -> tuple[list[Report], int]:
         query = select(self._model).options(
             selectinload(self._model.photos),
@@ -214,6 +219,8 @@ class ReportRepository(
             query = query.where(self._model.issue_type == issue_type)
         if status:
             query = query.where(self._model.status == status)
+        if assignee_id:
+            query = query.where(self._model.assigned_to_id == assignee_id)
 
         count_query = select(func.count()).select_from(query.subquery())
         total = await self._session.execute(count_query)
@@ -393,6 +400,13 @@ class ReportRepository(
     async def delete_resolution_photo(self, photo_id: UUID) -> None:
         query = delete(ResolutionPhotoModel).where(
             ResolutionPhotoModel.id == photo_id
+        )
+        await self._session.execute(query)
+        await self._session.commit()
+
+    async def delete_resolution_by_report_id(self, report_id: UUID) -> None:
+        query = delete(ReportResolutionModel).where(
+            ReportResolutionModel.report_id == report_id
         )
         await self._session.execute(query)
         await self._session.commit()
