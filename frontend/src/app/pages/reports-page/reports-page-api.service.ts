@@ -9,6 +9,7 @@ export interface ReportsFilters {
   status?: string;
   district?: string;
   issue_type?: string;
+  assigned_to_me?: boolean;
 }
 
 @Injectable({
@@ -28,7 +29,7 @@ export class ReportsApiService {
       .set('limit', limit);
 
     if (filters.status) {
-      params = params.set('status', filters.status);
+      params = params.set('status_filter', filters.status);
     }
 
     if (filters.district) {
@@ -37,6 +38,10 @@ export class ReportsApiService {
 
     if (filters.issue_type) {
       params = params.set('issue_type', filters.issue_type);
+    }
+
+    if (filters.assigned_to_me) {
+      params = params.set('assigned_to_me', 'true');
     }
 
     return this.http

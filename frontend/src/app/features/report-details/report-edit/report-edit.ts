@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { take } from 'rxjs';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -20,6 +21,7 @@ import {
   IssueType,
   ISSUE_TYPE_LABELS
 } from '../../../core/models/issue-type';
+import { REPORT_STATUS_OPTIONS } from '../../../core/models/report.models';
 import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
@@ -46,6 +48,8 @@ export class ReportEditComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly apiService = inject(MapWidgetApiService);
 
+  govOrgs = signal<any[]>([]);
+  isLoadingGovOrgs = signal(false);
   report = signal<ReportDetails | null>(null);
   isLoading = signal(false);
   isSaving = signal(false);
@@ -56,18 +60,13 @@ export class ReportEditComponent implements OnInit {
   currentUserId = this.authService.currentUser()?.id ?? '';
   currentUserRole = this.authService.currentUser()?.role ?? 'user';
   
-  statuses = [
-    { value: 'pending', label: 'На рассмотрении' },
-    { value: 'confirmed', label: 'Подтверждена' },
-    { value: 'rejected', label: 'Отклонена' },
-    { value: 'resolved', label: 'Решена' },
-    { value: 'closed', label: 'Закрыта' }
-  ];
+  readonly statuses = REPORT_STATUS_OPTIONS;
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.maxLength(120)]],
     description: ['', [Validators.required, Validators.maxLength(2000)]],
-    status: ['pending', [Validators.required]]
+    status: ['pending', [Validators.required]],
+    assigned_to_id: ['']
   });
 
   isOwnReport = computed(() => {
@@ -80,19 +79,16 @@ export class ReportEditComponent implements OnInit {
     return report.created_by.id === this.currentUserId;
   });
 
-  isModeratorOrJkh = computed(() => {
-    return [
-      'gov_org',
-      'moderator',
-    ].includes(this.currentUserRole);
+  isModerator = computed(() => {
+    return 'moderator' === this.currentUserRole
   });
 
   canEditTitleAndDescription = computed(() => {
-    return this.isOwnReport();
+    return this.isOwnReport() || this.isModerator();
   });
 
   canEditStatus = computed(() => {
-    return this.isModeratorOrJkh();
+    return this.isModerator();
   });
 
   canEditAnything = computed(() => {
@@ -101,6 +97,20 @@ export class ReportEditComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadReport();
+    if (this.currentUserRole === 'moderator') {
+      this.loadGovOrgs();
+    }
+  }
+
+  loadGovOrgs(): void {
+    this.isLoadingGovOrgs.set(true);
+    this.apiService.getGovOrgs().pipe(take(1)).subscribe({
+      next: orgs => {
+        this.govOrgs.set(orgs);
+        this.isLoadingGovOrgs.set(false);
+      },
+      error: () => this.isLoadingGovOrgs.set(false)
+    });
   }
 
   loadReport(): void {
@@ -121,7 +131,8 @@ export class ReportEditComponent implements OnInit {
         this.form.patchValue({
           title: report.title,
           description: report.description,
-          status: report.status
+          status: report.status,
+          assigned_to_id: report.assigned_to?.id || ''
         });
 
         this.applyPermissionsToForm();
@@ -166,6 +177,10 @@ export class ReportEditComponent implements OnInit {
 
     if (this.canEditStatus()) {
       body.status = formValue.status ?? report.status;
+    }
+
+    if (this.currentUserRole === 'moderator' && formValue.assigned_to_id) {
+      body.assigned_to_id = formValue.assigned_to_id;
     }
 
     this.isSaving.set(true);

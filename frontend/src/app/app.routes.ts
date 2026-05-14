@@ -35,5 +35,17 @@ export const appRoutes: Route[] = [
         loadComponent: () =>
             import('./pages/reports-page/reports-page.component')
             .then(m => m.ReportsPageComponent)
-    }
+    },
+    {
+        path: 'gov/dashboard',
+        loadComponent: () =>
+            import('./pages/gov-dashboard/gov-dashboard.component')
+              .then(m => m.GovDashboardComponent)
+    },
+    {
+        path: 'admin/dashboard',
+        loadComponent: () =>
+            import('./pages/admin-dashboard/admin-dashboard.component')
+                .then(m => m.AdminDashboardComponent)
+    },
 ];

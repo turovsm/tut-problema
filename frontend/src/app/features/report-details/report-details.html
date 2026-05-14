@@ -37,7 +37,7 @@
           </p>
         </div>
 
-        @if (isOwnReport()) {
+        @if (isOwnReport() || isModerator()) {
           <button
             mat-flat-button
             color="primary"
@@ -61,6 +61,16 @@
           <span>Автор</span>
           <strong>{{ r.created_by.username }}</strong>
           <small>{{ r.created_by.email }}</small>
+        </div>
+
+        <div class="info-item">
+          <span>Исполнитель (УК)</span>
+          @if (r.assigned_to) {
+            <strong>{{ r.assigned_to.username }}</strong>
+            <small>{{ r.assigned_to.email }}</small>
+          } @else {
+            <strong>Не назначен</strong>
+          }
         </div>
 
         <div class="info-item">
@@ -119,11 +129,74 @@
         </div>
       }
 
-      @if (isModerator()) {
-        <div class="moderation-section">
+      @if (r.resolution) {
+        <div class="resolution-section">
+          <h2>Отчет о выполнении</h2>
+          <span class="resolution-date">
+            Проблема устранена: {{ r.resolution.resolved_at | date:'dd.MM.yyyy HH:mm' }}
+          </span>
+          <p class="resolution-comment">
+            {{ r.resolution.comment }}
+          </p>
+
+          @if (r.resolution.photos && r.resolution.photos.length > 0) {
+            <div class="photos-grid" style="margin-top: 16px;">
+              @for (photo of r.resolution.photos; track photo.id) {
+                <div class="photo-item">
+                  <a
+                    class="photo-link"
+                    [href]="getPhotoUrl(photo.file_url)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      [src]="getPhotoUrl(photo.file_url)"
+                      alt="Фото решения"
+                    />
+                  </a>
+                  @if (isModerator()) {
+                    <button
+                      class="delete-photo-button"
+                      type="button"
+                      title="Удалить фото решения"
+                      (click)="deleteResolutionPhoto(photo.id)"
+                    >
+                      ×
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+          }
+          @if (isModerator()) {
+            <div style="margin-top: 24px;">
+              <button
+                mat-stroked-button
+                color="primary"
+                type="button"
+                [disabled]="isUploadingResPhoto()"
+                (click)="resPhotoInput.click()"
+              >
+                {{ isUploadingResPhoto() ? 'Загрузка...' : '+ Добавить фото к отчёту' }}
+              </button>
+
+              <input
+                #resPhotoInput
+                type="file"
+                style="display: none"
+                accept="image/*"
+                (change)="uploadResolutionPhoto($event, r.resolution.id)"
+              />
+            </div>
+          }
+        </div>
+      }
+
+      @if (isAssignedToMe() && r.status !== 'resolved' && r.status !== 'closed') {
+        <form class="moderation-section" (submit)="$event.preventDefault(); resolveReport()">
           <div>
-            <h2>Модерация</h2>
-            <p>Удалите неподходящие фото или закройте жалобу с комментарием и фотографиями результата.</p>
+            <h2>Отчет о выполнении</h2>
+            <p>Закройте жалобу: добавьте комментарий о проделанной работе и прикрепите подтверждающие фотографии.</p>
           </div>
 
           @if (moderationSuccessMessage()) {
@@ -139,19 +212,19 @@
           }
 
           <mat-form-field appearance="outline" class="resolve-comment-field">
-            <mat-label>Комментарий к закрытию</mat-label>
+            <mat-label>Комментарий к решению</mat-label>
             <textarea
               matInput
               rows="4"
               [value]="resolveComment()"
               (input)="resolveComment.set($any($event.target).value)"
-              placeholder="Например: проблему устранили, территория очищена"
+              placeholder="Например: Яма засыпана щебнем и заасфальтирована"
             ></textarea>
           </mat-form-field>
 
           <div class="resolve-files">
             <label class="file-upload-label">
-              Фото от модератора
+              Фотоотчет (до 10 фото)
               <input
                 type="file"
                 accept="image/*"
@@ -181,13 +254,12 @@
           <button
             mat-flat-button
             color="primary"
-            type="button"
-            [disabled]="isResolvingReport() || r.status === 'resolved' || r.status === 'closed'"
-            (click)="resolveReport()"
+            type="submit"
+            [disabled]="isResolvingReport()"
           >
-            {{ isResolvingReport() ? 'Закрываем...' : 'Закрыть жалобу' }}
+            {{ isResolvingReport() ? 'Отправляем...' : 'Отправить отчет и закрыть жалобу' }}
           </button>
-        </div>
+        </form>
       }
 
       <div class="vote-section">
@@ -232,8 +304,8 @@
             mat-stroked-button
             color="warn"
             type="button"
-            [disabled]="!canVote() || r.user_vote === 'reject'"
-            (click)="vote('reject')"
+            [disabled]="!canVote() || r.user_vote === 'dismiss'"
+            (click)="vote('dismiss')"
           >
             Отклонить
           </button>
