@@ -1,38 +1,34 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 
-import { ReportsApiService, ReportsFilters } from './reports-page-api.service';
+import { ReportsApiService, ReportsFilters } from '../reports-page/reports-page-api.service';
 import { ReportCardComponent } from '../../shared/report-card/report-card.component';
 import { ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
 import { MyReport, REPORT_STATUS_OPTIONS } from '../../core/models/report.models';
 import { PaginatedResponse } from '../../core/models/response.model';
 
 @Component({
-  selector: 'app-reports-page',
+  selector: 'app-gov-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
-    MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule,
     ReportCardComponent
   ],
-  templateUrl: './reports-page.component.html',
-  styleUrl: './reports-page.component.less'
+  templateUrl: './gov-dashboard.component.html',
+  styleUrl: './gov-dashboard.component.less'
 })
-export class ReportsPageComponent implements OnInit {
+export class GovDashboardComponent implements OnInit {
   private readonly reportsApiService = inject(ReportsApiService);
 
   readonly reports = signal<MyReport[]>([]);
@@ -41,7 +37,6 @@ export class ReportsPageComponent implements OnInit {
   readonly errorMessage = signal('');
 
   readonly selectedStatus = signal('');
-  readonly selectedDistrict = signal('');
   readonly selectedIssueType = signal('');
 
   readonly page = signal(1);
@@ -78,8 +73,8 @@ export class ReportsPageComponent implements OnInit {
         this.isLoadingMoreReports.set(false);
       },
       error: error => {
-        console.error('Ошибка загрузки жалоб:', error);
-        this.errorMessage.set('Не удалось загрузить жалобы');
+        console.error('Ошибка загрузки задач УК:', error);
+        this.errorMessage.set('Не удалось загрузить задачи');
         this.isLoadingReports.set(false);
         this.isLoadingMoreReports.set(false);
       }
@@ -90,7 +85,6 @@ export class ReportsPageComponent implements OnInit {
     if (this.isLoadingMoreReports() || !this.hasNext()) {
       return;
     }
-
     this.loadReports(this.page() + 1);
   }
 
@@ -104,32 +98,21 @@ export class ReportsPageComponent implements OnInit {
     this.loadReports();
   }
 
-  onDistrictChange(event: Event): void {
-    const district = (event.target as HTMLInputElement).value.trim();
-    this.selectedDistrict.set(district);
-    this.loadReports();
-  }
-
   resetFilters(): void {
     this.selectedStatus.set('');
-    this.selectedDistrict.set('');
     this.selectedIssueType.set('');
     this.loadReports();
   }
 
   hasActiveFilters(): boolean {
-    return Boolean(
-      this.selectedStatus() ||
-      this.selectedDistrict() ||
-      this.selectedIssueType()
-    );
+    return Boolean(this.selectedStatus() || this.selectedIssueType());
   }
 
   private getFilters(): ReportsFilters {
     return {
       status: this.selectedStatus() || undefined,
-      district: this.selectedDistrict() || undefined,
-      issue_type: this.selectedIssueType() || undefined
+      issue_type: this.selectedIssueType() || undefined,
+      assigned_to_me: true
     };
   }
 
@@ -138,7 +121,6 @@ export class ReportsPageComponent implements OnInit {
       ? response.items
       : [...this.reports(), ...response.items]
     );
-
     this.page.set(response.page);
     this.total.set(response.total);
     this.hasNext.set(response.has_next);

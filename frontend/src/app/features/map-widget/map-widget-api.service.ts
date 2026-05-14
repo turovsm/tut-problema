@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiResponseSuccess } from '../../core/models/response.model';
+import { ApiResponseSuccess, PaginatedResponse } from '../../core/models/response.model';
 import { IssueType } from '../../core/models/issue-type';
 
 export interface ReportsResponse {
@@ -26,7 +26,7 @@ export interface Report {
   created_at: string;
   updated_at: string;
   photos: string[];
-  user_vote: 'confirm' | 'reject' | null;
+  user_vote: 'confirm' | 'dismiss' | null;
 }
 
 export interface ReportPhoto {
@@ -34,6 +34,19 @@ export interface ReportPhoto {
   file_name: string;
   file_url: string;
   uploaded_at: string;
+}
+
+export interface ResolutionPhoto {
+  id: string;
+  file_url: string;
+  uploaded_at: string;
+}
+
+export interface ReportResolution {
+  id: string;
+  comment: string;
+  resolved_at: string;
+  photos: ResolutionPhoto[];
 }
 
 export interface ReportCreatedBy {
@@ -57,14 +70,16 @@ export interface ReportDetails {
   };
   status: string;
   created_by: ReportCreatedBy;
+  assigned_to?: ReportCreatedBy | null;
+  resolution?: ReportResolution | null;
   created_at: string;
   updated_at: string;
   photos: ReportPhoto[];
-  user_vote: 'confirm' | 'reject' | null;
+  user_vote: 'confirm' | 'dismiss' | null;
 }
 
 export interface VoteReportBody {
-  vote_type: 'confirm' | 'reject';
+  vote_type: 'confirm' | 'dismiss';
   user_location_lng: number;
   user_location_lat: number;
   accuracy: number;
@@ -73,7 +88,7 @@ export interface VoteReportBody {
 export interface VoteReportResponse {
   id: string;
   report_id: string;
-  vote_type: 'confirm' | 'reject';
+  vote_type: 'confirm' | 'dismiss';
   is_verified: boolean;
   created_at: string;
 }
@@ -82,6 +97,7 @@ export interface UpdateReportBody {
   title?: string;
   description?: string;
   status?: string;
+  assigned_to_id?: string;
 }
 
 @Injectable({
@@ -89,6 +105,18 @@ export interface UpdateReportBody {
 })
 export class MapWidgetApiService {
   private readonly http = inject(HttpClient);
+
+  getGovOrgs(): Observable<ReportCreatedBy[]> {
+    const params = new HttpParams().set('limit', '100');
+    return this.http
+      .get<ApiResponseSuccess<PaginatedResponse<ReportCreatedBy>>>(
+        `${environment.apiUrl}/api/users/admin/users`,
+        { params, withCredentials: true }
+      )
+      .pipe(
+        map(res => res.data.items.filter((u: any) => u.role === 'gov_org'))
+      );
+  }
 
   getNearbyReports(): Observable<Report[] | null> {
     return this.http
