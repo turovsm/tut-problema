@@ -1,0 +1,110 @@
+<mat-toolbar class="header">
+  <div class="header__left">
+    <button
+      mat-icon-button
+      class="mobile-menu-btn"
+      (click)="toggleMobileMenu()"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <a routerLink="/" class="logo">
+      <mat-icon class="logo__icon">place</mat-icon>
+      <span class="logo__text">ТутПроблема</span>
+    </a>
+
+    <nav class="nav desktop-only">
+      <a
+        routerLink="/"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Карта
+      </a>
+
+      <a
+        routerLink="/reports"
+        routerLinkActive="active"
+      >
+        Жалобы
+      </a>
+
+      @if (isGov()) {
+        <a
+          routerLink="/gov/dashboard"
+          routerLinkActive="active"
+        >
+          Dashboard
+        </a>
+      }
+
+      @if (isModerator()) {
+        <a
+          routerLink="/admin/dashboard"
+          routerLinkActive="active"
+        >
+          Админ-панель
+        </a>
+      }
+    </nav>
+  </div>
+
+  <div class="header__right">
+    @if (user().isAuthenticated) {
+      <button mat-icon-button>
+        <mat-icon>notifications</mat-icon>
+      </button>
+
+      <button mat-button [matMenuTriggerFor]="profileMenu">
+        <mat-icon>account_circle</mat-icon>
+        <span class="desktop-only">{{ user().name }}</span>
+      </button>
+
+      <mat-menu #profileMenu="matMenu">
+        <button mat-menu-item routerLink="/profile">
+          <mat-icon>person</mat-icon>
+          <span>Профиль</span>
+        </button>
+
+        <button mat-menu-item routerLink="/profile/reports">
+          <mat-icon>description</mat-icon>
+          <span>Мои заявки</span>
+        </button>
+
+        <mat-divider></mat-divider>
+
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Выйти</span>
+        </button>
+      </mat-menu>
+    } @else {
+      <button mat-button type="button" (click)="openLogin()">
+        Войти
+      </button>
+
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="openRegister()"
+      >
+        Регистрация
+      </button>
+    }
+  </div>
+</mat-toolbar>
+
+@if (isMobileMenuOpen()) {
+  <div class="mobile-menu">
+    <a routerLink="/">Карта</a>
+    <a routerLink="/reports">Жалобы</a>
+
+    @if (isGov()) {
+      <a routerLink="/gov/dashboard">Dashboard</a>
+    }
+    @if (isModerator()) {
+      <a routerLink="/admin/dashboard">Админ-панель</a>
+    }
+  </div>
+}

@@ -1,0 +1,28 @@
+<div class="auth-dialog">
+  <button
+    mat-icon-button
+    class="auth-dialog__close"
+    type="button"
+    (click)="close()"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+
+  @if (mode() === 'login') {
+    <app-login-form
+      (success)="closeAfterSuccess()"
+      (goToRegister)="switchToRegister()"
+    ></app-login-form>
+  } @else if (mode() === 'register') {
+    <app-register-form
+      (registered)="switchToVerifyEmail($event)"
+      (goToLogin)="switchToLogin()"
+    ></app-register-form>
+  } @else {
+    <app-verify-email
+      [email]="verificationEmail()"
+      (success)="closeAfterSuccess()"
+      (goToLogin)="switchToLogin()"
+    ></app-verify-email>
+  }
+</div>

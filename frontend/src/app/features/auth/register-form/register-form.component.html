@@ -1,0 +1,86 @@
+<div class="auth-form">
+  <h1>Регистрация</h1>
+  <p>Создайте аккаунт, чтобы сообщать о&nbsp;проблемах ЖКХ</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="fill">
+      <mat-label>Никнейм</mat-label>
+      <input matInput formControlName="name" />
+
+      @if (form.controls.name.hasError('required')) {
+        <mat-error>Имя обязательно</mat-error>
+      }
+
+      @if (form.controls.name.hasError('minlength')) {
+        <mat-error>Минимум 3 символа</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" />
+
+      @if (form.controls.email.hasError('required')) {
+        <mat-error>Email обязателен</mat-error>
+      }
+
+      @if (form.controls.email.hasError('email')) {
+        <mat-error>Введите корректный email</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Пароль</mat-label>
+
+      <input
+        matInput
+        [type]="hidePassword ? 'password' : 'text'"
+        formControlName="password"
+      />
+
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="hidePassword = !hidePassword"
+      >
+        <mat-icon>
+          {{ hidePassword ? 'visibility' : 'visibility_off' }}
+        </mat-icon>
+      </button>
+
+      @if (form.controls.password.hasError('required')) {
+        <mat-error>Пароль обязателен</mat-error>
+      }
+
+      @if (form.controls.password.hasError('minlength')) {
+        <mat-error>Минимум 8 символов</mat-error>
+      } @else if (form.controls.password.hasError('pattern')) {
+        <mat-error>Пароль должен содержать заглавную букву, цифру и спецсимвол</mat-error>
+      }
+    </mat-form-field>
+
+    @if (error()) {
+      <div class="auth-error">
+        {{ error() }}
+      </div>
+    }
+
+    <button
+      class="submit-button"
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="isLoading()"
+    >
+      {{ isLoading() ? 'Создаём...' : 'Зарегистрироваться' }}
+    </button>
+  </form>
+
+  <div class="auth-switch">
+    Уже есть аккаунт?
+    <button mat-button type="button" (click)="goToLogin.emit()">
+      Войти
+    </button>
+  </div>
+</div>

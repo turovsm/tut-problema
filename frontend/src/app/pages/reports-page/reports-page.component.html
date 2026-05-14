@@ -1,0 +1,137 @@
+<div class="reports-page">
+  <section class="reports-hero">
+    <div>
+      <p class="eyebrow">Жалобы пользователей</p>
+      <h1>Все жалобы</h1>
+      <p>
+        Здесь отображаются обращения от всех пользователей. Каждая карточка сама загружает статистику голосов.
+      </p>
+    </div>
+
+    <button mat-raised-button color="primary" routerLink="/">
+      Сообщить о проблеме
+    </button>
+  </section>
+
+  <mat-card class="filters-card">
+    <div class="filters-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Статус</mat-label>
+        <mat-select
+          [value]="selectedStatus()"
+          (selectionChange)="onStatusChange($event.value)"
+        >
+          <mat-option value="">Все статусы</mat-option>
+
+          @for (status of statusOptions; track status.value) {
+            <mat-option [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Район</mat-label>
+        <input
+          matInput
+          type="text"
+          placeholder="Например, Центральный"
+          [value]="selectedDistrict()"
+          (change)="onDistrictChange($event)"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Тип проблемы</mat-label>
+        <mat-select
+          [value]="selectedIssueType()"
+          (selectionChange)="onIssueTypeChange($event.value)"
+        >
+          <mat-option value="">Все типы</mat-option>
+
+          @for (issueType of issueTypeOptions; track issueType.value) {
+            <mat-option [value]="issueType.value">
+              {{ issueType.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="filters-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="!hasActiveFilters() || isLoadingReports()"
+        (click)="resetFilters()"
+      >
+        Сбросить фильтры
+      </button>
+    </div>
+  </mat-card>
+
+  @if (isLoadingReports()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Загрузка жалоб...</p>
+    </div>
+  }
+
+  @if (!isLoadingReports() && errorMessage()) {
+    <mat-card class="state-card error-card">
+      <p>{{ errorMessage() }}</p>
+
+      <button mat-raised-button color="primary" type="button" (click)="loadReports()">
+        Повторить
+      </button>
+    </mat-card>
+  }
+
+  @if (!isLoadingReports() && !errorMessage() && !reports().length) {
+    <mat-card class="state-card empty-card">
+      <h2>{{ hasActiveFilters() ? 'По выбранным фильтрам жалоб нет' : 'Жалоб пока нет' }}</h2>
+      <p>
+        {{ hasActiveFilters() ? 'Попробуйте изменить статус, район или тип проблемы.' : 'Будьте первым, кто отметит проблему на карте.' }}
+      </p>
+
+      @if (hasActiveFilters()) {
+        <button mat-raised-button color="primary" type="button" (click)="resetFilters()">
+          Сбросить фильтры
+        </button>
+      } @else {
+        <button mat-raised-button color="primary" routerLink="/">
+          Открыть карту
+        </button>
+      }
+    </mat-card>
+  }
+
+  @if (!isLoadingReports() && !errorMessage() && reports().length) {
+    <section class="reports-section">
+      <div class="section-header">
+        <h2>Найдено жалоб: {{ total() }}</h2>
+      </div>
+
+      <div class="reports-list">
+        @for (report of reports(); track report.id) {
+          <app-report-card [report]="report"></app-report-card>
+        }
+      </div>
+
+      @if (hasNext()) {
+        <div class="load-more-wrapper">
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            [disabled]="isLoadingMoreReports()"
+            (click)="loadMoreReports()"
+          >
+            {{ isLoadingMoreReports() ? 'Загрузка...' : 'Показать ещё' }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+</div>
