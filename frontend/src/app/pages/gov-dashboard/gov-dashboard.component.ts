@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { ReportsApiService, ReportsFilters } from '../reports-page/reports-page-api.service';
 import { ReportCardComponent } from '../../shared/report-card/report-card.component';
 import { ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
-import { MyReport } from '../../core/models/report.models';
+import { MyReport, REPORT_STATUS_OPTIONS } from '../../core/models/report.models';
 import { PaginatedResponse } from '../../core/models/response.model';
 
 @Component({
@@ -44,13 +44,7 @@ export class GovDashboardComponent implements OnInit {
   readonly total = signal(0);
   readonly hasNext = signal(false);
 
-  readonly statusOptions = [
-    { value: 'pending', label: 'Ожидает' },
-    { value: 'confirmed', label: 'Подтверждена' },
-    { value: 'dismissed', label: 'Отклонена' },
-    { value: 'resolved', label: 'Решена' },
-    { value: 'closed', label: 'Закрыта' }
-  ];
+  readonly statusOptions = REPORT_STATUS_OPTIONS;
 
   readonly issueTypeOptions = Object.entries(ISSUE_TYPE_LABELS).map(([value, label]) => ({
     value,

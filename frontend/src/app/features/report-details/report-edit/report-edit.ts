@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { take } from 'rxjs';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -20,6 +21,7 @@ import {
   IssueType,
   ISSUE_TYPE_LABELS
 } from '../../../core/models/issue-type';
+import { REPORT_STATUS_OPTIONS } from '../../../core/models/report.models';
 import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
@@ -58,12 +60,7 @@ export class ReportEditComponent implements OnInit {
   currentUserId = this.authService.currentUser()?.id ?? '';
   currentUserRole = this.authService.currentUser()?.role ?? 'user';
   
-  statuses = [
-    { value: 'pending', label: 'На рассмотрении' },
-    { value: 'confirmed', label: 'Подтверждена' },
-    { value: 'dismissed', label: 'Отклонена' },
-    { value: 'resolved', label: 'Решена' }
-  ];
+  readonly statuses = REPORT_STATUS_OPTIONS;
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.maxLength(120)]],
@@ -107,7 +104,7 @@ export class ReportEditComponent implements OnInit {
 
   loadGovOrgs(): void {
     this.isLoadingGovOrgs.set(true);
-    this.apiService.getGovOrgs().subscribe({
+    this.apiService.getGovOrgs().pipe(take(1)).subscribe({
       next: orgs => {
         this.govOrgs.set(orgs);
         this.isLoadingGovOrgs.set(false);

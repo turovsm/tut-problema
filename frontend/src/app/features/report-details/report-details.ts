@@ -140,11 +140,13 @@ export class ReportDetailsComponent implements OnInit {
 
     this.isVoting.set(true);
 
+    const cappedAccuracy = Math.min(coords.accuracy, 1000);
+
     this.apiService.voteForReport(report.id, {
       vote_type: voteType,
       user_location_lng: coords.longitude,
       user_location_lat: coords.latitude,
-      accuracy: coords.accuracy
+      accuracy: cappedAccuracy
     }).subscribe({
       next: () => {
         this.isVoting.set(false);

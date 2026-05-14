@@ -44,3 +44,10 @@ export interface ReportPhoto {
   file_url: string;
   uploaded_at: string;
 }
+
+export const REPORT_STATUS_OPTIONS = [
+  { value: 'pending', label: 'На рассмотрении' },
+  { value: 'confirmed', label: 'Подтверждена' },
+  { value: 'dismissed', label: 'Отклонена' },
+  { value: 'resolved', label: 'Решена' }
+];
