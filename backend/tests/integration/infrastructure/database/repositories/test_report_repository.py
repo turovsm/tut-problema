@@ -3,9 +3,14 @@ import uuid
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.domain.entities.enums import IssueType, ReportStatus
+from app.domain.entities.enums import IssueType, ReportStatus, UserRole
 from app.domain.entities.location import Location
-from app.domain.entities.report import Report, ReportPhoto
+from app.domain.entities.report import (
+    Report,
+    ReportPhoto,
+    ReportResolution,
+    ResolutionPhoto,
+)
 from app.domain.entities.user import User
 from app.infrastructure.database.repositories.report_repository import (
     ReportRepository,
@@ -25,11 +30,22 @@ class TestReportRepository:
         return await user_repo.save(user)
 
     @pytest.fixture
+    async def sample_staff(self, db_session: AsyncSession):
+        user_repo = UserRepository(db_session)
+        user = User(
+            email="staff@test.com",
+            username="staff",
+            password_hash="h",
+            role=UserRole.MODERATOR,
+        )
+        return await user_repo.save(user)
+
+    @pytest.fixture
     def repo(self, db_session: AsyncSession):
         return ReportRepository(db_session)
 
     async def test_save_and_get_by_id(
-        self, repo: ReportRepository, sample_user: User
+        self, repo: ReportRepository, sample_user: User, sample_staff: User
     ):
         report_id = uuid.uuid4()
         new_report = Report(
@@ -39,6 +55,7 @@ class TestReportRepository:
             location=Location(longitude=37.61, latitude=55.75),
             user_location=Location(longitude=37.611, latitude=55.751),
             created_by_id=sample_user.id,
+            assigned_to_id=sample_staff.id,
             description="Deep hole",
         )
 
@@ -52,6 +69,8 @@ class TestReportRepository:
         assert found.location.latitude == 55.75
         assert found.created_by is not None
         assert found.created_by.id == sample_user.id
+        assert found.assigned_to is not None
+        assert found.assigned_to.id == sample_staff.id
 
     async def test_get_nearby_reports(
         self, repo: ReportRepository, sample_user: User
@@ -231,3 +250,88 @@ class TestReportRepository:
         assert len(reports) == 1
         assert reports[0].title == "My Report"
         assert reports[0].created_by_id == sample_user.id
+
+    async def test_resolution_lifecycle(
+        self, repo: ReportRepository, sample_user: User, sample_staff: User
+    ):
+        report = await repo.save(
+            Report(
+                title="To Resolve",
+                location=Location(0, 0),
+                user_location=Location(0, 0),
+                created_by_id=sample_user.id,
+                issue_type=IssueType.OTHER,
+            )
+        )
+
+        res = ReportResolution(
+            report_id=report.id,
+            resolved_by_id=sample_staff.id,
+            comment="Fixed successfully",
+        )
+        saved_res = await repo.save_resolution(res)
+
+        res_photo = await repo.add_resolution_photo(
+            ResolutionPhoto(
+                resolution_id=saved_res.id,
+                file_name="result.jpg",
+                file_path="path/res.jpg",
+            )
+        )
+
+        found_report = await repo.get_by_id(report.id)
+        assert found_report.resolution is not None
+        assert found_report.resolution.comment == "Fixed successfully"
+        assert len(found_report.resolution.photos) == 1
+        assert found_report.resolution.photos[0] == res_photo
+
+        await repo.delete_resolution_photo(res_photo.id)
+        assert await repo.get_resolution_photo_by_id(res_photo.id) is None
+
+    async def test_get_resolution_by_id(
+        self, repo: ReportRepository, sample_user: User, sample_staff: User
+    ):
+        report = await repo.save(
+            Report(
+                title="T",
+                location=Location(0, 0),
+                user_location=Location(0, 0),
+                created_by_id=sample_user.id,
+                issue_type=IssueType.OTHER,
+            )
+        )
+        res = await repo.save_resolution(
+            ReportResolution(
+                report_id=report.id,
+                resolved_by_id=sample_staff.id,
+                comment="C",
+            )
+        )
+
+        found = await repo.get_resolution_by_id(res.id)
+        assert found is not None
+        assert found.comment == "C"
+
+    async def test_delete_report_cascades_to_resolution(
+        self, repo: ReportRepository, sample_user: User, sample_staff: User
+    ):
+        report = await repo.save(
+            Report(
+                title="T",
+                location=Location(0, 0),
+                user_location=Location(0, 0),
+                created_by_id=sample_user.id,
+                issue_type=IssueType.OTHER,
+            )
+        )
+        res = await repo.save_resolution(
+            ReportResolution(
+                report_id=report.id,
+                resolved_by_id=sample_staff.id,
+                comment="X",
+            )
+        )
+
+        await repo.delete(report.id)
+
+        assert await repo.get_resolution_by_id(res.id) is None

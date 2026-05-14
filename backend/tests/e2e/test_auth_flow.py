@@ -1,9 +1,10 @@
-import os
 import re
 
 import httpx
 import pytest
 from fastapi import status
+
+from tests.conftest import wait_for_email
 
 
 @pytest.mark.usefixtures("containers_infra")
@@ -21,15 +22,12 @@ class TestAuthFlowE2E:
         await client.post("/api/auth/register", json=register_payload)
 
         # 2. ПОЛУЧЕНИЕ ТОКЕНА
-        mailpit_api = os.environ.get("MAILPIT_API_URL")
-        async with httpx.AsyncClient() as mail_client:
-            mail_resp = await mail_client.get(f"{mailpit_api}/messages")
-            msg_id = mail_resp.json()["messages"][0]["ID"]
-            detail = await mail_client.get(f"{mailpit_api}/message/{msg_id}")
-            html_body = detail.json()["HTML"]
-            verification_token = re.search(
-                r"token=([a-f0-9\-]{36})", html_body
-            ).group(1)
+        email_data = await wait_for_email(email_to=email)
+        html_body = email_data["HTML"]
+
+        token_match = re.search(r"token=([a-f0-9\-]{36})", html_body)
+        assert token_match is not None, "Verification token not found in email"
+        verification_token = token_match.group(1)
 
         # 3. ВЕРИФИКАЦИЯ
         await client.post(

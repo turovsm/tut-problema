@@ -34,6 +34,7 @@ class TestUpdateReportUseCase:
             user_location=Location(0, 0),
             created_by_id=uuid.uuid4(),
             status=ReportStatus.PENDING,
+            assigned_to_id=None,
         )
 
     async def test_update_success_by_owner(
@@ -104,6 +105,41 @@ class TestUpdateReportUseCase:
 
         with pytest.raises(PermissionDeniedException):
             await use_case.execute(dto)
+
+    async def test_assign_report_success_as_moderator(
+        self, use_case, mock_report_repo, sample_report
+    ):
+        mock_report_repo.get_by_id.return_value = sample_report
+        assignee_id = uuid.uuid4()
+
+        dto = UpdateReportDTO(
+            report_id=sample_report.id,
+            user_id=uuid.uuid4(),
+            user_role=UserRole.MODERATOR,
+            assigned_to_id=assignee_id,
+        )
+
+        result = await use_case.execute(dto)
+
+        assert result.assigned_to_id == assignee_id
+        mock_report_repo.save.assert_called_once()
+
+    async def test_assign_report_forbidden_for_owner(
+        self, use_case, mock_report_repo, sample_report
+    ):
+        mock_report_repo.get_by_id.return_value = sample_report
+
+        dto = UpdateReportDTO(
+            report_id=sample_report.id,
+            user_id=sample_report.created_by_id,
+            user_role=UserRole.USER,
+            assigned_to_id=uuid.uuid4(),
+        )
+
+        with pytest.raises(PermissionDeniedException) as exc:
+            await use_case.execute(dto)
+
+        assert "permissions to assign reports" in exc.value.message
 
     async def test_update_report_not_found(self, use_case, mock_report_repo):
         mock_report_repo.get_by_id.return_value = None

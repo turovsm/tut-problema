@@ -8,7 +8,6 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
-    async_sessionmaker,
     create_async_engine,
 )
 from sqlalchemy.sql import text
@@ -78,10 +77,11 @@ async def setup_db(containers_infra):
 async def db_session(setup_db) -> AsyncGenerator[AsyncSession, None]:
     connection = await setup_db.connect()
     trans = await connection.begin()
-    Session = async_sessionmaker(
-        bind=connection, expire_on_commit=False, class_=AsyncSession
+    session = AsyncSession(
+        bind=connection,
+        expire_on_commit=False,
+        join_transaction_mode="create_savepoint",
     )
-    session = Session()
 
     yield session
 
@@ -112,3 +112,24 @@ async def client(db_session) -> AsyncGenerator[AsyncClient, None]:
 
     await redis_client.disconnect()
     app.dependency_overrides.clear()
+
+
+async def wait_for_email(email_to: str, timeout: int = 10) -> dict:
+    api_url = os.environ.get("MAILPIT_API_URL")
+    start_time = asyncio.get_event_loop().time()
+
+    async with AsyncClient() as client:
+        while (asyncio.get_event_loop().time() - start_time) < timeout:
+            resp = await client.get(f"{api_url}/messages")
+            messages = resp.json().get("messages", [])
+
+            for msg in messages:
+                if any(to["Address"] == email_to for to in msg.get("To", [])):
+                    detail = await client.get(f"{api_url}/message/{msg['ID']}")
+                    return detail.json()
+
+            await asyncio.sleep(0.5)
+
+    raise TimeoutError(
+        f"Email to {email_to} not found in Mailpit after {timeout}s"
+    )

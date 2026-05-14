@@ -42,13 +42,19 @@ class DeleteReportUseCase:
         await self.report_repo.delete(report_id)
 
         # 4. Удаление физических файлов
-        for photo in report.photos:
+        files_to_delete = [p.file_path for p in report.photos]
+        if report.resolution and report.resolution.photos:
+            files_to_delete.extend(
+                [p.file_path for p in report.resolution.photos]
+            )
+
+        for file_path in files_to_delete:
             try:
-                await self.storage_provider.delete_file(photo.file_path)
+                await self.storage_provider.delete_file(file_path)
             except Exception as e:
                 logger.warning(
                     "Could not delete physical file during report deletion",
                     report_id=str(report_id),
-                    file_path=photo.file_path,
+                    file_path=file_path,
                     error=str(e),
                 )

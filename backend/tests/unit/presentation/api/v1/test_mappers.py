@@ -8,7 +8,12 @@ from app.domain.entities.enums import (
     VoteType,
 )
 from app.domain.entities.location import Location
-from app.domain.entities.report import Report, ReportPhoto
+from app.domain.entities.report import (
+    Report,
+    ReportPhoto,
+    ReportResolution,
+    ResolutionPhoto,
+)
 from app.domain.entities.user import User
 from app.domain.entities.vote import Vote
 from app.presentation.api.schemas.reports import ReportResponse
@@ -43,6 +48,8 @@ class TestMappers:
         report_id = uuid.uuid4()
         user_id = uuid.uuid4()
         photo_id = uuid.uuid4()
+        assignee_id = uuid.uuid4()
+        res_id = uuid.uuid4()
 
         creator = User(
             id=user_id,
@@ -52,11 +59,34 @@ class TestMappers:
             role=UserRole.USER,
         )
 
+        assignee = User(
+            id=assignee_id,
+            email="test2@test.com",
+            username="testuser2",
+            password_hash="hash",
+            role=UserRole.USER,
+        )
+
         photo = ReportPhoto(
             id=photo_id,
             report_id=report_id,
             file_name="img.jpg",
             file_path="/tmp/img.jpg",
+        )
+
+        res_photo = ResolutionPhoto(
+            id=uuid.uuid4(),
+            resolution_id=res_id,
+            file_name="done.jpg",
+            file_path="path/done.jpg",
+        )
+
+        resolution = ReportResolution(
+            id=res_id,
+            report_id=report_id,
+            resolved_by_id=assignee_id,
+            comment="Resolved",
+            photos=[res_photo],
         )
 
         report_entity = Report(
@@ -71,6 +101,9 @@ class TestMappers:
             photos=[photo],
             created_by=creator,
             current_user_vote=VoteType.DISMISS,
+            assigned_to_id=assignee_id,
+            assigned_to=assignee,
+            resolution=resolution,
         )
 
         response = ReportMapper.to_report_response(report_entity)
@@ -84,8 +117,21 @@ class TestMappers:
         assert response.created_by.id == user_id
         assert response.created_by.username == "testuser"
 
+        assert response.assigned_to is not None
+        assert response.assigned_to.id == assignee_id
+        assert response.assigned_to.username == "testuser2"
+
         assert len(response.photos) == 1
         assert response.photos[0].id == photo_id
         assert response.photos[0].file_url == f"/api/uploads/photos/{photo_id}"
+
+        assert response.resolution is not None
+        assert response.resolution.id == res_id
+        assert response.resolution.comment == "Resolved"
+        assert len(response.resolution.photos) == 1
+        assert (
+            response.resolution.photos[0].file_url
+            == f"/api/uploads/resolutions/{res_photo.id}"
+        )
 
         assert response.user_vote == VoteType.DISMISS

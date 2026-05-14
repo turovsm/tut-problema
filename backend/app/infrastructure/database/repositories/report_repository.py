@@ -174,6 +174,7 @@ class ReportRepository(
                 status=report.status,
                 created_by_id=report.created_by_id,
                 created_at=report.created_at,
+                assigned_to_id=report.assigned_to_id,
             )
             self._session.add(model)
         else:

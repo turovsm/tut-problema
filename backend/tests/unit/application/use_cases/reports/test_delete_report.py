@@ -6,7 +6,12 @@ import pytest
 from app.application.use_cases.reports.delete_report import DeleteReportUseCase
 from app.domain.entities.enums import UserRole
 from app.domain.entities.location import Location
-from app.domain.entities.report import Report, ReportPhoto
+from app.domain.entities.report import (
+    Report,
+    ReportPhoto,
+    ReportResolution,
+    ResolutionPhoto,
+)
 from app.domain.exceptions.base import PermissionDeniedException
 from app.domain.exceptions.report import ReportNotFoundException
 
@@ -37,6 +42,7 @@ class TestDeleteReportUseCase:
     def sample_report(self):
         report_id = uuid.uuid4()
         owner_id = uuid.uuid4()
+        res_id = uuid.uuid4()
         photos = [
             ReportPhoto(
                 report_id=report_id, file_name="1.jpg", file_path="path/1.jpg"
@@ -45,6 +51,24 @@ class TestDeleteReportUseCase:
                 report_id=report_id, file_name="2.jpg", file_path="path/2.jpg"
             ),
         ]
+
+        res_photos = [
+            ResolutionPhoto(
+                id=uuid.uuid4(),
+                resolution_id=res_id,
+                file_name="res.jpg",
+                file_path="path/res.jpg",
+            )
+        ]
+
+        resolution = ReportResolution(
+            id=res_id,
+            report_id=report_id,
+            resolved_by_id=uuid.uuid4(),
+            comment="Fixed",
+            photos=res_photos,
+        )
+
         return Report(
             id=report_id,
             title="Title",
@@ -53,6 +77,7 @@ class TestDeleteReportUseCase:
             user_location=Location(0, 0),
             created_by_id=owner_id,
             photos=photos,
+            resolution=resolution,
         )
 
     async def test_delete_success_by_owner(
@@ -68,9 +93,10 @@ class TestDeleteReportUseCase:
 
         mock_report_repo.delete.assert_called_once_with(sample_report.id)
 
-        assert mock_storage_provider.delete_file.call_count == 2
+        assert mock_storage_provider.delete_file.call_count == 3
         mock_storage_provider.delete_file.assert_any_call("path/1.jpg")
         mock_storage_provider.delete_file.assert_any_call("path/2.jpg")
+        mock_storage_provider.delete_file.assert_any_call("path/res.jpg")
 
     async def test_delete_success_by_moderator(
         self, use_case, mock_report_repo, sample_report
@@ -117,6 +143,7 @@ class TestDeleteReportUseCase:
         mock_storage_provider.delete_file.side_effect = [
             Exception("Disk error"),
             None,
+            None,
         ]
 
         await use_case.execute(
@@ -132,5 +159,5 @@ class TestDeleteReportUseCase:
         assert kwargs["report_id"] == str(sample_report.id)
         assert kwargs["error"] == "Disk error"
 
-        assert mock_storage_provider.delete_file.call_count == 2
+        assert mock_storage_provider.delete_file.call_count == 3
         mock_report_repo.delete.assert_called_once()
