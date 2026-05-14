@@ -1,0 +1,93 @@
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: 100%;
+}
+
+.filters-card {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+}
+
+.map-layout {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 600px;
+  overflow: hidden;
+}
+
+.map-container {
+  flex: 1;
+  height: 100%;
+  transition: width 0.25s ease;
+}
+
+.leaflet-control-attribution {
+    display: none;
+}
+
+.create-complaint-button {
+  background-color: #2563eb;
+  border: none;
+  border-radius: 6px;
+  height: 30px;
+  color: white;
+  padding: 0 10px;
+  transition: background-color 0.5s ease-out;
+
+  &:hover {
+    background-color: #184ab8;
+  }
+}
+
+.complaint-panel {
+  width: 420px;
+  max-width: 420px;
+  height: 100%;
+  overflow-y: auto;
+  background: white;
+  border-left: 1px solid #e2e8f0;
+  box-shadow: -4px 0 16px rgba(15, 23, 42, 0.12);
+  z-index: 1000;
+}
+
+/* Чтобы Leaflet нормально пересчитал размер карты */
+.form-open .map-container {
+  width: calc(100% - 420px);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .map-layout {
+    height: calc(100vh - 120px);
+  }
+
+  .map-container {
+    width: 100%;
+    height: 100%;
+  }
+
+  .complaint-panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    width: 100%;
+    max-width: none;
+    height: auto;
+    max-height: 70%;
+
+    border-left: none;
+    border-top: 1px solid #e2e8f0;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.2);
+  }
+
+  .form-open .map-container {
+    width: 100%;
+  }
+}

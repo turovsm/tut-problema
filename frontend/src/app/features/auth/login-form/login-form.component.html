@@ -1,0 +1,81 @@
+<div class="auth-form">
+  <h1>Вход</h1>
+  <p>Войдите, чтобы создавать и отслеживать заявки</p>
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <mat-form-field appearance="fill">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" />
+
+      @if (form.controls.email.hasError('required')) {
+        <mat-error>Email обязателен</mat-error>
+      }
+
+      @if (form.controls.email.hasError('email')) {
+        <mat-error>Введите корректный email</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Пароль</mat-label>
+
+      <input
+        matInput
+        [type]="hidePassword ? 'password' : 'text'"
+        formControlName="password"
+      />
+
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="hidePassword = !hidePassword"
+      >
+        <mat-icon>
+          {{ hidePassword ? 'visibility' : 'visibility_off' }}
+        </mat-icon>
+      </button>
+
+      @if (form.controls.password.hasError('required')) {
+        <mat-error>Пароль обязателен</mat-error>
+      }
+    </mat-form-field>
+
+    @if (error) {
+      <div class="auth-error">
+        {{ error }}
+      </div>
+    }
+
+    <mat-checkbox formControlName="remember_me">
+      Запомнить меня
+    </mat-checkbox>
+
+    @let loading = isLoading | async;
+    <button
+      class="submit-button"
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="loading"
+    >
+      @if (loading) {
+        <mat-progress-spinner
+          class="submit-spinner"
+          mode="indeterminate"
+          diameter="18"
+        />
+        <span>Входим...</span>
+      } @else {
+        <span>Войти</span>
+      }
+      </button>
+  </form>
+
+  <div class="auth-switch">
+    Нет аккаунта?
+    <button mat-button type="button" (click)="goToRegister.emit()">
+      Зарегистрироваться
+    </button>
+  </div>
+</div>

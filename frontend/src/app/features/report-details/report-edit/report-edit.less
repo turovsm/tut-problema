@@ -1,0 +1,140 @@
+.edit-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 48px 0;
+  color: #64748b;
+}
+
+.error-card {
+  padding: 20px;
+  color: #dc2626;
+  background: #fef2f2;
+}
+
+.edit-card {
+  padding: 24px;
+  border-radius: 20px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.meta {
+  margin: 8px 0 0;
+  color: #64748b;
+}
+
+.section {
+  margin-top: 28px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.hint {
+  margin: 0 0 14px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.permission-warning {
+  padding: 14px 16px;
+  border-radius: 14px;
+  color: #b45309;
+  background: #fffbeb;
+  margin-bottom: 20px;
+}
+
+.info-box {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.info-box div {
+  padding: 14px;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.info-box span {
+  display: block;
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.info-box strong {
+  display: block;
+  color: #0f172a;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.delete-button {
+  margin-left: auto;
+}
+
+@media (max-width: 720px) {
+  .edit-page {
+    padding: 16px;
+  }
+
+  .edit-card {
+    padding: 18px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  .info-box {
+    grid-template-columns: 1fr;
+  }
+
+  .delete-button {
+    margin-left: 0;
+  }
+}
