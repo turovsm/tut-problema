@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { AuthService } from '../../../core/auth/auth.service';
-import { BehaviorSubject, catchError, EMPTY, take, tap, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, take, throwError } from 'rxjs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 

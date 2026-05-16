@@ -52,7 +52,7 @@ export class ComplaintFormComponent {
   @Input() address?: string;
 
   @Output() formSubmit = new EventEmitter<ComplaintFormValue>();
-  @Output() cancel = new EventEmitter<void>();
+  @Output() formCancel = new EventEmitter<void>();
 
   selectedFiles: File[] = [];
 
@@ -97,6 +97,6 @@ export class ComplaintFormComponent {
   }
 
   close(): void {
-    this.cancel.emit();
+    this.formCancel.emit();
   }
 }

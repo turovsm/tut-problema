@@ -1,7 +1,6 @@
-import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { take } from 'rxjs';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -15,7 +14,6 @@ import { AuthService } from '../../../core/auth/auth.service';
   selector: 'app-verify-email',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatFormFieldModule,

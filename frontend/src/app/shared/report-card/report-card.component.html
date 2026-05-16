@@ -28,7 +28,14 @@
     </div>
   </div>
 
-  <div class="report-votes" (click)="$event.stopPropagation()">
+  <div
+    class="report-votes"
+    role="button"
+    tabindex="0"
+    (click)="$event.stopPropagation()"
+    (keydown.enter)="$event.stopPropagation()"
+    (keydown.space)="$event.stopPropagation()"
+  >
     @if (isLoadingVoteStats()) {
       <div class="votes-loading">
         <mat-spinner diameter="20"></mat-spinner>

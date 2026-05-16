@@ -1,7 +1,6 @@
 import { Route } from '@angular/router';
 import { HomePage } from './pages/home-page/home-page';
 import { VerifyEmailPage } from './pages/verify-email/verify-email';
-import { ReportsPageComponent } from './pages/reports-page/reports-page.component';
 
 export const appRoutes: Route[] = [
     {

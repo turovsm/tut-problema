@@ -29,6 +29,9 @@ import { MyReport } from '../../core/models/report.models';
   styleUrl: './profile.less'
 })
 export class ProfilePageComponent implements OnInit {
+  private readonly profileApi = inject(ProfileApiService);
+  private readonly router = inject(Router);
+
   private readonly authService = inject(AuthService);
   readonly user = this.authService.currentUser;
 
@@ -40,11 +43,6 @@ export class ProfilePageComponent implements OnInit {
 
   isLoadingReports = signal(false);
   errorMessage = '';
-
-  constructor(
-    private readonly profileApi: ProfileApiService,
-    private readonly router: Router
-  ) {}
 
   ngOnInit(): void {
     if (!this.user()) {

@@ -1,7 +1,7 @@
 <div class="edit-page">
-  <a class="back-link" (click)="cancel()">
+  <button mat-button class="back-link" type="button" (click)="cancel()">
     ← Назад к жалобе
-  </a>
+  </button>
 
   @if (isLoading()) {
     <div class="loading">

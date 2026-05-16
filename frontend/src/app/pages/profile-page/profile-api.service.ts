@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MyReport, ReportVoteStats, UserProfile } from '../../core/models/report.models';
@@ -9,9 +9,9 @@ import { ApiResponseSuccess, PaginatedResponse } from '../../core/models/respons
   providedIn: 'root'
 })
 export class ProfileApiService {
-  private readonly apiUrl = environment.apiUrl;
+  private readonly http = inject(HttpClient);
 
-  constructor(private readonly http: HttpClient) {}
+  private readonly apiUrl = environment.apiUrl;
 
   getCurrentUser(): Observable<UserProfile> {
     return this.http

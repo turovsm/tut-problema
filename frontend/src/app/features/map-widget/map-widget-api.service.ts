@@ -114,7 +114,7 @@ export class MapWidgetApiService {
         { params, withCredentials: true }
       )
       .pipe(
-        map(res => res.data.items.filter((u: any) => u.role === 'gov_org'))
+        map(res => res.data.items.filter((u: ReportCreatedBy) => u.role === 'gov_org'))
       );
   }
 

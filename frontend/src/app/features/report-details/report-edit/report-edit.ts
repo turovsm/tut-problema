@@ -14,7 +14,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import {
   MapWidgetApiService,
   ReportDetails,
-  UpdateReportBody
+  UpdateReportBody,
+  ReportCreatedBy
 } from '../../map-widget/map-widget-api.service';
 
 import {
@@ -48,7 +49,7 @@ export class ReportEditComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly apiService = inject(MapWidgetApiService);
 
-  govOrgs = signal<any[]>([]);
+  govOrgs = signal<ReportCreatedBy[]>([]);
   isLoadingGovOrgs = signal(false);
   report = signal<ReportDetails | null>(null);
   isLoading = signal(false);

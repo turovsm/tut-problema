@@ -6,9 +6,11 @@
       <mat-select [(value)]="selectedType" (selectionChange)="applyFilters()">
         <mat-option value="">Все</mat-option>
 
-        <mat-option *ngFor="let t of types" [value]="t">
-          {{ t }}
-        </mat-option>
+        @for (t of types; track t) {
+          <mat-option [value]="t">
+            {{ t }}
+          </mat-option>
+        }
       </mat-select>
     </mat-form-field>
 
@@ -36,7 +38,7 @@
         [lng]="selectedLng"
         [address]="selectedAddress()"
         (formSubmit)="submitComplaint($event)"
-        (cancel)="closeComplaintForm()"
+        (formCancel)="closeComplaintForm()"
       ></app-complaint-form>
     }
   </div>
