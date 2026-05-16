@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
@@ -18,7 +18,6 @@ import { AuthComponent } from '../../features/auth/auth';
   templateUrl: './header.html',
   styleUrls: ['./header.less'],
   imports: [
-    CommonModule,
     RouterLink,
     RouterLinkActive,
     MatToolbarModule,
@@ -27,7 +26,7 @@ import { AuthComponent } from '../../features/auth/auth';
     MatMenuModule,
     MatDividerModule,
     MatDialogModule
-  ]
+]
 })
 export class HeaderComponent {
   private readonly authService = inject(AuthService);

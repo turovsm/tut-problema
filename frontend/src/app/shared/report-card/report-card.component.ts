@@ -1,4 +1,4 @@
-import { Component, inject, input, Input, OnInit, signal } from '@angular/core';
+import { Component, inject, Input, OnInit, signal } from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -7,7 +7,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { environment } from '../../../environments/environment';
-import { ISSUE_TYPE_LABELS, IssueType } from '../../core/models/issue-type';
+import { ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
 import { ReportCardApiService } from './report-card-api.service';
 import { MyReport, ReportVoteStats } from '../../core/models/report.models';
 

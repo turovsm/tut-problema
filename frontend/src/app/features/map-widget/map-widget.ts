@@ -1,5 +1,4 @@
 import { Component, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -9,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 
 import * as L from 'leaflet';
 
-import { MapWidgetApiService } from './map-widget-api.service';
+import { MapWidgetApiService, Report } from './map-widget-api.service';
 import {
   ComplaintFormComponent,
   ComplaintFormValue
@@ -37,7 +36,6 @@ interface Complaint {
   styleUrls: ['./map-widget.less'],
   encapsulation: ViewEncapsulation.None,
   imports: [
-    CommonModule,
     MatCardModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -279,10 +277,13 @@ export class MapWidget implements OnInit {
       }).addTo(this.map);
 
       this.selectedPointMarker.on('dragend', () => {
-        const position = this.selectedPointMarker!.getLatLng();
-        this.selectedLat = position.lat;
-        this.selectedLng = position.lng;
-        this.loadAddressFromCoords(position.lat, position.lng);
+        const marker = this.selectedPointMarker;
+        if  (marker) {
+          const position = marker.getLatLng();
+          this.selectedLat = position.lat;
+          this.selectedLng = position.lng;
+          this.loadAddressFromCoords(position.lat, position.lng);
+        }
       });
     }
 
@@ -333,17 +334,17 @@ export class MapWidget implements OnInit {
         return;
       }
 
-      this.complaints = reports.map((report: any) => {
+      this.complaints = reports.map((report: Report) => {
         const [lng, lat] = report.location.coordinates;
 
         return {
           id: report.id,
           title: report.title,
           type: report.issue_type ?? 'other',
-          district: report.district ?? '',
+          district: '',
           lat,
           lng,
-          status: report.status ?? 'pending'
+          status: (report.status ?? 'pending') as Complaint['status'] 
         };
       });
 
