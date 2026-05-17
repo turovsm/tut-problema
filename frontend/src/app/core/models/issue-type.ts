@@ -20,5 +20,5 @@ export const ISSUE_TYPE_LABELS: Record<IssueType, string> = {
   water_leak: 'Утечка воды',
   sewer_overflow: 'Проблема с канализацией',
   illegal_dumping: 'Незаконная свалка',
-  other: 'Другое'
+  other: 'Другое',
 };

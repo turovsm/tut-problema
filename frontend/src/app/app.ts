@@ -10,5 +10,4 @@ import { HeaderComponent } from './core/layout/header';
 })
 export class App {
   protected title = 'ТутПроблема';
-
 }

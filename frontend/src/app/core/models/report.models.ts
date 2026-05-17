@@ -1,4 +1,4 @@
-import { IssueType } from "./issue-type";
+import { IssueType } from './issue-type';
 
 export type ReportStatus = 'pending' | 'confirmed' | 'dismissed' | 'resolved';
 
@@ -49,5 +49,5 @@ export const REPORT_STATUS_OPTIONS = [
   { value: 'pending', label: 'На рассмотрении' },
   { value: 'confirmed', label: 'Подтверждена' },
   { value: 'dismissed', label: 'Отклонена' },
-  { value: 'resolved', label: 'Решена' }
+  { value: 'resolved', label: 'Решена' },
 ];

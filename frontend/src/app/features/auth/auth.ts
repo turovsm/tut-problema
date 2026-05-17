@@ -1,5 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
@@ -22,10 +26,10 @@ export interface AuthDialogData {
     MatIconModule,
     LoginFormComponent,
     RegisterFormComponent,
-    VerifyEmailComponent
+    VerifyEmailComponent,
   ],
   templateUrl: './auth.html',
-  styleUrls: ['./auth.less']
+  styleUrls: ['./auth.less'],
 })
 export class AuthComponent {
   private readonly data: AuthDialogData = inject(MAT_DIALOG_DATA);

@@ -9,7 +9,7 @@ describe('ComplaintFormComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ComplaintFormComponent],
-      providers: [provideAnimationsAsync('noop')]
+      providers: [provideAnimationsAsync('noop')],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ComplaintFormComponent);

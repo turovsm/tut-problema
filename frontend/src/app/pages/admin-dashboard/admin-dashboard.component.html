@@ -1,82 +1,87 @@
 <div class="admin-dashboard-page">
-    <section class="dashboard-hero">
-        <div>
-            <p class="eyebrow">Кабинет Модератора</p>
-            <h1>Админ-панель</h1>
-            <p>Управление пользователями и модерация платформы.</p>
-        </div>
-    </section>
+  <section class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Кабинет Модератора</p>
+      <h1>Админ-панель</h1>
+      <p>Управление пользователями и модерация платформы.</p>
+    </div>
+  </section>
 
-    <section class="users-section">
-        <div class="section-header">
-            <h2>Пользователи ({{ total() }})</h2>
-        </div>
+  <section class="users-section">
+    <div class="section-header">
+      <h2>Пользователи ({{ total() }})</h2>
+    </div>
 
-        @if (isLoading()) {
-            <div class="loading-state">
-                <mat-spinner diameter="40"></mat-spinner>
-                <p>Загрузка пользователей...</p>
-            </div>
-        }
+    @if (isLoading()) {
+      <div class="loading-state">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Загрузка пользователей...</p>
+      </div>
+    }
 
-        @if (!isLoading() && errorMessage()) {
-            <mat-card style="padding: 20px; color: red;">
-                {{ errorMessage() }}
-            </mat-card>
-        }
+    @if (!isLoading() && errorMessage()) {
+      <mat-card style="padding: 20px; color: red">
+        {{ errorMessage() }}
+      </mat-card>
+    }
 
-        @if (!isLoading() && !errorMessage() && users().length) {
-            <div class="users-list">
-                @for (user of users(); track user.id) {
-                    <mat-card class="user-card">
-                        <div class="user-info">
-                            <strong>{{ user.username }}</strong>
-                            <span>{{ user.email }}</span>
-                            <span>Регистрация: {{ user.created_at | date:'dd.MM.yyyy HH:mm' }}</span>
-                        </div>
-
-                        <div class="user-meta">
-                            <mat-chip>
-                                Роль: {{ user.role }}
-                            </mat-chip>
-
-                            <mat-chip [ngClass]="user.is_verified ? 'chip-success' : 'chip-warning'">
-                                {{ user.is_verified ? 'Email подтвержден' : 'Нет email' }}
-                            </mat-chip>
-
-                            <mat-chip [ngClass]="user.is_active ? 'chip-success' : 'chip-error'">
-                                {{ user.is_active ? 'Активен' : 'Заблокирован' }}
-                            </mat-chip>
-                        </div>
-
-                        <div class="user-actions">
-                            <button
-                                    mat-flat-button
-                                    [color]="user.is_active ? 'warn' : 'primary'"
-                                    [disabled]="user.role === 'moderator'"
-                                    type="button"
-                                    (click)="toggleUserStatus(user)"
-                            >
-                                {{ user.is_active ? 'Заблокировать' : 'Разблокировать' }}
-                            </button>
-                        </div>
-                    </mat-card>
-                }
+    @if (!isLoading() && !errorMessage() && users().length) {
+      <div class="users-list">
+        @for (user of users(); track user.id) {
+          <mat-card class="user-card">
+            <div class="user-info">
+              <strong>{{ user.username }}</strong>
+              <span>{{ user.email }}</span>
+              <span
+                >Регистрация:
+                {{ user.created_at | date: 'dd.MM.yyyy HH:mm' }}</span
+              >
             </div>
 
-            @if (hasNext()) {
-                <div style="display: flex; justify-content: center; margin-top: 24px;">
-                    <button
-                            mat-stroked-button
-                            color="primary"
-                            type="button"
-                            [disabled]="isLoadingMore()"
-                            (click)="loadMore()"
-                    >
-                        {{ isLoadingMore() ? 'Загрузка...' : 'Показать ещё' }}
-                    </button>
-                </div>
-            }
+            <div class="user-meta">
+              <mat-chip> Роль: {{ user.role }} </mat-chip>
+
+              <mat-chip
+                [ngClass]="user.is_verified ? 'chip-success' : 'chip-warning'"
+              >
+                {{ user.is_verified ? 'Email подтвержден' : 'Нет email' }}
+              </mat-chip>
+
+              <mat-chip
+                [ngClass]="user.is_active ? 'chip-success' : 'chip-error'"
+              >
+                {{ user.is_active ? 'Активен' : 'Заблокирован' }}
+              </mat-chip>
+            </div>
+
+            <div class="user-actions">
+              <button
+                mat-flat-button
+                [color]="user.is_active ? 'warn' : 'primary'"
+                [disabled]="user.role === 'moderator'"
+                type="button"
+                (click)="toggleUserStatus(user)"
+              >
+                {{ user.is_active ? 'Заблокировать' : 'Разблокировать' }}
+              </button>
+            </div>
+          </mat-card>
         }
-    </section>
+      </div>
+
+      @if (hasNext()) {
+        <div style="display: flex; justify-content: center; margin-top: 24px">
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            [disabled]="isLoadingMore()"
+            (click)="loadMore()"
+          >
+            {{ isLoadingMore() ? 'Загрузка...' : 'Показать ещё' }}
+          </button>
+        </div>
+      }
+    }
+  </section>
 </div>

@@ -2,7 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiResponseSuccess, PaginatedResponse } from '../../core/models/response.model';
+import {
+  ApiResponseSuccess,
+  PaginatedResponse,
+} from '../../core/models/response.model';
 import { IssueType } from '../../core/models/issue-type';
 
 export interface ReportsResponse {
@@ -101,7 +104,7 @@ export interface UpdateReportBody {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MapWidgetApiService {
   private readonly http = inject(HttpClient);
@@ -109,49 +112,45 @@ export class MapWidgetApiService {
   getGovOrgs(): Observable<ReportCreatedBy[]> {
     const params = new HttpParams().set('limit', '100');
     return this.http
-      .get<ApiResponseSuccess<PaginatedResponse<ReportCreatedBy>>>(
-        `${environment.apiUrl}/api/users/admin/users`,
-        { params, withCredentials: true }
-      )
+      .get<
+        ApiResponseSuccess<PaginatedResponse<ReportCreatedBy>>
+      >(`${environment.apiUrl}/api/users/admin/users`, { params, withCredentials: true })
       .pipe(
-        map(res => res.data.items.filter((u: ReportCreatedBy) => u.role === 'gov_org'))
+        map((res) =>
+          res.data.items.filter((u: ReportCreatedBy) => u.role === 'gov_org'),
+        ),
       );
   }
 
   getNearbyReports(): Observable<Report[] | null> {
     return this.http
       .get<ReportsResponse>(`${environment.apiUrl}/api/reports`)
-      .pipe(
-        map(res => res.status === 'success' ? res.data.items : null)
-      );
+      .pipe(map((res) => (res.status === 'success' ? res.data.items : null)));
   }
 
   getReportById(reportId: string): Observable<ReportDetails> {
     return this.http
-      .get<ApiResponseSuccess<ReportDetails>>(
-        `${environment.apiUrl}/api/reports/${reportId}`,
-        { withCredentials: true }
-      )
-      .pipe(map(res => res.data));
+      .get<
+        ApiResponseSuccess<ReportDetails>
+      >(`${environment.apiUrl}/api/reports/${reportId}`, { withCredentials: true })
+      .pipe(map((res) => res.data));
   }
 
   voteForReport(
     reportId: string,
-    body: VoteReportBody
+    body: VoteReportBody,
   ): Observable<VoteReportResponse> {
     return this.http
-      .post<ApiResponseSuccess<VoteReportResponse>>(
-        `${environment.apiUrl}/api/votes/reports/${reportId}`,
-        body,
-        { withCredentials: true }
-      )
-      .pipe(map(res => res.data));
+      .post<
+        ApiResponseSuccess<VoteReportResponse>
+      >(`${environment.apiUrl}/api/votes/reports/${reportId}`, body, { withCredentials: true })
+      .pipe(map((res) => res.data));
   }
 
   removeReportVote(reportId: string): Observable<void> {
     return this.http.delete<void>(
       `${environment.apiUrl}/api/votes/reports/${reportId}`,
-      { withCredentials: true }
+      { withCredentials: true },
     );
   }
 
@@ -163,36 +162,36 @@ export class MapWidgetApiService {
         format: 'jsonv2',
         lat,
         lon: lng,
-        'accept-language': 'ru'
-      }
+        'accept-language': 'ru',
+      },
     });
   }
 
-  createComplaint(formData: FormData): Observable<ApiResponseSuccess<{ id: string }>> {
+  createComplaint(
+    formData: FormData,
+  ): Observable<ApiResponseSuccess<{ id: string }>> {
     return this.http.post<ApiResponseSuccess<{ id: string }>>(
       `${environment.apiUrl}/api/reports`,
       formData,
-      { withCredentials: true }
+      { withCredentials: true },
     );
   }
 
   updateReport(
     reportId: string,
-    body: UpdateReportBody
+    body: UpdateReportBody,
   ): Observable<ReportDetails> {
     return this.http
-      .put<ApiResponseSuccess<ReportDetails>>(
-        `${environment.apiUrl}/api/reports/${reportId}`,
-        body,
-        { withCredentials: true }
-      )
-      .pipe(map(res => res.data));
+      .put<
+        ApiResponseSuccess<ReportDetails>
+      >(`${environment.apiUrl}/api/reports/${reportId}`, body, { withCredentials: true })
+      .pipe(map((res) => res.data));
   }
 
   deleteReport(reportId: string): Observable<void> {
     return this.http.delete<void>(
       `${environment.apiUrl}/api/reports/${reportId}`,
-      { withCredentials: true }
+      { withCredentials: true },
     );
   }
 }

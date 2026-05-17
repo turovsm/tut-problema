@@ -1,4 +1,10 @@
-import { Component, inject, OnInit, signal, ViewEncapsulation } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  signal,
+  ViewEncapsulation,
+} from '@angular/core';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -11,12 +17,10 @@ import * as L from 'leaflet';
 import { MapWidgetApiService, Report } from './map-widget-api.service';
 import {
   ComplaintFormComponent,
-  ComplaintFormValue
+  ComplaintFormValue,
 } from '../complaint-form/complaint-form';
 
-import {
-  IssueType,
-  ISSUE_TYPE_LABELS} from '../../core/models/issue-type';
+import { IssueType, ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
 import { AuthService } from '../../core/auth/auth.service';
 
 interface Complaint {
@@ -26,7 +30,7 @@ interface Complaint {
   district: string;
   lat: number;
   lng: number;
-  status: 'pending'| 'confirmed'| 'dismissed' | 'resolved';
+  status: 'pending' | 'confirmed' | 'dismissed' | 'resolved';
 }
 
 @Component({
@@ -41,8 +45,8 @@ interface Complaint {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    ComplaintFormComponent
-  ]
+    ComplaintFormComponent,
+  ],
 })
 export class MapWidget implements OnInit {
   map!: L.Map;
@@ -52,12 +56,12 @@ export class MapWidget implements OnInit {
   complaints: Complaint[] = [];
   filteredComplaints: Complaint[] = [];
 
-  statuses = ['pending', 'confirmed', 'dismissed', 'resolved']
+  statuses = ['pending', 'confirmed', 'dismissed', 'resolved'];
 
   labels = ISSUE_TYPE_LABELS;
 
   selectedType: IssueType | '' = '';
-  selectedStatus: 'pending'| 'confirmed'| 'dismissed' | 'resolved' | '' = '';
+  selectedStatus: 'pending' | 'confirmed' | 'dismissed' | 'resolved' | '' = '';
 
   selectedPointMarker?: L.Marker;
   selectedLat?: number;
@@ -82,7 +86,7 @@ export class MapWidget implements OnInit {
     water_leak: '#0ea5e9',
     sewer_overflow: '#64748b',
     illegal_dumping: '#22c55e',
-    other: '#9ca3af'
+    other: '#9ca3af',
   };
 
   ngOnInit(): void {
@@ -95,7 +99,7 @@ export class MapWidget implements OnInit {
   initMap(): void {
     const permBounds: L.LatLngBoundsExpression = [
       [57.9, 56.0],
-      [58.1, 56.5]
+      [58.1, 56.5],
     ];
 
     this.map = L.map('map', {
@@ -103,11 +107,11 @@ export class MapWidget implements OnInit {
       zoom: 12,
       maxBounds: permBounds,
       minZoom: 12,
-      maxBoundsViscosity: 1.0
+      maxBoundsViscosity: 1.0,
     });
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+      attribution: '&copy; OpenStreetMap contributors',
     }).addTo(this.map);
 
     this.complaintMarkersLayer.addTo(this.map);
@@ -120,9 +124,10 @@ export class MapWidget implements OnInit {
   }
 
   applyFilters(): void {
-    this.filteredComplaints = this.complaints.filter(c =>
-      (this.selectedType ? c.type === this.selectedType : true) &&
-      (this.selectedStatus ? c.status === this.selectedStatus : true)
+    this.filteredComplaints = this.complaints.filter(
+      (c) =>
+        (this.selectedType ? c.type === this.selectedType : true) &&
+        (this.selectedStatus ? c.status === this.selectedStatus : true),
     );
 
     this.updateMapMarkers();
@@ -131,11 +136,12 @@ export class MapWidget implements OnInit {
   updateMapMarkers(): void {
     this.complaintMarkersLayer.clearLayers();
 
-    this.filteredComplaints.forEach(c => {
+    this.filteredComplaints.forEach((c) => {
       const marker = this.createComplaintCircleMarker(c.lat, c.lng, c.type);
 
       marker
-        .bindPopup(`
+        .bindPopup(
+          `
           <div class="complaint-popup">
             <b>${c.title}</b><br>
             Тип: ${this.getIssueLabel(c.type)}<br>
@@ -144,7 +150,8 @@ export class MapWidget implements OnInit {
               Подробнее
             </a>
           </div>
-        `)
+        `,
+        )
         .addTo(this.complaintMarkersLayer);
     });
   }
@@ -189,12 +196,12 @@ export class MapWidget implements OnInit {
     formData.append('user_location_lng', String(value.location_lng));
     formData.append('user_location_lat', String(value.location_lat));
 
-    value.files.forEach(file => {
+    value.files.forEach((file) => {
       formData.append('files', file, file.name);
     });
 
     this.apiService.createComplaint(formData).subscribe({
-      next: response => {
+      next: (response) => {
         if (response.status !== 'success') {
           alert(response.message || 'Не удалось создать жалобу');
           return;
@@ -204,7 +211,7 @@ export class MapWidget implements OnInit {
         this.closeComplaintForm();
         this.loadReports();
       },
-      error: error => {
+      error: (error) => {
         console.error('Ошибка создания жалобы:', error);
 
         if (error.status === 400) {
@@ -228,7 +235,7 @@ export class MapWidget implements OnInit {
         }
 
         alert('Ошибка сервера при создании жалобы');
-      }
+      },
     });
   }
 
@@ -237,13 +244,15 @@ export class MapWidget implements OnInit {
   }
 
   private getIssueColor(type: IssueType | string): string {
-    return this.issueTypeColors[type as IssueType] ?? this.issueTypeColors['other'];
+    return (
+      this.issueTypeColors[type as IssueType] ?? this.issueTypeColors['other']
+    );
   }
 
   private createComplaintCircleMarker(
     lat: number,
     lng: number,
-    type: IssueType | string
+    type: IssueType | string,
   ): L.CircleMarker {
     const color = this.getIssueColor(type);
 
@@ -252,7 +261,7 @@ export class MapWidget implements OnInit {
       color,
       fillColor: color,
       fillOpacity: 0.85,
-      weight: 2
+      weight: 2,
     });
   }
 
@@ -268,17 +277,17 @@ export class MapWidget implements OnInit {
         iconUrl: 'assets/pin.svg',
         iconSize: [40, 40],
         iconAnchor: [20, 37],
-        popupAnchor: [0, -40]
+        popupAnchor: [0, -40],
       });
 
       this.selectedPointMarker = L.marker([lat, lng], {
         draggable: true,
-        icon: pinIcon
+        icon: pinIcon,
       }).addTo(this.map);
 
       this.selectedPointMarker.on('dragend', () => {
         const marker = this.selectedPointMarker;
-        if  (marker) {
+        if (marker) {
           const position = marker.getLatLng();
           this.selectedLat = position.lat;
           this.selectedLng = position.lng;
@@ -293,30 +302,28 @@ export class MapWidget implements OnInit {
     button.className = 'create-complaint-button';
     button.textContent = 'Сообщить о проблеме';
 
-    button.addEventListener('click', event => {
+    button.addEventListener('click', (event) => {
       event.stopPropagation();
       event.preventDefault();
       this.createComplaint();
     });
 
     if (!this.isComplaintFormOpen()) {
-      this.selectedPointMarker
-        .bindPopup(button)
-        .openPopup();
+      this.selectedPointMarker.bindPopup(button).openPopup();
     }
   }
 
   private addDistricts(): void {
     fetch('assets/districts_perm.geojson')
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         this.districtsLayer = L.geoJSON(data, {
           style: {
             color: '#2563eb',
             weight: 2,
             fillColor: '#3b82f6',
-            fillOpacity: 0.15
-          }
+            fillOpacity: 0.15,
+          },
         }).addTo(this.map);
 
         const cityBounds = this.districtsLayer.getBounds();
@@ -329,7 +336,7 @@ export class MapWidget implements OnInit {
   }
 
   private loadReports(): void {
-    this.apiService.getNearbyReports().subscribe(reports => {
+    this.apiService.getNearbyReports().subscribe((reports) => {
       if (!reports) {
         return;
       }
@@ -344,7 +351,7 @@ export class MapWidget implements OnInit {
           district: '',
           lat,
           lng,
-          status: (report.status ?? 'pending') as Complaint['status'] 
+          status: (report.status ?? 'pending') as Complaint['status'],
         };
       });
 
@@ -356,12 +363,12 @@ export class MapWidget implements OnInit {
     this.selectedAddress.set('Определяем адрес...');
 
     this.apiService.loadAddress(lat, lng).subscribe({
-      next: data => {
+      next: (data) => {
         this.selectedAddress.set(data.display_name || 'Адрес не найден');
       },
       error: () => {
         this.selectedAddress.set('Адрес не найден');
-      }
+      },
     });
   }
 
@@ -371,7 +378,7 @@ export class MapWidget implements OnInit {
     }
 
     navigator.geolocation.getCurrentPosition(
-      position => {
+      (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
 
@@ -379,17 +386,17 @@ export class MapWidget implements OnInit {
 
         this.map.setView([lat, lng], 15);
       },
-      error => {
+      (error) => {
         console.warn(
           'Пользователь не дал доступ к геолокации или произошла ошибка:',
-          error
+          error,
         );
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 0
-      }
+        maximumAge: 0,
+      },
     );
   }
 }

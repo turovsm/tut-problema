@@ -4,187 +4,162 @@
   </button>
 
   @if (isLoading()) {
-    <div class="loading">
-      <mat-spinner diameter="40"></mat-spinner>
-      <p>Загрузка жалобы...</p>
+  <div class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Загрузка жалобы...</p>
+  </div>
+  } @if (errorMessage()) {
+  <mat-card class="error-card"> {{ errorMessage() }} </mat-card>
+  } @if (report(); as r) {
+  <mat-card class="edit-card">
+    <div class="header">
+      <div>
+        <h1>Редактирование жалобы</h1>
+
+        <p class="meta">
+          {{ getIssueLabel(r.issue_type) }} · текущий статус: {{
+          getStatusLabel(r.status) }}
+        </p>
+      </div>
     </div>
-  }
 
-  @if (errorMessage()) {
-    <mat-card class="error-card">
-      {{ errorMessage() }}
-    </mat-card>
-  }
+    @if (!canEditAnything()) {
+    <div class="permission-warning">
+      У вас нет прав на редактирование этой жалобы.
+    </div>
+    }
 
-  @if (report(); as r) {
-    <mat-card class="edit-card">
-      <div class="header">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <section class="section">
+        <h2>Основная информация</h2>
+
+        @if (!canEditTitleAndDescription()) {
+        <p class="hint">
+          Заголовок и описание может редактировать только автор жалобы.
+        </p>
+        }
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Заголовок</mat-label>
+          <input matInput formControlName="title" maxlength="120" />
+
+          @if (form.controls.title.hasError('required')) {
+          <mat-error>Введите заголовок</mat-error>
+          } @if (form.controls.title.hasError('maxlength')) {
+          <mat-error>Максимум 120 символов</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Описание</mat-label>
+          <textarea
+            matInput
+            formControlName="description"
+            rows="8"
+            maxlength="2000"
+          ></textarea>
+
+          @if (form.controls.description.hasError('required')) {
+          <mat-error>Введите описание</mat-error>
+          } @if (form.controls.description.hasError('maxlength')) {
+          <mat-error>Максимум 2000 символов</mat-error>
+          }
+        </mat-form-field>
+      </section>
+
+      <section class="section">
+        <h2>Статус</h2>
+
+        @if (!canEditStatus()) {
+        <p class="hint">
+          Статус может изменять только модератор или сотрудник ЖКХ.
+        </p>
+        }
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Статус жалобы</mat-label>
+
+          <mat-select formControlName="status">
+            @for (status of statuses; track status.value) {
+            <mat-option [value]="status.value"> {{ status.label }} </mat-option>
+            }
+          </mat-select>
+
+          @if (form.controls.status.hasError('required')) {
+          <mat-error>Выберите статус</mat-error>
+          }
+        </mat-form-field>
+      </section>
+
+      @if (currentUserRole === 'moderator') {
+      <section class="section">
+        <h2>Исполнитель (УК)</h2>
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Назначить на</mat-label>
+
+          <mat-select formControlName="assigned_to_id">
+            <mat-option value="">Не назначено</mat-option>
+
+            @for (org of govOrgs(); track org.id) {
+            <mat-option [value]="org.id">
+              {{ org.username }} ({{ org.email }})
+            </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </section>
+      }
+
+      <div class="info-box">
         <div>
-          <h1>Редактирование жалобы</h1>
+          <span>Автор</span>
+          <strong>{{ r.created_by.username }}</strong>
+        </div>
 
-          <p class="meta">
-            {{ getIssueLabel(r.issue_type) }} ·
-            текущий статус: {{ getStatusLabel(r.status) }}
-          </p>
+        <div>
+          <span>Создано</span>
+          <strong>{{ r.created_at | date:'dd.MM.yyyy HH:mm' }}</strong>
+        </div>
+
+        <div>
+          <span>Обновлено</span>
+          <strong>{{ r.updated_at | date:'dd.MM.yyyy HH:mm' }}</strong>
         </div>
       </div>
 
-      @if (!canEditAnything()) {
-        <div class="permission-warning">
-          У вас нет прав на редактирование этой жалобы.
-        </div>
-      }
+      <div class="actions">
+        <button
+          mat-flat-button
+          color="primary"
+          type="submit"
+          [disabled]="isSaving() || isDeleting() || !canEditAnything()"
+        >
+          @if (isSaving()) { Сохранение... } @else { Сохранить }
+        </button>
 
-      <form [formGroup]="form" (ngSubmit)="save()">
-        <section class="section">
-          <h2>Основная информация</h2>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="isSaving() || isDeleting()"
+          (click)="cancel()"
+        >
+          Отмена
+        </button>
 
-          @if (!canEditTitleAndDescription()) {
-            <p class="hint">
-              Заголовок и описание может редактировать только автор жалобы.
-            </p>
-          }
-
-          <mat-form-field appearance="fill" class="full-width">
-            <mat-label>Заголовок</mat-label>
-            <input
-              matInput
-              formControlName="title"
-              maxlength="120"
-            />
-
-            @if (form.controls.title.hasError('required')) {
-              <mat-error>Введите заголовок</mat-error>
-            }
-
-            @if (form.controls.title.hasError('maxlength')) {
-              <mat-error>Максимум 120 символов</mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="fill" class="full-width">
-            <mat-label>Описание</mat-label>
-            <textarea
-              matInput
-              formControlName="description"
-              rows="8"
-              maxlength="2000"
-            ></textarea>
-
-            @if (form.controls.description.hasError('required')) {
-              <mat-error>Введите описание</mat-error>
-            }
-
-            @if (form.controls.description.hasError('maxlength')) {
-              <mat-error>Максимум 2000 символов</mat-error>
-            }
-          </mat-form-field>
-        </section>
-
-        <section class="section">
-          <h2>Статус</h2>
-
-          @if (!canEditStatus()) {
-            <p class="hint">
-              Статус может изменять только модератор или сотрудник ЖКХ.
-            </p>
-          }
-
-          <mat-form-field appearance="fill" class="full-width">
-            <mat-label>Статус жалобы</mat-label>
-
-            <mat-select formControlName="status">
-              @for (status of statuses; track status.value) {
-                <mat-option [value]="status.value">
-                  {{ status.label }}
-                </mat-option>
-              }
-            </mat-select>
-
-            @if (form.controls.status.hasError('required')) {
-              <mat-error>Выберите статус</mat-error>
-            }
-          </mat-form-field>
-        </section>
-
-        @if (currentUserRole === 'moderator') {
-          <section class="section">
-            <h2>Исполнитель (УК)</h2>
-            <mat-form-field appearance="fill" class="full-width">
-              <mat-label>Назначить на</mat-label>
-
-              <mat-select formControlName="assigned_to_id">
-                <mat-option value="">Не назначено</mat-option>
-
-                @for (org of govOrgs(); track org.id) {
-                  <mat-option [value]="org.id">
-                    {{ org.username }} ({{ org.email }})
-                  </mat-option>
-                }
-              </mat-select>
-
-            </mat-form-field>
-          </section>
+        @if (isOwnReport() || canEditStatus()) {
+        <button
+          mat-button
+          color="warn"
+          type="button"
+          class="delete-button"
+          [disabled]="isSaving() || isDeleting()"
+          (click)="deleteReport()"
+        >
+          @if (isDeleting()) { Удаление... } @else { Удалить жалобу }
+        </button>
         }
-
-        <div class="info-box">
-          <div>
-            <span>Автор</span>
-            <strong>{{ r.created_by.username }}</strong>
-          </div>
-
-          <div>
-            <span>Создано</span>
-            <strong>{{ r.created_at | date:'dd.MM.yyyy HH:mm' }}</strong>
-          </div>
-
-          <div>
-            <span>Обновлено</span>
-            <strong>{{ r.updated_at | date:'dd.MM.yyyy HH:mm' }}</strong>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button
-            mat-flat-button
-            color="primary"
-            type="submit"
-            [disabled]="isSaving() || isDeleting() || !canEditAnything()"
-          >
-            @if (isSaving()) {
-              Сохранение...
-            } @else {
-              Сохранить
-            }
-          </button>
-
-          <button
-            mat-stroked-button
-            type="button"
-            [disabled]="isSaving() || isDeleting()"
-            (click)="cancel()"
-          >
-            Отмена
-          </button>
-
-          @if (isOwnReport() || canEditStatus()) {
-            <button
-              mat-button
-              color="warn"
-              type="button"
-              class="delete-button"
-              [disabled]="isSaving() || isDeleting()"
-              (click)="deleteReport()"
-            >
-              @if (isDeleting()) {
-                Удаление...
-              } @else {
-                Удалить жалобу
-              }
-            </button>
-          }
-        </div>
-      </form>
-    </mat-card>
+      </div>
+    </form>
+  </mat-card>
   }
 </div>
