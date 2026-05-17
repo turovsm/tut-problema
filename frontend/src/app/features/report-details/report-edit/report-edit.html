@@ -81,7 +81,9 @@
 
           <mat-select formControlName="status">
             @for (status of statuses; track status) {
-            <mat-option [value]="status"> {{ statusLabels[status] }} </mat-option>
+            <mat-option [value]="status">
+              {{ statusLabels[status] }}
+            </mat-option>
             }
           </mat-select>
 

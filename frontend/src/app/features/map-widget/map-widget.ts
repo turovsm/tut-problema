@@ -22,7 +22,10 @@ import {
 
 import { IssueType, ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
 import { AuthService } from '../../core/auth/auth.service';
-import { REPORT_STATUS_OPTIONS, ReportStatus } from '../../core/models/report.models';
+import {
+  REPORT_STATUS_OPTIONS,
+  ReportStatus,
+} from '../../core/models/report.models';
 
 interface Complaint {
   id: string;
@@ -60,7 +63,7 @@ export class MapWidget implements OnInit {
   statuses: ReportStatus[] = ['pending', 'confirmed', 'dismissed', 'resolved'];
 
   typeLabels = ISSUE_TYPE_LABELS;
-  statusLabels= REPORT_STATUS_OPTIONS;
+  statusLabels = REPORT_STATUS_OPTIONS;
 
   selectedType: IssueType | '' = '';
   selectedStatus: 'pending' | 'confirmed' | 'dismissed' | 'resolved' | '' = '';

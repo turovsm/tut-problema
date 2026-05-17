@@ -19,7 +19,10 @@ import {
 } from '../../map-widget/map-widget-api.service';
 
 import { IssueType, ISSUE_TYPE_LABELS } from '../../../core/models/issue-type';
-import { REPORT_STATUS_OPTIONS, ReportStatus } from '../../../core/models/report.models';
+import {
+  REPORT_STATUS_OPTIONS,
+  ReportStatus,
+} from '../../../core/models/report.models';
 import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({

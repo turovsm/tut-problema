@@ -49,7 +49,12 @@ export class GovDashboardComponent implements OnInit {
   readonly total = signal(0);
   readonly hasNext = signal(false);
 
-  readonly statuses:  ReportStatus[] = ['pending', 'confirmed', 'dismissed', 'resolved'];
+  readonly statuses: ReportStatus[] = [
+    'pending',
+    'confirmed',
+    'dismissed',
+    'resolved',
+  ];
   readonly statusOptions = REPORT_STATUS_OPTIONS;
 
   readonly issueTypeOptions = Object.entries(ISSUE_TYPE_LABELS).map(

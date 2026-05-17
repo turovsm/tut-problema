@@ -15,7 +15,11 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AuthService } from '../../core/auth/auth.service';
@@ -23,7 +27,9 @@ import { ProfileApiService } from './profile-api.service';
 import { ReportCardComponent } from '../../shared/report-card/report-card.component';
 import { MyReport } from '../../core/models/report.models';
 
-function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+function passwordMatchValidator(
+  control: AbstractControl,
+): ValidationErrors | null {
   const newPassword = control.get('newPassword')?.value;
   const confirmPassword = control.get('confirmPassword')?.value;
 
@@ -60,7 +66,7 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
             autocomplete="current-password"
           />
           @if (passwordForm.controls.currentPassword.hasError('required')) {
-          <mat-error>Введите текущий пароль</mat-error>
+            <mat-error>Введите текущий пароль</mat-error>
           }
         </mat-form-field>
 
@@ -73,9 +79,10 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
             autocomplete="new-password"
           />
           @if (passwordForm.controls.newPassword.hasError('required')) {
-          <mat-error>Введите новый пароль</mat-error>
-          } @if (passwordForm.controls.newPassword.hasError('minlength')) {
-          <mat-error>Минимум 8 символов</mat-error>
+            <mat-error>Введите новый пароль</mat-error>
+          }
+          @if (passwordForm.controls.newPassword.hasError('minlength')) {
+            <mat-error>Минимум 8 символов</mat-error>
           }
         </mat-form-field>
 
@@ -88,17 +95,20 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
             autocomplete="new-password"
           />
           @if (passwordForm.controls.confirmPassword.hasError('required')) {
-          <mat-error>Повторите новый пароль</mat-error>
-          } @if (passwordForm.hasError('passwordMismatch') &&
-          passwordForm.controls.confirmPassword.touched) {
-          <mat-error>Пароли не совпадают</mat-error>
+            <mat-error>Повторите новый пароль</mat-error>
+          }
+          @if (
+            passwordForm.hasError('passwordMismatch') &&
+            passwordForm.controls.confirmPassword.touched
+          ) {
+            <mat-error>Пароли не совпадают</mat-error>
           }
         </mat-form-field>
 
         @if (passwordErrorMessage) {
-        <div class="password-error">
-          {{ passwordErrorMessage }}
-        </div>
+          <div class="password-error">
+            {{ passwordErrorMessage }}
+          </div>
         }
       </mat-dialog-content>
 
@@ -119,8 +129,10 @@ function passwordMatchValidator(control: AbstractControl): ValidationErrors | nu
           [disabled]="passwordForm.invalid || isChangingPassword()"
         >
           @if (isChangingPassword()) {
-          <mat-spinner diameter="20"></mat-spinner>
-          } @else { Сохранить }
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            Сохранить
+          }
         </button>
       </mat-dialog-actions>
     </form>
@@ -162,7 +174,9 @@ export class ChangePasswordDialogComponent {
   private readonly authService = inject(AuthService);
   private readonly fb = inject(NonNullableFormBuilder);
 
-  readonly dialogRef = inject(MatDialogRef<ChangePasswordDialogComponent, boolean>);
+  readonly dialogRef = inject(
+    MatDialogRef<ChangePasswordDialogComponent, boolean>,
+  );
   readonly isChangingPassword = signal(false);
 
   passwordErrorMessage = '';

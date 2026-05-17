@@ -56,26 +56,26 @@
       </button>
     </mat-menu>
     } @else {
-      <div class="auth-actions">
-        <button
-          mat-button
-          class="auth-action auth-action--login"
-          type="button"
-          (click)="openLogin()"
-        >
-          Войти
-        </button>
+    <div class="auth-actions">
+      <button
+        mat-button
+        class="auth-action auth-action--login"
+        type="button"
+        (click)="openLogin()"
+      >
+        Войти
+      </button>
 
-        <button
-          mat-raised-button
-          color="primary"
-          class="auth-action auth-action--register"
-          type="button"
-          (click)="openRegister()"
-        >
-          Регистрация
-        </button>
-      </div>
+      <button
+        mat-raised-button
+        color="primary"
+        class="auth-action auth-action--register"
+        type="button"
+        (click)="openRegister()"
+      >
+        Регистрация
+      </button>
+    </div>
     }
   </div>
 </mat-toolbar>
@@ -85,11 +85,10 @@
   <a routerLink="/">Карта</a>
   <a routerLink="/reports">Жалобы</a>
 
-    @if (isGov()) {
-      <a routerLink="/gov/dashboard">Dashboard</a>
-    }
-    @if (isModerator()) {
-      <a routerLink="/admin/dashboard">Админ-панель</a>
-    }
-  </div>
+  @if (isGov()) {
+  <a routerLink="/gov/dashboard">Dashboard</a>
+  } @if (isModerator()) {
+  <a routerLink="/admin/dashboard">Админ-панель</a>
+  }
+</div>
 }

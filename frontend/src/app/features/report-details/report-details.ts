@@ -161,16 +161,14 @@ export class ReportDetailsComponent implements OnInit {
           }
 
           if (error.status === 403) {
-            if (error.error?.error === "Email not verified.") {
-              alert(
-              'Подтвердите почту для голосования за проблему',
-            );
+            if (error.error?.error === 'Email not verified.') {
+              alert('Подтвердите почту для голосования за проблему');
             } else {
               alert(
-              'Вы не можете голосовать: возможно, жалоба вне разрешённого радиуса',
-            );
+                'Вы не можете голосовать: возможно, жалоба вне разрешённого радиуса',
+              );
             }
-            
+
             return;
           }
 
