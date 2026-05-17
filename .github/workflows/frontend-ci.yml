@@ -43,7 +43,16 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci
+
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: frontend/.nx/cache
+          key: ${{ runner.os }}-nx-lint-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-lint-
+            ${{ runner.os }}-nx-
 
       - name: Check Prettier Formatting
         run: npx nx format:check
@@ -68,7 +77,16 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci
+
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: frontend/.nx/cache
+          key: ${{ runner.os }}-nx-test-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-test-
+            ${{ runner.os }}-nx-
 
       - name: Run Jest Tests
         run: npx nx test frontend --configuration=ci --codeCoverage
@@ -96,7 +114,16 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci
+
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: frontend/.nx/cache
+          key: ${{ runner.os }}-nx-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-build-
+            ${{ runner.os }}-nx-
 
       - name: Build Application
         run: npx nx build frontend --configuration=production
@@ -118,10 +145,33 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci
+
+      - name: Get Playwright version
+        id: playwright-version
+        run: echo "version=$(npm ls @playwright/test --json | jq -r '.dependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright Browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
 
       - name: Install Playwright Browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps
+
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: frontend/.nx/cache
+          key: ${{ runner.os }}-nx-e2e-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-nx-e2e-
+            ${{ runner.os }}-nx-
 
       - name: Run E2E Tests
         run: npx nx e2e e2e
