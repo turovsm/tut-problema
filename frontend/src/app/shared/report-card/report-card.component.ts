@@ -11,8 +11,6 @@ import { ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
 import { ReportCardApiService } from './report-card-api.service';
 import { MyReport, ReportVoteStats } from '../../core/models/report.models';
 
-
-
 @Component({
   selector: 'app-report-card',
   standalone: true,
@@ -23,10 +21,10 @@ import { MyReport, ReportVoteStats } from '../../core/models/report.models';
     NgClass,
     MatCardModule,
     MatChipsModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
   ],
   templateUrl: './report-card.component.html',
-  styleUrl: './report-card.component.less'
+  styleUrl: './report-card.component.less',
 })
 export class ReportCardComponent implements OnInit {
   private readonly reportCardApiService = inject(ReportCardApiService);
@@ -51,15 +49,15 @@ export class ReportCardComponent implements OnInit {
     this.voteStatsError.set(false);
 
     this.reportCardApiService.getReportVoteStats(this.report.id).subscribe({
-      next: stats => {
+      next: (stats) => {
         this.voteStats.set(stats);
         this.isLoadingVoteStats.set(false);
       },
-      error: error => {
+      error: (error) => {
         console.error('Ошибка загрузки голосов жалобы:', error);
         this.voteStatsError.set(true);
         this.isLoadingVoteStats.set(false);
-      }
+      },
     });
   }
 
@@ -86,7 +84,7 @@ export class ReportCardComponent implements OnInit {
       pending: 'Ожидает',
       confirmed: 'Подтверждена',
       dismissed: 'Отклонена',
-      resolved: 'Решена'
+      resolved: 'Решена',
     };
 
     return labels[status] ?? status;

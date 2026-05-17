@@ -12,13 +12,10 @@ import { MatInputModule } from '@angular/material/input';
 import { environment } from '../../../environments/environment';
 import {
   MapWidgetApiService,
-  ReportDetails
+  ReportDetails,
 } from '../map-widget/map-widget-api.service';
 
-import {
-  IssueType,
-  ISSUE_TYPE_LABELS
-} from '../../core/models/issue-type';
+import { IssueType, ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
@@ -34,8 +31,8 @@ import { AuthService } from '../../core/auth/auth.service';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatFormFieldModule,
-    MatInputModule
-  ]
+    MatInputModule,
+  ],
 })
 export class ReportDetailsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -82,7 +79,7 @@ export class ReportDetailsComponent implements OnInit {
       return false;
     }
     return report.assigned_to?.id === this.currentUserId;
-  })
+  });
 
   canVote = computed(() => {
     return Boolean(this.report()) && !this.isOwnReport() && !this.isVoting();
@@ -105,17 +102,17 @@ export class ReportDetailsComponent implements OnInit {
     this.errorMessage.set('');
 
     this.apiService.getReportById(reportId).subscribe({
-      next: report => {
+      next: (report) => {
         this.report.set(report);
         this.isLoading.set(false);
       },
-      error: error => {
+      error: (error) => {
         console.error('Ошибка загрузки жалобы:', error);
         this.errorMessage.set(
-          error.error?.message || 'Не удалось загрузить жалобу'
+          error.error?.message || 'Не удалось загрузить жалобу',
         );
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -142,38 +139,42 @@ export class ReportDetailsComponent implements OnInit {
 
     const cappedAccuracy = Math.min(coords.accuracy, 1000);
 
-    this.apiService.voteForReport(report.id, {
-      vote_type: voteType,
-      user_location_lng: coords.longitude,
-      user_location_lat: coords.latitude,
-      accuracy: cappedAccuracy
-    }).subscribe({
-      next: () => {
-        this.isVoting.set(false);
-        this.loadReport();
-      },
-      error: error => {
-        console.error('Ошибка голосования:', error);
-        this.isVoting.set(false);
+    this.apiService
+      .voteForReport(report.id, {
+        vote_type: voteType,
+        user_location_lng: coords.longitude,
+        user_location_lat: coords.latitude,
+        accuracy: cappedAccuracy,
+      })
+      .subscribe({
+        next: () => {
+          this.isVoting.set(false);
+          this.loadReport();
+        },
+        error: (error) => {
+          console.error('Ошибка голосования:', error);
+          this.isVoting.set(false);
 
-        if (error.status === 401) {
-          alert('Необходимо авторизоваться');
-          return;
-        }
+          if (error.status === 401) {
+            alert('Необходимо авторизоваться');
+            return;
+          }
 
-        if (error.status === 403) {
-          alert('Вы не можете голосовать: возможно, жалоба вне разрешённого радиуса');
-          return;
-        }
+          if (error.status === 403) {
+            alert(
+              'Вы не можете голосовать: возможно, жалоба вне разрешённого радиуса',
+            );
+            return;
+          }
 
-        if (error.status === 409) {
-          alert('Вы уже голосовали за эту жалобу');
-          return;
-        }
+          if (error.status === 409) {
+            alert('Вы уже голосовали за эту жалобу');
+            return;
+          }
 
-        alert(error.error?.message || 'Не удалось отправить голос');
-      }
-    });
+          alert(error.error?.message || 'Не удалось отправить голос');
+        },
+      });
   }
 
   removeVote(): void {
@@ -190,11 +191,11 @@ export class ReportDetailsComponent implements OnInit {
         this.isVoting.set(false);
         this.loadReport();
       },
-      error: error => {
+      error: (error) => {
         console.error('Ошибка снятия голоса:', error);
         this.isVoting.set(false);
         alert(error.error?.message || 'Не удалось снять голос');
-      }
+      },
     });
   }
 
@@ -214,7 +215,9 @@ export class ReportDetailsComponent implements OnInit {
   }
 
   removeResolveFile(fileToRemove: File): void {
-    this.resolveFiles.update(files => files.filter(file => file !== fileToRemove));
+    this.resolveFiles.update((files) =>
+      files.filter((file) => file !== fileToRemove),
+    );
   }
 
   deletePhoto(photoId: string): void {
@@ -234,7 +237,7 @@ export class ReportDetailsComponent implements OnInit {
 
     this.http
       .delete(`${environment.apiUrl}/api/uploads/photos/${photoId}`, {
-        withCredentials: true
+        withCredentials: true,
       })
       .subscribe({
         next: () => {
@@ -242,13 +245,13 @@ export class ReportDetailsComponent implements OnInit {
           this.moderationSuccessMessage.set('Фото удалено');
           this.loadReport();
         },
-        error: error => {
+        error: (error) => {
           console.error('Ошибка удаления фото:', error);
           this.isDeletingPhoto.set(false);
           this.moderationErrorMessage.set(
-            error.error?.message || 'Не удалось удалить фото'
+            error.error?.message || 'Не удалось удалить фото',
           );
-        }
+        },
       });
   }
 
@@ -259,17 +262,24 @@ export class ReportDetailsComponent implements OnInit {
     if (!confirm('Удалить это фото из отчёта?')) return;
 
     this.http
-      .delete(`${environment.apiUrl}/api/uploads/resolutions/photos/${photoId}`, {
-        withCredentials: true
-      })
+      .delete(
+        `${environment.apiUrl}/api/uploads/resolutions/photos/${photoId}`,
+        {
+          withCredentials: true,
+        },
+      )
       .subscribe({
         next: () => {
           this.loadReport();
         },
-        error: error => {
+        error: (error) => {
           console.error('Ошибка удаления фото отчёта:', error);
-          alert(error.error?.detail || error.error?.message || 'Не удалось удалить фото');
-        }
+          alert(
+            error.error?.detail ||
+              error.error?.message ||
+              'Не удалось удалить фото',
+          );
+        },
       });
   }
 
@@ -286,21 +296,29 @@ export class ReportDetailsComponent implements OnInit {
     this.isUploadingResPhoto.set(true);
 
     this.http
-      .post(`${environment.apiUrl}/api/uploads/resolutions/${resolutionId}/photos`, formData, {
-        withCredentials: true
-      })
+      .post(
+        `${environment.apiUrl}/api/uploads/resolutions/${resolutionId}/photos`,
+        formData,
+        {
+          withCredentials: true,
+        },
+      )
       .subscribe({
         next: () => {
           this.isUploadingResPhoto.set(false);
           input.value = '';
           this.loadReport();
         },
-        error: error => {
+        error: (error) => {
           console.error('Ошибка загрузки фото отчёта:', error);
           this.isUploadingResPhoto.set(false);
           input.value = '';
-          alert(error.error?.detail || error.error?.message || 'Не удалось загрузить фото');
-        }
+          alert(
+            error.error?.detail ||
+              error.error?.message ||
+              'Не удалось загрузить фото',
+          );
+        },
       });
   }
 
@@ -324,7 +342,7 @@ export class ReportDetailsComponent implements OnInit {
     const files = this.resolveFiles();
 
     if (files.length > 0) {
-      files.forEach(file => {
+      files.forEach((file) => {
         formData.append('files', file, file.name);
       });
     }
@@ -334,9 +352,13 @@ export class ReportDetailsComponent implements OnInit {
     this.moderationSuccessMessage.set('');
 
     this.http
-      .post(`${environment.apiUrl}/api/reports/${report.id}/resolve`, formData, {
-        withCredentials: true
-      })
+      .post(
+        `${environment.apiUrl}/api/reports/${report.id}/resolve`,
+        formData,
+        {
+          withCredentials: true,
+        },
+      )
       .subscribe({
         next: () => {
           this.isResolvingReport.set(false);
@@ -345,17 +367,16 @@ export class ReportDetailsComponent implements OnInit {
           this.moderationSuccessMessage.set('Отчет отправлен, жалоба закрыта');
           this.loadReport();
         },
-        error: error => {
+        error: (error) => {
           console.error('Ошибка отправки отчета:', error);
           this.isResolvingReport.set(false);
           this.moderationErrorMessage.set(
-            error.error?.message || 'Не удалось отправить отчет'
+            error.error?.message || 'Не удалось отправить отчет',
           );
-        }
+        },
       });
   }
 
-  
   getIssueLabel(type: IssueType | string): string {
     return ISSUE_TYPE_LABELS[type as IssueType] ?? type;
   }
@@ -365,7 +386,7 @@ export class ReportDetailsComponent implements OnInit {
       pending: 'На рассмотрении',
       confirmed: 'Подтверждена',
       dismissed: 'Отклонена',
-      resolved: 'Решена'
+      resolved: 'Решена',
     };
 
     return labels[status] ?? status;
@@ -400,21 +421,21 @@ export class ReportDetailsComponent implements OnInit {
     }
 
     navigator.geolocation.getCurrentPosition(
-      position => {
+      (position) => {
         this.userLocation.set(position.coords);
         this.geoErrorMessage.set('');
       },
-      error => {
+      (error) => {
         console.warn('Геолокация недоступна:', error);
         this.geoErrorMessage.set(
-          'Геолокация недоступна. Без неё нельзя голосовать.'
+          'Геолокация недоступна. Без неё нельзя голосовать.',
         );
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 0
-      }
+        maximumAge: 0,
+      },
     );
   }
 }

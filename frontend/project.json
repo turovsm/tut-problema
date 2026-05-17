@@ -1,9 +1,7 @@
 {
   "name": "frontend",
   "$schema": "node_modules/nx/schemas/project-schema.json",
-  "includedScripts": [
-    "node_modules/leaflet/dist/leaflet.js"
-  ],
+  "includedScripts": ["node_modules/leaflet/dist/leaflet.js"],
   "projectType": "application",
   "prefix": "app",
   "sourceRoot": "./src",
@@ -11,9 +9,7 @@
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/frontend",
         "browser": "./src/main.ts",
@@ -79,16 +75,12 @@
     "lint": {
       "executor": "@nx/eslint:lint",
       "options": {
-        "lintFilePatterns": [
-          "./src"
-        ]
+        "lintFilePatterns": ["./src"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectName}"
-      ],
+      "outputs": ["{workspaceRoot}/coverage/{projectName}"],
       "options": {
         "jestConfig": "jest.config.cts",
         "tsConfig": "tsconfig.spec.json"

@@ -1,5 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  inject,
+  signal,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { take } from 'rxjs';
 
@@ -21,7 +28,7 @@ import { AuthService } from '../../../core/auth/auth.service';
     MatIconModule,
   ],
   templateUrl: './verify-email.component.html',
-  styleUrls: ['./verify-email.component.less']
+  styleUrls: ['./verify-email.component.less'],
 })
 export class VerifyEmailComponent {
   private readonly fb = inject(FormBuilder);
@@ -39,7 +46,9 @@ export class VerifyEmailComponent {
 
   resendCode(): void {
     if (!this.email) {
-      this.error.set('Email не найден. Вернитесь к регистрации и попробуйте ещё раз');
+      this.error.set(
+        'Email не найден. Вернитесь к регистрации и попробуйте ещё раз',
+      );
       return;
     }
 
@@ -47,16 +56,19 @@ export class VerifyEmailComponent {
     this.error.set('');
     this.message.set('');
 
-    this.authService.sendVerification(this.email).pipe(take(1)).subscribe({
-      next: () => {
-        this.message.set('Код подтверждения отправлен повторно');
-        this.isResending.set(false);
-      },
-      error: (err: HttpErrorResponse) => {
-        this.error.set(this.getResendErrorText(err));
-        this.isResending.set(false);
-      }
-    });
+    this.authService
+      .sendVerification(this.email)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          this.message.set('Код подтверждения отправлен повторно');
+          this.isResending.set(false);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.error.set(this.getResendErrorText(err));
+          this.isResending.set(false);
+        },
+      });
   }
 
   private getVerifyErrorText(err: HttpErrorResponse): string {

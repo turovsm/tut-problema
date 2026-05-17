@@ -1,4 +1,3 @@
-
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
@@ -25,8 +24,8 @@ import { AuthComponent } from '../../features/auth/auth';
     MatIconModule,
     MatMenuModule,
     MatDividerModule,
-    MatDialogModule
-]
+    MatDialogModule,
+  ],
 })
 export class HeaderComponent {
   private readonly authService = inject(AuthService);
@@ -41,12 +40,12 @@ export class HeaderComponent {
     return {
       isAuthenticated: !!currentUser,
       name: currentUser?.username ?? currentUser?.email ?? '',
-      role: currentUser?.role ?? null
+      role: currentUser?.role ?? null,
     };
   });
 
   toggleMobileMenu(): void {
-    this.isMobileMenuOpen.update(value => !value);
+    this.isMobileMenuOpen.update((value) => !value);
   }
 
   openLogin(): void {
@@ -54,7 +53,7 @@ export class HeaderComponent {
       data: { mode: 'login' },
       width: '480px',
       maxWidth: 'calc(100vw - 32px)',
-      panelClass: 'auth-dialog-panel'
+      panelClass: 'auth-dialog-panel',
     });
   }
 
@@ -63,7 +62,7 @@ export class HeaderComponent {
       data: { mode: 'register' },
       width: '480px',
       maxWidth: 'calc(100vw - 32px)',
-      panelClass: 'auth-dialog-panel'
+      panelClass: 'auth-dialog-panel',
     });
   }
 

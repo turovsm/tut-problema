@@ -2,9 +2,7 @@
   <h2>Сообщить о проблеме ЖКХ</h2>
 
   <p class="point-info">
-    Точка на карте:
-    {{ lat | number:'1.5-5' }},
-    {{ lng | number:'1.5-5' }}
+    Точка на карте: {{ lat | number:'1.5-5' }}, {{ lng | number:'1.5-5' }}
   </p>
   <p class="point-info">{{address}}</p>
 
@@ -19,21 +17,11 @@
       />
 
       @if (complaintForm.controls.title.hasError('required')) {
-        <mat-error>
-          Заголовок обязателен
-        </mat-error>
-      }
-
-      @if (complaintForm.controls.title.hasError('minlength')) {
-        <mat-error>
-          Минимум 5 символов
-        </mat-error>
-      }
-
-      @if (complaintForm.controls.title.hasError('maxlength')) {
-        <mat-error>
-          Максимум 200 символов
-        </mat-error>
+      <mat-error> Заголовок обязателен </mat-error>
+      } @if (complaintForm.controls.title.hasError('minlength')) {
+      <mat-error> Минимум 5 символов </mat-error>
+      } @if (complaintForm.controls.title.hasError('maxlength')) {
+      <mat-error> Максимум 200 символов </mat-error>
       }
     </mat-form-field>
     <mat-form-field appearance="fill">
@@ -41,16 +29,12 @@
 
       <mat-select formControlName="type">
         @for (type of types; track type) {
-          <mat-option [value]="type.value">
-            {{ type.label }}
-          </mat-option>
+        <mat-option [value]="type.value"> {{ type.label }} </mat-option>
         }
       </mat-select>
 
       @if (complaintForm.controls.type.hasError('required')) {
-        <mat-error>
-          Выберите тип проблемы
-        </mat-error>
+      <mat-error> Выберите тип проблемы </mat-error>
       }
     </mat-form-field>
 
@@ -65,15 +49,9 @@
       ></textarea>
 
       @if (complaintForm.controls.description.hasError('required')) {
-        <mat-error>
-          Описание обязательно
-        </mat-error>
-      }
-
-      @if (complaintForm.controls.description.hasError('minlength')) {
-        <mat-error>
-          Минимум 10 символов
-        </mat-error>
+      <mat-error> Описание обязательно </mat-error>
+      } @if (complaintForm.controls.description.hasError('minlength')) {
+      <mat-error> Минимум 10 символов </mat-error>
       }
     </mat-form-field>
 
@@ -89,20 +67,14 @@
       />
 
       @if (selectedFiles.length) {
-        <div class="files-info">
-          Выбрано файлов: {{ selectedFiles.length }}
-        </div>
+      <div class="files-info">Выбрано файлов: {{ selectedFiles.length }}</div>
       }
     </div>
 
     <div class="form-actions">
-      <button mat-button type="button" (click)="close()">
-        Отмена
-      </button>
+      <button mat-button type="button" (click)="close()">Отмена</button>
 
-      <button mat-raised-button color="primary" type="submit">
-        Отправить
-      </button>
+      <button mat-raised-button color="primary" type="submit">Отправить</button>
     </div>
   </form>
 </mat-card>

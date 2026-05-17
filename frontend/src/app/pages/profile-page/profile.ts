@@ -23,10 +23,10 @@ import { MyReport } from '../../core/models/report.models';
     MatButtonModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-    ReportCardComponent
+    ReportCardComponent,
   ],
   templateUrl: './profile.html',
-  styleUrl: './profile.less'
+  styleUrl: './profile.less',
 })
 export class ProfilePageComponent implements OnInit {
   private readonly profileApi = inject(ProfileApiService);
@@ -58,15 +58,15 @@ export class ProfilePageComponent implements OnInit {
     this.errorMessage = '';
 
     this.profileApi.getMyReports().subscribe({
-      next: reports => {
+      next: (reports) => {
         this.reports = reports;
         this.isLoadingReports.set(false);
       },
-      error: error => {
+      error: (error) => {
         console.error('Ошибка загрузки жалоб пользователя:', error);
         this.errorMessage = 'Не удалось загрузить ваши жалобы';
         this.isLoadingReports.set(false);
-      }
+      },
     });
   }
 
@@ -75,10 +75,10 @@ export class ProfilePageComponent implements OnInit {
       next: () => {
         this.router.navigate(['/auth/login']);
       },
-      error: error => {
+      error: (error) => {
         console.error('Ошибка выхода:', error);
         this.router.navigate(['/auth/login']);
-      }
+      },
     });
   }
 }

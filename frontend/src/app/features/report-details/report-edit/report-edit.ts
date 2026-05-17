@@ -15,13 +15,10 @@ import {
   MapWidgetApiService,
   ReportDetails,
   UpdateReportBody,
-  ReportCreatedBy
+  ReportCreatedBy,
 } from '../../map-widget/map-widget-api.service';
 
-import {
-  IssueType,
-  ISSUE_TYPE_LABELS
-} from '../../../core/models/issue-type';
+import { IssueType, ISSUE_TYPE_LABELS } from '../../../core/models/issue-type';
 import { REPORT_STATUS_OPTIONS } from '../../../core/models/report.models';
 import { AuthService } from '../../../core/auth/auth.service';
 
@@ -40,8 +37,8 @@ import { AuthService } from '../../../core/auth/auth.service';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatProgressSpinnerModule
-  ]
+    MatProgressSpinnerModule,
+  ],
 })
 export class ReportEditComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -60,14 +57,14 @@ export class ReportEditComponent implements OnInit {
   private readonly authService = inject(AuthService);
   currentUserId = this.authService.currentUser()?.id ?? '';
   currentUserRole = this.authService.currentUser()?.role ?? 'user';
-  
+
   readonly statuses = REPORT_STATUS_OPTIONS;
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.maxLength(120)]],
     description: ['', [Validators.required, Validators.maxLength(2000)]],
     status: ['pending', [Validators.required]],
-    assigned_to_id: ['']
+    assigned_to_id: [''],
   });
 
   isOwnReport = computed(() => {
@@ -81,7 +78,7 @@ export class ReportEditComponent implements OnInit {
   });
 
   isModerator = computed(() => {
-    return 'moderator' === this.currentUserRole
+    return 'moderator' === this.currentUserRole;
   });
 
   canEditTitleAndDescription = computed(() => {
@@ -105,13 +102,16 @@ export class ReportEditComponent implements OnInit {
 
   loadGovOrgs(): void {
     this.isLoadingGovOrgs.set(true);
-    this.apiService.getGovOrgs().pipe(take(1)).subscribe({
-      next: orgs => {
-        this.govOrgs.set(orgs);
-        this.isLoadingGovOrgs.set(false);
-      },
-      error: () => this.isLoadingGovOrgs.set(false)
-    });
+    this.apiService
+      .getGovOrgs()
+      .pipe(take(1))
+      .subscribe({
+        next: (orgs) => {
+          this.govOrgs.set(orgs);
+          this.isLoadingGovOrgs.set(false);
+        },
+        error: () => this.isLoadingGovOrgs.set(false),
+      });
   }
 
   loadReport(): void {
@@ -126,27 +126,27 @@ export class ReportEditComponent implements OnInit {
     this.errorMessage.set('');
 
     this.apiService.getReportById(reportId).subscribe({
-      next: report => {
+      next: (report) => {
         this.report.set(report);
 
         this.form.patchValue({
           title: report.title,
           description: report.description,
           status: report.status,
-          assigned_to_id: report.assigned_to?.id || ''
+          assigned_to_id: report.assigned_to?.id || '',
         });
 
         this.applyPermissionsToForm();
 
         this.isLoading.set(false);
       },
-      error: error => {
+      error: (error) => {
         console.error('Ошибка загрузки жалобы:', error);
         this.errorMessage.set(
-          error.error?.message || 'Не удалось загрузить жалобу'
+          error.error?.message || 'Не удалось загрузить жалобу',
         );
         this.isLoading.set(false);
-      }
+      },
     });
   }
 
@@ -187,11 +187,11 @@ export class ReportEditComponent implements OnInit {
     this.isSaving.set(true);
 
     this.apiService.updateReport(report.id, body).subscribe({
-      next: updatedReport => {
+      next: (updatedReport) => {
         this.isSaving.set(false);
         this.router.navigate(['/reports', updatedReport.id]);
       },
-      error: error => {
+      error: (error) => {
         console.error('Ошибка обновления жалобы:', error);
         this.isSaving.set(false);
 
@@ -206,7 +206,7 @@ export class ReportEditComponent implements OnInit {
         }
 
         alert(error.error?.message || 'Не удалось сохранить изменения');
-      }
+      },
     });
   }
 
@@ -217,9 +217,7 @@ export class ReportEditComponent implements OnInit {
       return;
     }
 
-    const confirmed = confirm(
-      'Удалить жалобу? Это действие нельзя отменить.'
-    );
+    const confirmed = confirm('Удалить жалобу? Это действие нельзя отменить.');
 
     if (!confirmed) {
       return;
@@ -232,7 +230,7 @@ export class ReportEditComponent implements OnInit {
         this.isDeleting.set(false);
         this.router.navigate(['/']);
       },
-      error: error => {
+      error: (error) => {
         console.error('Ошибка удаления жалобы:', error);
         this.isDeleting.set(false);
 
@@ -247,7 +245,7 @@ export class ReportEditComponent implements OnInit {
         }
 
         alert(error.error?.message || 'Не удалось удалить жалобу');
-      }
+      },
     });
   }
 
@@ -267,7 +265,7 @@ export class ReportEditComponent implements OnInit {
   }
 
   getStatusLabel(status: string): string {
-    return this.statuses.find(s => s.value === status)?.label ?? status;
+    return this.statuses.find((s) => s.value === status)?.label ?? status;
   }
 
   private applyPermissionsToForm(): void {
