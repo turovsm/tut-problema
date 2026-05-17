@@ -1,13 +1,11 @@
 services:
   backend:
-    build: .
+    build:
+      context: ./backend
     container_name: tutproblema-backend
-    ports:
-      - "${BACKEND_PORT}:8000"
     env_file:
       - .env
     volumes:
-      - .:/app
       - uploads_data:/app/uploads
     depends_on:
       db:
@@ -19,9 +17,20 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: ${HEALTHCHECK_INTERVAL}
-      timeout: ${HEALTHCHECK_TIMEOUT}
-      retries: ${HEALTHCHECK_RETRIES}
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${HEALTHCHECK_RETRIES:-3}
+
+  migrations:
+    build:
+      context: ./backend
+    container_name: tutproblema-migrations
+    env_file:
+      - .env
+    command: alembic upgrade head
+    depends_on:
+      db:
+        condition: service_healthy
 
   db:
     image: postgis/postgis:16-3.4
@@ -30,30 +39,26 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
-    ports:
-      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: ${DB_HEALTHCHECK_INTERVAL}
-      timeout: ${DB_HEALTHCHECK_TIMEOUT}
-      retries: ${DB_HEALTHCHECK_RETRIES}
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME} -h 127.0.0.1"]
+      interval: ${DB_HEALTHCHECK_INTERVAL:-5s}
+      timeout: ${DB_HEALTHCHECK_TIMEOUT:-5s}
+      retries: ${DB_HEALTHCHECK_RETRIES:-10}
 
   redis:
     image: redis:7-alpine
     container_name: tutproblema-redis
-    ports:
-      - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: ${REDIS_HEALTHCHECK_INTERVAL}
-      timeout: ${REDIS_HEALTHCHECK_TIMEOUT}
-      retries: ${REDIS_HEALTHCHECK_RETRIES}
+      interval: ${REDIS_HEALTHCHECK_INTERVAL:-10s}
+      timeout: ${REDIS_HEALTHCHECK_TIMEOUT:-5s}
+      retries: ${REDIS_HEALTHCHECK_RETRIES:-5}
     command: redis-server --appendonly yes
 
   pgadmin:
@@ -63,23 +68,38 @@ services:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
     ports:
-      - "${PGADMIN_PORT}:80"
+      - "127.0.0.1:${PGADMIN_PORT:-5050}:80"
     depends_on:
       db:
         condition: service_healthy
     restart: unless-stopped
 
-  migrations:
-    build: .
-    container_name: tutproblema-migrations
-    env_file:
-      - .env
-    command: alembic upgrade head
+  frontend:
+    build:
+      context: ./frontend
+    container_name: tutproblema-frontend
+    restart: unless-stopped
     depends_on:
-      db:
-        condition: service_healthy
+      - backend
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: tutproblema-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
 
 volumes:
   postgres_data:
   redis_data:
   uploads_data:
+  caddy_data:
+  caddy_config:

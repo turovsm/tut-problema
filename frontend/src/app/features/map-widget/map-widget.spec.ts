@@ -11,8 +11,9 @@ describe('MapWidget', () => {
   beforeEach(async () => {
     global.fetch = jest.fn(() =>
       Promise.resolve({
-        json: () => Promise.resolve({ type: 'FeatureCollection', features: [] }),
-      })
+        json: () =>
+          Promise.resolve({ type: 'FeatureCollection', features: [] }),
+      }),
     ) as jest.Mock;
 
     await TestBed.configureTestingModule({
@@ -20,8 +21,8 @@ describe('MapWidget', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideAnimationsAsync('noop')
-      ]
+        provideAnimationsAsync('noop'),
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MapWidget);

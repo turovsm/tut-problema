@@ -1,7 +1,7 @@
 export interface ApiResponseSuccess<T> {
-    status: "success" | "error";
-    data: T;
-    message: string;
+  status: 'success' | 'error';
+  data: T;
+  message: string;
 }
 
 export interface PaginatedResponse<T> {

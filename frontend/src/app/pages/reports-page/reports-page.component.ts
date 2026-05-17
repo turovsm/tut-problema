@@ -1,5 +1,4 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -12,14 +11,16 @@ import { MatSelectModule } from '@angular/material/select';
 import { ReportsApiService, ReportsFilters } from './reports-page-api.service';
 import { ReportCardComponent } from '../../shared/report-card/report-card.component';
 import { ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
-import { MyReport, REPORT_STATUS_OPTIONS } from '../../core/models/report.models';
+import {
+  MyReport,
+  REPORT_STATUS_OPTIONS,
+} from '../../core/models/report.models';
 import { PaginatedResponse } from '../../core/models/response.model';
 
 @Component({
   selector: 'app-reports-page',
   standalone: true,
   imports: [
-    CommonModule,
     RouterLink,
     MatButtonModule,
     MatCardModule,
@@ -27,10 +28,10 @@ import { PaginatedResponse } from '../../core/models/response.model';
     MatInputModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    ReportCardComponent
+    ReportCardComponent,
   ],
   templateUrl: './reports-page.component.html',
-  styleUrl: './reports-page.component.less'
+  styleUrl: './reports-page.component.less',
 })
 export class ReportsPageComponent implements OnInit {
   private readonly reportsApiService = inject(ReportsApiService);
@@ -51,10 +52,12 @@ export class ReportsPageComponent implements OnInit {
 
   readonly statusOptions = REPORT_STATUS_OPTIONS;
 
-  readonly issueTypeOptions = Object.entries(ISSUE_TYPE_LABELS).map(([value, label]) => ({
-    value,
-    label
-  }));
+  readonly issueTypeOptions = Object.entries(ISSUE_TYPE_LABELS).map(
+    ([value, label]) => ({
+      value,
+      label,
+    }),
+  );
 
   ngOnInit(): void {
     this.loadReports();
@@ -71,19 +74,21 @@ export class ReportsPageComponent implements OnInit {
       this.isLoadingMoreReports.set(true);
     }
 
-    this.reportsApiService.getReports(page, this.limit, this.getFilters()).subscribe({
-      next: response => {
-        this.applyReportsResponse(response, isFirstPage);
-        this.isLoadingReports.set(false);
-        this.isLoadingMoreReports.set(false);
-      },
-      error: error => {
-        console.error('Ошибка загрузки жалоб:', error);
-        this.errorMessage.set('Не удалось загрузить жалобы');
-        this.isLoadingReports.set(false);
-        this.isLoadingMoreReports.set(false);
-      }
-    });
+    this.reportsApiService
+      .getReports(page, this.limit, this.getFilters())
+      .subscribe({
+        next: (response) => {
+          this.applyReportsResponse(response, isFirstPage);
+          this.isLoadingReports.set(false);
+          this.isLoadingMoreReports.set(false);
+        },
+        error: (error) => {
+          console.error('Ошибка загрузки жалоб:', error);
+          this.errorMessage.set('Не удалось загрузить жалобы');
+          this.isLoadingReports.set(false);
+          this.isLoadingMoreReports.set(false);
+        },
+      });
   }
 
   loadMoreReports(): void {
@@ -120,8 +125,8 @@ export class ReportsPageComponent implements OnInit {
   hasActiveFilters(): boolean {
     return Boolean(
       this.selectedStatus() ||
-      this.selectedDistrict() ||
-      this.selectedIssueType()
+        this.selectedDistrict() ||
+        this.selectedIssueType(),
     );
   }
 
@@ -129,14 +134,16 @@ export class ReportsPageComponent implements OnInit {
     return {
       status: this.selectedStatus() || undefined,
       district: this.selectedDistrict() || undefined,
-      issue_type: this.selectedIssueType() || undefined
+      issue_type: this.selectedIssueType() || undefined,
     };
   }
 
-  private applyReportsResponse(response: PaginatedResponse<MyReport>, isFirstPage: boolean): void {
-    this.reports.set(isFirstPage
-      ? response.items
-      : [...this.reports(), ...response.items]
+  private applyReportsResponse(
+    response: PaginatedResponse<MyReport>,
+    isFirstPage: boolean,
+  ): void {
+    this.reports.set(
+      isFirstPage ? response.items : [...this.reports(), ...response.items],
     );
 
     this.page.set(response.page);

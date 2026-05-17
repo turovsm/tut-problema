@@ -1,91 +1,88 @@
 <div class="profile-page">
   @if (user(); as user) {
-    <div class="profile-card">
-      <div class="profile-header">
-        <div>
-          <h1>{{ user.username }}</h1>
-          <p>{{ user.email }}</p>
-        </div>
-
-        <button mat-stroked-button color="warn" type="button" (click)="logout()">
-          Выйти
-        </button>
+  <div class="profile-card">
+    <div class="profile-header">
+      <div>
+        <h1>{{ user.username }}</h1>
+        <p>{{ user.email }}</p>
       </div>
 
-      <div class="profile-meta">
-        <mat-chip [ngClass]="user.is_verified ? 'chip-success' : 'chip-warning'">
-          {{ user.is_verified ? 'Email подтвержден' : 'Email не подтвержден' }}
-        </mat-chip>
-
-        <mat-chip>
-          Роль: {{ user.role }}
-        </mat-chip>
-
-        <mat-chip [ngClass]="user.is_active ? 'chip-success' : 'chip-warning'">
-          {{ user.is_active ? 'Аккаунт активен' : 'Аккаунт отключен' }}
-        </mat-chip>
-      </div>
-
-      @if (!user.is_verified) {
-        <div class="verify-warning">
-          Подтвердите email, чтобы создавать жалобы и голосовать за проблемы.
-        </div>
-      }
+      <button mat-stroked-button color="warn" type="button" (click)="logout()">
+        Выйти
+      </button>
     </div>
 
-    <section class="reports-section">
-      <div class="section-header">
-        <h2>Мои жалобы</h2>
+    <div class="profile-meta">
+      <mat-chip [ngClass]="user.is_verified ? 'chip-success' : 'chip-warning'">
+        {{ user.is_verified ? 'Email подтвержден' : 'Email не подтвержден' }}
+      </mat-chip>
 
-        <button mat-raised-button color="primary" routerLink="/">
-          Сообщить о проблеме
-        </button>
-      </div>
+      <mat-chip> Роль: {{ user.role }} </mat-chip>
 
-      @if (isLoadingReports()) {
-        <div class="loading-state">
-          <mat-spinner diameter="40"></mat-spinner>
-          <p>Загрузка жалоб...</p>
-        </div>
-      }
+      <mat-chip [ngClass]="user.is_active ? 'chip-success' : 'chip-warning'">
+        {{ user.is_active ? 'Аккаунт активен' : 'Аккаунт отключен' }}
+      </mat-chip>
+    </div>
 
-      @if (!isLoadingReports() && errorMessage) {
-        <mat-card class="error-card">
-          <p>{{ errorMessage }}</p>
+    @if (!user.is_verified) {
+    <div class="verify-warning">
+      Подтвердите email, чтобы создавать жалобы и голосовать за проблемы.
+    </div>
+    }
+  </div>
 
-          <button mat-raised-button color="primary" type="button" (click)="loadMyReports()">
-            Повторить
-          </button>
-        </mat-card>
-      }
+  <section class="reports-section">
+    <div class="section-header">
+      <h2>Мои жалобы</h2>
 
-      @if (!(isLoadingReports()) && !errorMessage && !reports.length) {
-        <mat-card class="empty-card">
-          <h3>У вас пока нет жалоб</h3>
-          <p>Откройте карту и отметьте проблему в вашем районе.</p>
+      <button mat-raised-button color="primary" routerLink="/">
+        Сообщить о проблеме
+      </button>
+    </div>
 
-          <button mat-raised-button color="primary" routerLink="/">
-            Открыть карту
-          </button>
-        </mat-card>
-      }
-
-      @if (!isLoadingReports() && !errorMessage && reports.length) {
-        <div class="reports-list">
-          @for (report of reports; track report.id) {
-            <app-report-card [report]="report"></app-report-card>
-          }
-        </div>
-      }
-    </section>
-  } @else {
+    @if (isLoadingReports()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Загрузка жалоб...</p>
+    </div>
+    } @if (!isLoadingReports() && errorMessage) {
     <mat-card class="error-card">
-      <h2>Пользователь не авторизован</h2>
-      <p>Войдите в аккаунт, чтобы открыть профиль.</p>
+      <p>{{ errorMessage }}</p>
 
-      <button mat-raised-button color="primary" routerLink="/auth/login">
-        Войти
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="loadMyReports()"
+      >
+        Повторить
       </button>
     </mat-card>
+    } @if (!(isLoadingReports()) && !errorMessage && !reports.length) {
+    <mat-card class="empty-card">
+      <h3>У вас пока нет жалоб</h3>
+      <p>Откройте карту и отметьте проблему в вашем районе.</p>
+
+      <button mat-raised-button color="primary" routerLink="/">
+        Открыть карту
+      </button>
+    </mat-card>
+    } @if (!isLoadingReports() && !errorMessage && reports.length) {
+    <div class="reports-list">
+      @for (report of reports; track report.id) {
+      <app-report-card [report]="report"></app-report-card>
+      }
+    </div>
+    }
+  </section>
+  } @else {
+  <mat-card class="error-card">
+    <h2>Пользователь не авторизован</h2>
+    <p>Войдите в аккаунт, чтобы открыть профиль.</p>
+
+    <button mat-raised-button color="primary" routerLink="/auth/login">
+      Войти
+    </button>
+  </mat-card>
   }
 </div>

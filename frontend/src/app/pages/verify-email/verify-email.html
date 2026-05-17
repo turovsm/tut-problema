@@ -1,41 +1,45 @@
 @if (status() === 'loading') {
-    <mat-progress-spinner></mat-progress-spinner>
+<mat-progress-spinner></mat-progress-spinner>
 } @else if (status() === 'success') {
-    <mat-icon class="result-icon result-icon__success">check_circle_outline</mat-icon>
-    <p><b>Ваша почта подтверждена</b></p>
-    <p>Вы можете закрыть эту вкладку</p>
+<mat-icon class="result-icon result-icon__success"
+  >check_circle_outline</mat-icon
+>
+<p><b>Ваша почта подтверждена</b></p>
+<p>Вы можете закрыть эту вкладку</p>
 } @else {
-    <mat-icon class="result-icon result-icon__error">error_outline</mat-icon>
-    <p><b>{{ errorText() }}</b></p>
+<mat-icon class="result-icon result-icon__error">error_outline</mat-icon>
+<p><b>{{ errorText() }}</b></p>
 
-    <form class="resend-form" [formGroup]="form" (ngSubmit)="submit()">
-        <mat-form-field appearance="outline">
-            <mat-label>Введите почту</mat-label>
-            <input matInput type="email" formControlName="email" id="email" autocomplete="email" />
+<form class="resend-form" [formGroup]="form" (ngSubmit)="submit()">
+  <mat-form-field appearance="outline">
+    <mat-label>Введите почту</mat-label>
+    <input
+      matInput
+      type="email"
+      formControlName="email"
+      id="email"
+      autocomplete="email"
+    />
 
-            @if (form.controls.email.hasError('required')) {
-                <mat-error>Введите почту</mat-error>
-            } @else if (form.controls.email.hasError('email')) {
-                <mat-error>Введите корректную почту</mat-error>
-            }
-        </mat-form-field>
-
-        <button
-            matButton="tonal"
-            type="submit"
-            [disabled]="form.invalid || resendStatus() === 'loading'"
-        >
-            @if (resendStatus() === 'loading') {
-                Отправляем...
-            } @else {
-                Отправить повторно
-            }
-        </button>
-    </form>
-
-    @if (resendStatus() === 'success') {
-        <p class="resend-message">Письмо отправлено повторно</p>
-    } @else if (resendStatus() === 'error') {
-        <p class="resend-message resend-message__error">Не удалось отправить письмо</p>
+    @if (form.controls.email.hasError('required')) {
+    <mat-error>Введите почту</mat-error>
+    } @else if (form.controls.email.hasError('email')) {
+    <mat-error>Введите корректную почту</mat-error>
     }
-}
+  </mat-form-field>
+
+  <button
+    matButton="tonal"
+    type="submit"
+    [disabled]="form.invalid || resendStatus() === 'loading'"
+  >
+    @if (resendStatus() === 'loading') { Отправляем... } @else { Отправить
+    повторно }
+  </button>
+</form>
+
+@if (resendStatus() === 'success') {
+<p class="resend-message">Письмо отправлено повторно</p>
+} @else if (resendStatus() === 'error') {
+<p class="resend-message resend-message__error">Не удалось отправить письмо</p>
+} }

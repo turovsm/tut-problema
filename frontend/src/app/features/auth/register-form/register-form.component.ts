@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -15,7 +14,6 @@ import { HttpErrorResponse } from '@angular/common/http';
   selector: 'app-register-form',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     MatButtonModule,
     MatFormFieldModule,
@@ -23,7 +21,7 @@ import { HttpErrorResponse } from '@angular/common/http';
     MatIconModule,
   ],
   templateUrl: './register-form.component.html',
-  styleUrls: ['./register-form.component.less']
+  styleUrls: ['./register-form.component.less'],
 })
 export class RegisterFormComponent {
   private readonly fb = inject(FormBuilder);
@@ -40,15 +38,17 @@ export class RegisterFormComponent {
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [
+    password: [
+      '',
+      [
         Validators.required,
         Validators.minLength(8),
         Validators.pattern(/[0-9]/),
         Validators.pattern(/[a-z]/),
         Validators.pattern(/[A-Z]/),
-        Validators.pattern(/[@$!%*?&]/)
-      ]
-    ]
+        Validators.pattern(/[@$!%*?&]/),
+      ],
+    ],
   });
 
   submit(): void {
@@ -62,20 +62,23 @@ export class RegisterFormComponent {
 
     const email = this.form.value.email ?? '';
 
-    this.authService.register({
-      username: this.form.value.name ?? '',
-      email,
-      password: this.form.value.password ?? ''
-    }).pipe(take(1)).subscribe({
-      next: () => {
-        this.registered.emit(email);
-        this.isLoading.set(false);
-      },
-      error: (err: HttpErrorResponse) => {
-        this.error.set(this.getErrorText(err));
-        this.isLoading.set(false);
-      }
-    });
+    this.authService
+      .register({
+        username: this.form.value.name ?? '',
+        email,
+        password: this.form.value.password ?? '',
+      })
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          this.registered.emit(email);
+          this.isLoading.set(false);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.error.set(this.getErrorText(err));
+          this.isLoading.set(false);
+        },
+      });
   }
 
   getErrorText(err: HttpErrorResponse): string {

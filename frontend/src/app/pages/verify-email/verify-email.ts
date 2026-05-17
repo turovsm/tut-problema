@@ -32,7 +32,9 @@ export class VerifyEmailPage implements OnInit {
 
   readonly status = signal<'loading' | 'success' | 'error'>('loading');
   readonly errorText = signal('');
-  readonly resendStatus = signal<'idle' | 'loading' | 'success' | 'error'>('idle');
+  readonly resendStatus = signal<'idle' | 'loading' | 'success' | 'error'>(
+    'idle',
+  );
 
   readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -49,20 +51,23 @@ export class VerifyEmailPage implements OnInit {
 
     this.status.set('loading');
 
-    this.authService.verifyEmail(token).pipe(take(1)).subscribe({
-      next: () => {
-        this.status.set('success');
-      },
-      error: (err: HttpErrorResponse) => {
-        this.status.set('error');
+    this.authService
+      .verifyEmail(token)
+      .pipe(take(1))
+      .subscribe({
+        next: () => {
+          this.status.set('success');
+        },
+        error: (err: HttpErrorResponse) => {
+          this.status.set('error');
 
-        if (err.status === 400) {
-          this.errorText.set('Токен верификации устарел');
-        } else {
-          this.errorText.set('Произошла ошибка верификации');
-        }
-      },
-    });
+          if (err.status === 400) {
+            this.errorText.set('Токен верификации устарел');
+          } else {
+            this.errorText.set('Произошла ошибка верификации');
+          }
+        },
+      });
   }
 
   submit(): void {
