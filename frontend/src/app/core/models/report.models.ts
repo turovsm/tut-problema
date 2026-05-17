@@ -45,9 +45,9 @@ export interface ReportPhoto {
   uploaded_at: string;
 }
 
-export const REPORT_STATUS_OPTIONS = [
-  { value: 'pending', label: 'На рассмотрении' },
-  { value: 'confirmed', label: 'Подтверждена' },
-  { value: 'dismissed', label: 'Отклонена' },
-  { value: 'resolved', label: 'Решена' },
-];
+export const REPORT_STATUS_OPTIONS: Record<ReportStatus, string> = {
+  pending: 'Ожидает',
+  confirmed: 'Подтверждена',
+  dismissed: 'Отклонена',
+  resolved: 'Решена',
+};

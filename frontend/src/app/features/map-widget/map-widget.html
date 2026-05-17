@@ -7,7 +7,7 @@
         <mat-option value="">Все</mat-option>
 
         @for (t of types; track t) {
-        <mat-option [value]="t"> {{ t }} </mat-option>
+        <mat-option [value]="t"> {{ typeLabels[t] }} </mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -18,7 +18,7 @@
       <mat-select [(value)]="selectedStatus" (selectionChange)="applyFilters()">
         <mat-option value="">Все</mat-option>
         @for (status of statuses; track status) {
-        <mat-option [value]="status"> {{ status }} </mat-option>
+        <mat-option [value]="status"> {{ statusLabels[status] }} </mat-option>
         }
       </mat-select>
     </mat-form-field>

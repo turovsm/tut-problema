@@ -19,7 +19,7 @@ import {
 } from '../../map-widget/map-widget-api.service';
 
 import { IssueType, ISSUE_TYPE_LABELS } from '../../../core/models/issue-type';
-import { REPORT_STATUS_OPTIONS } from '../../../core/models/report.models';
+import { REPORT_STATUS_OPTIONS, ReportStatus } from '../../../core/models/report.models';
 import { AuthService } from '../../../core/auth/auth.service';
 
 @Component({
@@ -58,7 +58,8 @@ export class ReportEditComponent implements OnInit {
   currentUserId = this.authService.currentUser()?.id ?? '';
   currentUserRole = this.authService.currentUser()?.role ?? 'user';
 
-  readonly statuses = REPORT_STATUS_OPTIONS;
+  statuses: ReportStatus[] = ['pending', 'confirmed', 'dismissed', 'resolved'];
+  statusLabels = REPORT_STATUS_OPTIONS;
 
   form = this.fb.group({
     title: ['', [Validators.required, Validators.maxLength(120)]],
@@ -262,10 +263,6 @@ export class ReportEditComponent implements OnInit {
 
   getIssueLabel(type: IssueType | string): string {
     return ISSUE_TYPE_LABELS[type as IssueType] ?? type;
-  }
-
-  getStatusLabel(status: string): string {
-    return this.statuses.find((s) => s.value === status)?.label ?? status;
   }
 
   private applyPermissionsToForm(): void {
