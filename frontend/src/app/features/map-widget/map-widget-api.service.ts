@@ -7,6 +7,7 @@ import {
   PaginatedResponse,
 } from '../../core/models/response.model';
 import { IssueType } from '../../core/models/issue-type';
+import { ReportStatus } from '../../core/models/report.models';
 
 export interface ReportsResponse {
   status: 'success' | 'error';
@@ -71,7 +72,7 @@ export interface ReportDetails {
     type: string;
     coordinates: [number, number]; // [lng, lat]
   };
-  status: string;
+  status: ReportStatus;
   created_by: ReportCreatedBy;
   assigned_to?: ReportCreatedBy | null;
   resolution?: ReportResolution | null;

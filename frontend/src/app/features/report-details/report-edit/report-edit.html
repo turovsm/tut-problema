@@ -18,7 +18,7 @@
 
         <p class="meta">
           {{ getIssueLabel(r.issue_type) }} · текущий статус: {{
-          getStatusLabel(r.status) }}
+          statusLabels[r.status] }}
         </p>
       </div>
     </div>
@@ -80,8 +80,10 @@
           <mat-label>Статус жалобы</mat-label>
 
           <mat-select formControlName="status">
-            @for (status of statuses; track status.value) {
-            <mat-option [value]="status.value"> {{ status.label }} </mat-option>
+            @for (status of statuses; track status) {
+            <mat-option [value]="status">
+              {{ statusLabels[status] }}
+            </mat-option>
             }
           </mat-select>
 

@@ -36,9 +36,6 @@
 
   <div class="header__right">
     @if (user().isAuthenticated) {
-    <button mat-icon-button>
-      <mat-icon>notifications</mat-icon>
-    </button>
 
     <button mat-button [matMenuTriggerFor]="profileMenu">
       <mat-icon>account_circle</mat-icon>
@@ -51,11 +48,6 @@
         <span>Профиль</span>
       </button>
 
-      <button mat-menu-item routerLink="/profile/reports">
-        <mat-icon>description</mat-icon>
-        <span>Мои заявки</span>
-      </button>
-
       <mat-divider></mat-divider>
 
       <button mat-menu-item (click)="logout()">
@@ -64,16 +56,26 @@
       </button>
     </mat-menu>
     } @else {
-    <button mat-button type="button" (click)="openLogin()">Войти</button>
+    <div class="auth-actions">
+      <button
+        mat-button
+        class="auth-action auth-action--login"
+        type="button"
+        (click)="openLogin()"
+      >
+        Войти
+      </button>
 
-    <button
-      mat-raised-button
-      color="primary"
-      type="button"
-      (click)="openRegister()"
-    >
-      Регистрация
-    </button>
+      <button
+        mat-raised-button
+        color="primary"
+        class="auth-action auth-action--register"
+        type="button"
+        (click)="openRegister()"
+      >
+        Регистрация
+      </button>
+    </div>
     }
   </div>
 </mat-toolbar>
