@@ -7,9 +7,20 @@
         <p>{{ user.email }}</p>
       </div>
 
-      <button mat-stroked-button color="warn" type="button" (click)="logout()">
-        Выйти
-      </button>
+      <div class="profile-actions">
+        <button
+          mat-stroked-button
+          color="primary"
+          type="button"
+          (click)="openChangePasswordDialog()"
+        >
+          Сменить пароль
+        </button>
+
+        <button mat-stroked-button color="warn" type="button" (click)="logout()">
+          Выйти
+        </button>
+      </div>
     </div>
 
     <div class="profile-meta">
