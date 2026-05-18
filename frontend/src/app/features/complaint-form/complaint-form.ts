@@ -29,8 +29,8 @@ export interface ComplaintFormValue {
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule
-  ]
+    MatSelectModule,
+  ],
 })
 export class ComplaintFormComponent {
   private readonly fb = inject(FormBuilder);
@@ -45,40 +45,42 @@ export class ComplaintFormComponent {
     { value: 'water_leak', label: 'Утечка воды' },
     { value: 'sewer_overflow', label: 'Проблема с канализацией' },
     { value: 'illegal_dumping', label: 'Незаконная свалка' },
-    { value: 'other', label: 'Другое' }
+    { value: 'other', label: 'Другое' },
   ];
   @Input({ required: true }) lat!: number;
   @Input({ required: true }) lng!: number;
   @Input() address?: string;
 
   @Output() formSubmit = new EventEmitter<ComplaintFormValue>();
-  @Output() cancel = new EventEmitter<void>();
+  @Output() formCancel = new EventEmitter<void>();
 
   selectedFiles: File[] = [];
 
-
   complaintForm = this.fb.group({
-    title: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(200)]],
+    title: [
+      '',
+      [Validators.required, Validators.minLength(5), Validators.maxLength(200)],
+    ],
     type: ['', Validators.required],
     description: ['', [Validators.required, Validators.minLength(10)]],
-    files: [[] as File[]]
+    files: [[] as File[]],
   });
 
   onFilesSelected(event: Event): void {
-  const input = event.target as HTMLInputElement;
+    const input = event.target as HTMLInputElement;
 
-  if (!input.files?.length) {
-    this.selectedFiles = [];
-    this.complaintForm.patchValue({ files: [] });
-    return;
+    if (!input.files?.length) {
+      this.selectedFiles = [];
+      this.complaintForm.patchValue({ files: [] });
+      return;
+    }
+
+    this.selectedFiles = Array.from(input.files);
+
+    this.complaintForm.patchValue({
+      files: this.selectedFiles,
+    });
   }
-
-  this.selectedFiles = Array.from(input.files);
-
-  this.complaintForm.patchValue({
-    files: this.selectedFiles
-  });
-}
 
   submit(): void {
     if (this.complaintForm.invalid) {
@@ -92,11 +94,11 @@ export class ComplaintFormComponent {
       issue_type: this.complaintForm.value.type ?? '',
       files: this.selectedFiles,
       location_lat: this.lat,
-      location_lng: this.lng
+      location_lng: this.lng,
     });
   }
 
   close(): void {
-    this.cancel.emit();
+    this.formCancel.emit();
   }
 }

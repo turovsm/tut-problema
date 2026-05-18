@@ -15,8 +15,8 @@ describe('AuthComponent', () => {
         provideHttpClient(),
         provideAnimationsAsync('noop'),
         { provide: MAT_DIALOG_DATA, useValue: { mode: 'login' } },
-        { provide: MatDialogRef, useValue: {} }
-      ]
+        { provide: MatDialogRef, useValue: {} },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AuthComponent);

@@ -56,7 +56,10 @@
       @if (form.controls.password.hasError('minlength')) {
         <mat-error>Минимум 8 символов</mat-error>
       } @else if (form.controls.password.hasError('pattern')) {
-        <mat-error>Пароль должен содержать заглавную букву, цифру и спецсимвол</mat-error>
+        <mat-error
+          >Пароль должен содержать заглавную букву, цифру и
+          спецсимвол</mat-error
+        >
       }
     </mat-form-field>
 
@@ -79,8 +82,6 @@
 
   <div class="auth-switch">
     Уже есть аккаунт?
-    <button mat-button type="button" (click)="goToLogin.emit()">
-      Войти
-    </button>
+    <button mat-button type="button" (click)="goToLogin.emit()">Войти</button>
   </div>
 </div>

@@ -1,5 +1,4 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -7,26 +6,31 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 
-import { ReportsApiService, ReportsFilters } from '../reports-page/reports-page-api.service';
+import {
+  ReportsApiService,
+  ReportsFilters,
+} from '../reports-page/reports-page-api.service';
 import { ReportCardComponent } from '../../shared/report-card/report-card.component';
 import { ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
-import { MyReport, REPORT_STATUS_OPTIONS } from '../../core/models/report.models';
+import {
+  MyReport,
+  REPORT_STATUS_OPTIONS,
+} from '../../core/models/report.models';
 import { PaginatedResponse } from '../../core/models/response.model';
 
 @Component({
   selector: 'app-gov-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
     MatProgressSpinnerModule,
     MatSelectModule,
-    ReportCardComponent
+    ReportCardComponent,
   ],
   templateUrl: './gov-dashboard.component.html',
-  styleUrl: './gov-dashboard.component.less'
+  styleUrl: './gov-dashboard.component.less',
 })
 export class GovDashboardComponent implements OnInit {
   private readonly reportsApiService = inject(ReportsApiService);
@@ -46,10 +50,12 @@ export class GovDashboardComponent implements OnInit {
 
   readonly statusOptions = REPORT_STATUS_OPTIONS;
 
-  readonly issueTypeOptions = Object.entries(ISSUE_TYPE_LABELS).map(([value, label]) => ({
-    value,
-    label
-  }));
+  readonly issueTypeOptions = Object.entries(ISSUE_TYPE_LABELS).map(
+    ([value, label]) => ({
+      value,
+      label,
+    }),
+  );
 
   ngOnInit(): void {
     this.loadReports();
@@ -66,19 +72,21 @@ export class GovDashboardComponent implements OnInit {
       this.isLoadingMoreReports.set(true);
     }
 
-    this.reportsApiService.getReports(page, this.limit, this.getFilters()).subscribe({
-      next: response => {
-        this.applyReportsResponse(response, isFirstPage);
-        this.isLoadingReports.set(false);
-        this.isLoadingMoreReports.set(false);
-      },
-      error: error => {
-        console.error('Ошибка загрузки задач УК:', error);
-        this.errorMessage.set('Не удалось загрузить задачи');
-        this.isLoadingReports.set(false);
-        this.isLoadingMoreReports.set(false);
-      }
-    });
+    this.reportsApiService
+      .getReports(page, this.limit, this.getFilters())
+      .subscribe({
+        next: (response) => {
+          this.applyReportsResponse(response, isFirstPage);
+          this.isLoadingReports.set(false);
+          this.isLoadingMoreReports.set(false);
+        },
+        error: (error) => {
+          console.error('Ошибка загрузки задач УК:', error);
+          this.errorMessage.set('Не удалось загрузить задачи');
+          this.isLoadingReports.set(false);
+          this.isLoadingMoreReports.set(false);
+        },
+      });
   }
 
   loadMoreReports(): void {
@@ -112,14 +120,16 @@ export class GovDashboardComponent implements OnInit {
     return {
       status: this.selectedStatus() || undefined,
       issue_type: this.selectedIssueType() || undefined,
-      assigned_to_me: true
+      assigned_to_me: true,
     };
   }
 
-  private applyReportsResponse(response: PaginatedResponse<MyReport>, isFirstPage: boolean): void {
-    this.reports.set(isFirstPage
-      ? response.items
-      : [...this.reports(), ...response.items]
+  private applyReportsResponse(
+    response: PaginatedResponse<MyReport>,
+    isFirstPage: boolean,
+  ): void {
+    this.reports.set(
+      isFirstPage ? response.items : [...this.reports(), ...response.items],
     );
     this.page.set(response.page);
     this.total.set(response.total);

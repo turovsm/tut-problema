@@ -1,113 +1,136 @@
 <script src="gov-dashboard.component.ts"></script>
 <div class="gov-dashboard-page">
-    <section class="dashboard-hero">
-        <div>
-            <p class="eyebrow">Кабинет Управляющей Компании</p>
-            <h1>Панель управления</h1>
-            <p>Здесь отображаются все жалобы, которые были назначены на вашу организацию.</p>
-        </div>
-    </section>
+  <section class="dashboard-hero">
+    <div>
+      <p class="eyebrow">Кабинет Управляющей Компании</p>
+      <h1>Панель управления</h1>
+      <p>
+        Здесь отображаются все жалобы, которые были назначены на вашу
+        организацию.
+      </p>
+    </div>
+  </section>
 
-    <mat-card class="filters-card">
-        <div class="filters-grid">
-            <mat-form-field appearance="outline">
-                <mat-label>Статус</mat-label>
-                <mat-select
-                        [value]="selectedStatus()"
-                        (selectionChange)="onStatusChange($event.value)"
-                >
-                    <mat-option value="">Все статусы</mat-option>
-                    @for (status of statusOptions; track status.value) {
-                        <mat-option [value]="status.value">
-                            {{ status.label }}
-                        </mat-option>
-                    }
-                </mat-select>
-            </mat-form-field>
+  <mat-card class="filters-card">
+    <div class="filters-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Статус</mat-label>
+        <mat-select
+          [value]="selectedStatus()"
+          (selectionChange)="onStatusChange($event.value)"
+        >
+          <mat-option value="">Все статусы</mat-option>
+          @for (status of statusOptions; track status.value) {
+            <mat-option [value]="status.value">
+              {{ status.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Тип проблемы</mat-label>
-                <mat-select
-                        [value]="selectedIssueType()"
-                        (selectionChange)="onIssueTypeChange($event.value)"
-                >
-                    <mat-option value="">Все типы</mat-option>
-                    @for (issueType of issueTypeOptions; track issueType.value) {
-                        <mat-option [value]="issueType.value">
-                            {{ issueType.label }}
-                        </mat-option>
-                    }
-                </mat-select>
-            </mat-form-field>
-        </div>
+      <mat-form-field appearance="outline">
+        <mat-label>Тип проблемы</mat-label>
+        <mat-select
+          [value]="selectedIssueType()"
+          (selectionChange)="onIssueTypeChange($event.value)"
+        >
+          <mat-option value="">Все типы</mat-option>
+          @for (issueType of issueTypeOptions; track issueType.value) {
+            <mat-option [value]="issueType.value">
+              {{ issueType.label }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
 
-        <div class="filters-actions">
-            <button
-                    mat-stroked-button
-                    type="button"
-                    [disabled]="!hasActiveFilters() || isLoadingReports()"
-                    (click)="resetFilters()"
-            >
-                Сбросить фильтры
-            </button>
-        </div>
+    <div class="filters-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="!hasActiveFilters() || isLoadingReports()"
+        (click)="resetFilters()"
+      >
+        Сбросить фильтры
+      </button>
+    </div>
+  </mat-card>
+
+  @if (isLoadingReports()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Загрузка назначенных задач...</p>
+    </div>
+  }
+
+  @if (!isLoadingReports() && errorMessage()) {
+    <mat-card class="state-card error-card">
+      <p>{{ errorMessage() }}</p>
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="loadReports()"
+      >
+        Повторить
+      </button>
     </mat-card>
+  }
 
-    @if (isLoadingReports()) {
-        <div class="loading-state">
-            <mat-spinner diameter="40"></mat-spinner>
-            <p>Загрузка назначенных задач...</p>
+  @if (!isLoadingReports() && !errorMessage() && !reports().length) {
+    <mat-card class="state-card empty-card">
+      <h2>
+        {{
+          hasActiveFilters()
+            ? 'По выбранным фильтрам задач нет'
+            : 'У вас пока нет задач'
+        }}
+      </h2>
+      <p>
+        {{
+          hasActiveFilters()
+            ? 'Попробуйте изменить статус или тип проблемы.'
+            : 'Модераторы еще не назначили на вас ни одной жалобы.'
+        }}
+      </p>
+      @if (hasActiveFilters()) {
+        <button
+          mat-raised-button
+          color="primary"
+          type="button"
+          (click)="resetFilters()"
+        >
+          Сбросить фильтры
+        </button>
+      }
+    </mat-card>
+  }
+
+  @if (!isLoadingReports() && !errorMessage() && reports().length) {
+    <section class="reports-section">
+      <div class="section-header">
+        <h2>Ждут решения: {{ total() }}</h2>
+      </div>
+
+      <div class="reports-list">
+        @for (report of reports(); track report.id) {
+          <app-report-card [report]="report"></app-report-card>
+        }
+      </div>
+
+      @if (hasNext()) {
+        <div class="load-more-wrapper">
+          <button
+            mat-stroked-button
+            color="primary"
+            type="button"
+            [disabled]="isLoadingMoreReports()"
+            (click)="loadMoreReports()"
+          >
+            {{ isLoadingMoreReports() ? 'Загрузка...' : 'Показать ещё' }}
+          </button>
         </div>
-    }
-
-    @if (!isLoadingReports() && errorMessage()) {
-        <mat-card class="state-card error-card">
-            <p>{{ errorMessage() }}</p>
-            <button mat-raised-button color="primary" type="button" (click)="loadReports()">
-                Повторить
-            </button>
-        </mat-card>
-    }
-
-    @if (!isLoadingReports() && !errorMessage() && !reports().length) {
-        <mat-card class="state-card empty-card">
-            <h2>{{ hasActiveFilters() ? 'По выбранным фильтрам задач нет' : 'У вас пока нет задач' }}</h2>
-            <p>
-                {{ hasActiveFilters() ? 'Попробуйте изменить статус или тип проблемы.' : 'Модераторы еще не назначили на вас ни одной жалобы.' }}
-            </p>
-            @if (hasActiveFilters()) {
-                <button mat-raised-button color="primary" type="button" (click)="resetFilters()">
-                    Сбросить фильтры
-                </button>
-            }
-        </mat-card>
-    }
-
-    @if (!isLoadingReports() && !errorMessage() && reports().length) {
-        <section class="reports-section">
-            <div class="section-header">
-                <h2>Ждут решения: {{ total() }}</h2>
-            </div>
-
-            <div class="reports-list">
-                @for (report of reports(); track report.id) {
-                    <app-report-card [report]="report"></app-report-card>
-                }
-            </div>
-
-            @if (hasNext()) {
-                <div class="load-more-wrapper">
-                    <button
-                            mat-stroked-button
-                            color="primary"
-                            type="button"
-                            [disabled]="isLoadingMoreReports()"
-                            (click)="loadMoreReports()"
-                    >
-                        {{ isLoadingMoreReports() ? 'Загрузка...' : 'Показать ещё' }}
-                    </button>
-                </div>
-            }
-        </section>
-    }
+      }
+    </section>
+  }
 </div>

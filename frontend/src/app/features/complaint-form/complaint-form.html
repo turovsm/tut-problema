@@ -2,9 +2,7 @@
   <h2>Сообщить о проблеме ЖКХ</h2>
 
   <p class="point-info">
-    Точка на карте:
-    {{ lat | number:'1.5-5' }},
-    {{ lng | number:'1.5-5' }}
+    Точка на карте: {{ lat | number:'1.5-5' }}, {{ lng | number:'1.5-5' }}
   </p>
   <p class="point-info">{{address}}</p>
 
@@ -18,30 +16,26 @@
         placeholder="Например: Яма на дороге"
       />
 
-      <mat-error *ngIf="complaintForm.controls.title.hasError('required')">
-        Заголовок обязателен
-      </mat-error>
-
-      <mat-error *ngIf="complaintForm.controls.title.hasError('minlength')">
-        Минимум 5 символов
-      </mat-error>
-
-      <mat-error *ngIf="complaintForm.controls.title.hasError('maxlength')">
-        Максимум 200 символов
-      </mat-error>
+      @if (complaintForm.controls.title.hasError('required')) {
+      <mat-error> Заголовок обязателен </mat-error>
+      } @if (complaintForm.controls.title.hasError('minlength')) {
+      <mat-error> Минимум 5 символов </mat-error>
+      } @if (complaintForm.controls.title.hasError('maxlength')) {
+      <mat-error> Максимум 200 символов </mat-error>
+      }
     </mat-form-field>
     <mat-form-field appearance="fill">
       <mat-label>Тип проблемы</mat-label>
 
       <mat-select formControlName="type">
-        <mat-option *ngFor="let type of types" [value]="type.value">
-          {{ type.label }}
-        </mat-option>
+        @for (type of types; track type) {
+        <mat-option [value]="type.value"> {{ type.label }} </mat-option>
+        }
       </mat-select>
 
-      <mat-error *ngIf="complaintForm.controls.type.hasError('required')">
-        Выберите тип проблемы
-      </mat-error>
+      @if (complaintForm.controls.type.hasError('required')) {
+      <mat-error> Выберите тип проблемы </mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="fill">
@@ -54,13 +48,11 @@
         placeholder="Опишите проблему подробнее"
       ></textarea>
 
-      <mat-error *ngIf="complaintForm.controls.description.hasError('required')">
-        Описание обязательно
-      </mat-error>
-
-      <mat-error *ngIf="complaintForm.controls.description.hasError('minlength')">
-        Минимум 10 символов
-      </mat-error>
+      @if (complaintForm.controls.description.hasError('required')) {
+      <mat-error> Описание обязательно </mat-error>
+      } @if (complaintForm.controls.description.hasError('minlength')) {
+      <mat-error> Минимум 10 символов </mat-error>
+      }
     </mat-form-field>
 
     <div class="file-field">
@@ -74,19 +66,15 @@
         (change)="onFilesSelected($event)"
       />
 
-      <div class="files-info" *ngIf="selectedFiles.length">
-        Выбрано файлов: {{ selectedFiles.length }}
-      </div>
+      @if (selectedFiles.length) {
+      <div class="files-info">Выбрано файлов: {{ selectedFiles.length }}</div>
+      }
     </div>
 
     <div class="form-actions">
-      <button mat-button type="button" (click)="close()">
-        Отмена
-      </button>
+      <button mat-button type="button" (click)="close()">Отмена</button>
 
-      <button mat-raised-button color="primary" type="submit">
-        Отправить
-      </button>
+      <button mat-raised-button color="primary" type="submit">Отправить</button>
     </div>
   </form>
 </mat-card>

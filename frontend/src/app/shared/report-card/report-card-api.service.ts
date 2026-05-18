@@ -6,7 +6,7 @@ import { ReportVoteStats } from '../../core/models/report.models';
 import { ApiResponseSuccess } from '../../core/models/response.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ReportCardApiService {
   private readonly apiUrl = environment.apiUrl;
@@ -14,7 +14,9 @@ export class ReportCardApiService {
 
   getReportVoteStats(reportId: string): Observable<ReportVoteStats> {
     return this.http
-      .get<ApiResponseSuccess<ReportVoteStats>>(`${this.apiUrl}/api/votes/reports/${reportId}/stats`, { withCredentials: true })
-      .pipe(map(response => response.data));
+      .get<
+        ApiResponseSuccess<ReportVoteStats>
+      >(`${this.apiUrl}/api/votes/reports/${reportId}/stats`, { withCredentials: true })
+      .pipe(map((response) => response.data));
   }
 }

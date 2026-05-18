@@ -3,7 +3,10 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MyReport } from '../../core/models/report.models';
-import { ApiResponseSuccess, PaginatedResponse } from '../../core/models/response.model';
+import {
+  ApiResponseSuccess,
+  PaginatedResponse,
+} from '../../core/models/response.model';
 
 export interface ReportsFilters {
   status?: string;
@@ -13,7 +16,7 @@ export interface ReportsFilters {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ReportsApiService {
   private readonly apiUrl = environment.apiUrl;
@@ -22,11 +25,9 @@ export class ReportsApiService {
   getReports(
     page = 1,
     limit = 20,
-    filters: ReportsFilters = {}
+    filters: ReportsFilters = {},
   ): Observable<PaginatedResponse<MyReport>> {
-    let params = new HttpParams()
-      .set('page', page)
-      .set('limit', limit);
+    let params = new HttpParams().set('page', page).set('limit', limit);
 
     if (filters.status) {
       params = params.set('status_filter', filters.status);
@@ -45,10 +46,13 @@ export class ReportsApiService {
     }
 
     return this.http
-      .get<ApiResponseSuccess<PaginatedResponse<MyReport>>>(`${this.apiUrl}/api/reports`, {
-        params,
-        withCredentials: true
-      })
-      .pipe(map(response => response.data));
+      .get<ApiResponseSuccess<PaginatedResponse<MyReport>>>(
+        `${this.apiUrl}/api/reports`,
+        {
+          params,
+          withCredentials: true,
+        },
+      )
+      .pipe(map((response) => response.data));
   }
 }
