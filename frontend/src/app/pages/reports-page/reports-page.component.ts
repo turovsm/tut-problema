@@ -14,6 +14,7 @@ import { ISSUE_TYPE_LABELS } from '../../core/models/issue-type';
 import {
   MyReport,
   REPORT_STATUS_OPTIONS,
+  ReportStatus,
 } from '../../core/models/report.models';
 import { PaginatedResponse } from '../../core/models/response.model';
 
@@ -50,6 +51,12 @@ export class ReportsPageComponent implements OnInit {
   readonly total = signal(0);
   readonly hasNext = signal(false);
 
+  readonly statuses: ReportStatus[] = [
+    'pending',
+    'confirmed',
+    'dismissed',
+    'resolved',
+  ];
   readonly statusOptions = REPORT_STATUS_OPTIONS;
 
   readonly issueTypeOptions = Object.entries(ISSUE_TYPE_LABELS).map(

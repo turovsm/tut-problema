@@ -11,3 +11,9 @@ export interface PaginatedResponse<T> {
   limit: number;
   has_next: boolean;
 }
+
+export interface ApiError {
+  status: 'error' | 'success';
+  error: string;
+  code: number;
+}

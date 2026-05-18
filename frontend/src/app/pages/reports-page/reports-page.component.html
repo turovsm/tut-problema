@@ -24,9 +24,9 @@
         >
           <mat-option value="">Все статусы</mat-option>
 
-          @for (status of statusOptions; track status.value) {
-            <mat-option [value]="status.value">
-              {{ status.label }}
+          @for (status of statuses; track status) {
+            <mat-option [value]="status">
+              {{ statusOptions[status] }}
             </mat-option>
           }
         </mat-select>
