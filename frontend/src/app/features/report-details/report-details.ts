@@ -52,7 +52,6 @@ export class ReportDetailsComponent implements OnInit {
   resolveComment = signal('');
   resolveFiles = signal<File[]>([]);
 
-  userLocation = signal<GeolocationCoordinates | null>(null);
   geoErrorMessage = signal('');
 
   currentUser = this.authService.currentUser();
@@ -86,7 +85,6 @@ export class ReportDetailsComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.loadUserLocation();
     this.loadReport();
   }
 
@@ -118,7 +116,6 @@ export class ReportDetailsComponent implements OnInit {
 
   vote(voteType: 'confirm' | 'dismiss'): void {
     const report = this.report();
-    const coords = this.userLocation();
 
     if (!report) {
       return;
@@ -129,21 +126,15 @@ export class ReportDetailsComponent implements OnInit {
       return;
     }
 
-    if (!coords) {
-      alert('Для голосования нужно разрешить доступ к геолокации');
-      this.loadUserLocation();
-      return;
-    }
-
     this.isVoting.set(true);
 
-    const cappedAccuracy = Math.min(coords.accuracy, 1000);
+    const cappedAccuracy = 0;
 
     this.apiService
       .voteForReport(report.id, {
         vote_type: voteType,
-        user_location_lng: coords.longitude,
-        user_location_lat: coords.latitude,
+        user_location_lng: report.location.coordinates[0],
+        user_location_lat: report.location.coordinates[1],
         accuracy: cappedAccuracy,
       })
       .subscribe({
@@ -161,9 +152,18 @@ export class ReportDetailsComponent implements OnInit {
           }
 
           if (error.status === 403) {
-            alert(
-              'Вы не можете голосовать: возможно, жалоба вне разрешённого радиуса',
-            );
+            if (error.error?.error === 'Email not verified.') {
+              alert('Подтвердите почту для голосования за проблему');
+            } else if (
+              error.error?.error === 'You cannot vote on your own report'
+            ) {
+              alert('Нельзя голосовать за свою заявку');
+            } else {
+              alert(
+                'Вы не можете голосовать: возможно, жалоба вне разрешённого радиуса',
+              );
+            }
+
             return;
           }
 
@@ -410,32 +410,5 @@ export class ReportDetailsComponent implements OnInit {
     }
 
     return `${environment.apiUrl}${fileUrl}`;
-  }
-
-  private loadUserLocation(): void {
-    this.geoErrorMessage.set('');
-
-    if (!navigator.geolocation) {
-      this.geoErrorMessage.set('Геолокация не поддерживается браузером');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        this.userLocation.set(position.coords);
-        this.geoErrorMessage.set('');
-      },
-      (error) => {
-        console.warn('Геолокация недоступна:', error);
-        this.geoErrorMessage.set(
-          'Геолокация недоступна. Без неё нельзя голосовать.',
-        );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      },
-    );
   }
 }
