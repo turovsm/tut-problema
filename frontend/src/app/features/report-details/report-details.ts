@@ -146,15 +146,17 @@ export class ReportDetailsComponent implements OnInit {
           console.error('Ошибка голосования:', error);
           this.isVoting.set(false);
 
-        if (error.status === 401) {
-          alert('Необходимо авторизоваться');
-          return;
-        }
+          if (error.status === 401) {
+            alert('Необходимо авторизоваться');
+            return;
+          }
 
           if (error.status === 403) {
             if (error.error?.error === 'Email not verified.') {
               alert('Подтвердите почту для голосования за проблему');
-            } else if (error.error?.error === 'You cannot vote on your own report'){
+            } else if (
+              error.error?.error === 'You cannot vote on your own report'
+            ) {
               alert('Нельзя голосовать за свою заявку');
             } else {
               alert(
@@ -165,14 +167,14 @@ export class ReportDetailsComponent implements OnInit {
             return;
           }
 
-        if (error.status === 409) {
-          alert('Вы уже голосовали за эту жалобу');
-          return;
-        }
+          if (error.status === 409) {
+            alert('Вы уже голосовали за эту жалобу');
+            return;
+          }
 
-        alert(error.error?.message || 'Не удалось отправить голос');
-      }
-    });
+          alert(error.error?.message || 'Не удалось отправить голос');
+        },
+      });
   }
 
   removeVote(): void {
